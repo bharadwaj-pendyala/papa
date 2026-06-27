@@ -1,0 +1,6 @@
+.herdr/
+*.worktrees/
+__pycache__/
+*.pyc
+.venv/
+dist/
