@@ -20,6 +20,30 @@ Hemingway is a closed desktop/web app. Papa is the open, automatable version: th
 3. Teams that publish docs/blogs/READMEs have **no readability gate** the way they have lint/test gates for code.
 4. The emerging workflow — *LLM writes draft → human reviews → LLM revises* — has **no structured readability feedback** to close the loop. Papa is the missing measurement layer.
 
+## 2.5 Prior art & where Papa wins (web research, 2026-06)
+
+Researched the live landscape before locking scope. What's out there and the gap each leaves:
+
+| Tool | What it does | What it lacks (Papa's wedge) |
+|------|--------------|------------------------------|
+| **Hemingway Editor** | The highlight UX everyone wants, plus a grade panel | Closed, $20, no API/CLI/CI, chokes on Markdown with code/SVG, "leaves you to fix the mess yourself" |
+| **textlens** (npm) | Readability in CI: 7 formulas into a consensus grade, PR comments | No per-sentence highlights, no passive/adverb, no LLM rewrite. Scoring only |
+| **Vale** | Fast, offline, markup-aware prose *rules* engine | No built-in Hemingway view (readability is custom-script only), no LLM revise loop. Composes with Papa |
+| **proselint / write-good / alex** | Individual heuristics (weasel words, passive, inclusive language) | Fragmented, mismatched output, no shared grade panel, no LLM contract |
+
+**Differentiation thesis (sharpened).** Papa does not compete on raw formula count (textlens already does seven). Papa owns three things nobody bundles:
+
+1. the **Hemingway highlight view** (hard, very-hard, passive, adverb, complex spans) as an open artifact,
+2. the **LLM revise loop** (structured JSON a model optimizes against), and
+3. a **readability-regression gate**, the single most-cited unmet need: *"typos get flagged in CI, but PRs that make docs harder to read aren't."*
+
+Papa composes with Vale and textstat rather than replacing them.
+
+**Two correctness pitfalls the research flagged (now designed around):**
+
+- **Single-formula scores are gameable and noisy.** Flesch-Kincaid rewards short monosyllabic sentences regardless of quality and is surface-only. Papa reports a **consensus grade** across multiple formulas (ARI, FK, Gunning fog, Coleman-Liau, SMOG) and warns on suspiciously low-variance "gamed" text, rather than trusting one number.
+- **Raw numbers, dates, names, and URLs mis-score.** Textstat's own docs warn FK is wrong unless dates and names are normalized first. Papa runs a **pre-score normalization pass** (numbers, dates, URLs, identifiers become neutral one-syllable tokens) so the grade reflects the prose, not the data.
+
 ## 3. Who it's for
 
 - Engineers who write blogs/docs and want a quality bar without leaving the repo.
@@ -121,6 +145,10 @@ Design choice: the few write-good heuristics (passive, adverbs) are **reimplemen
 - `cli` — colored terminal output for local use.
 - Exit code: `0` pass / `1` threshold violation, for CI gating.
 
+**Two gate modes (research-driven):**
+- **Absolute gate** (`--max-grade N`): fail if the document is harder than grade `N`. The baseline behavior.
+- **Regression gate** (`--baseline <git-ref>`): compare each file against its version at `<git-ref>` (default the PR base) and fail if the consensus grade got **worse** by more than `--max-regression` (default 1.0), even when still under the absolute bar. This closes the most-cited gap: typos get caught in CI, but prose that quietly gets harder does not. textlens and friends only do absolute thresholds; the delta gate is Papa's.
+
 ---
 
 ## 8. The LLM loop (the differentiator)
@@ -161,7 +189,9 @@ Optional built-in: `papa post.md --suggest` runs that loop for you via a pluggab
 
 ## 10. Naming
 
-Recommended: **Papa** — Hemingway's nickname; short, warm, memorable; pairs with the tagline **"The Old Man and the CI."** Project strategy leans on the literary brand (see §12). Package-name availability must be verified; fall back to `papa-lint` / `papactl` if `papa` is taken on PyPI/npm.
+Recommended: **Papa** — Hemingway's nickname; short, warm, memorable; pairs with the tagline **"The Old Man and the CI."** Project strategy leans on the literary brand (see §12).
+
+**Package-name reality (verified 2026-06):** `papa` is **taken on both PyPI and npm**, and `papa-lint` is **free on PyPI**. Resolution: keep the brand and the CLI command as `papa`, but **publish the distribution as `papa-lint`** (PyPI), with `papactl` as fallback. Users still type `papa`; only the install name differs (`pipx install papa-lint`). This is now locked, not open.
 
 Alternatives if a clash forces it:
 - **Lucid** — clarity-forward, professional, broad.
@@ -173,8 +203,8 @@ Alternatives if a clash forces it:
 
 ## 11. Roadmap
 
-- **v0.1 (MVP):** ingest md/txt, readability + passive + adverbs + complex-phrase, HTML + JSON + CLI reports, threshold exit code. Run it on the LLM blog post as the first real-world demo.
-- **v0.2:** GitHub Action + SARIF + PR-comment reporter; MDX/HTML/rST ingestors; config file.
+- **v0.1 (MVP):** ingest md/txt, **pre-score normalization pass** (numbers/dates/URLs/identifiers), readability **consensus grade** (ARI + FK + Gunning fog) + passive + adverbs + complex-phrase, HTML + JSON + CLI reports, absolute threshold exit code. Run it on the LLM blog post as the first real-world demo.
+- **v0.2:** **regression gate** (`--baseline`, delta vs base ref); GitHub Action + SARIF + PR-comment reporter; MDX/HTML/rST ingestors; config file.
 - **v0.3:** `--suggest` LLM loop with Claude adapter; `proselint`/`alex` plugins; pre-commit + Docker.
 - **v1.0:** stable JSON schema, docs site, comparison benchmarks, plugin API for custom analyzers.
 
