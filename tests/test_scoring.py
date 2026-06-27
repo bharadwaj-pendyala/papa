@@ -45,6 +45,17 @@ def test_gate_passes_when_within_max():
     assert score.verdict == "pass"
 
 
+def test_gate_uses_raw_consensus_not_rounded_grade():
+    # 10.4 displays as "Grade 10" but is harder than 10 -> must fail
+    harder = build_score([], 5, (10.4, 10.4, 10.4, 10.4), 10)
+    assert harder.verdict == "fail"
+    assert "Grade 10" in harder.reading_grade  # display still rounds down
+
+    # exactly at the bar is not "harder than" -> passes
+    at_bar = build_score([], 5, (10.0, 10.0, 10.0, 10.0), 10)
+    assert at_bar.verdict == "pass"
+
+
 def test_counts_come_from_findings():
     findings = [
         _f(0, 5, PASSIVE),

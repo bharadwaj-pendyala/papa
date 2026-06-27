@@ -46,11 +46,13 @@ def build_score(
     max_grade: float | None,
 ) -> DocumentScore:
     ari, fk, fog, consensus = grades
-    label, grade = reading_grade(consensus)
+    label, _ = reading_grade(consensus)  # rounded grade is display-only
     if max_grade is None:
         verdict, threshold = "pass", None
     else:
-        verdict = "fail" if grade > max_grade else "pass"
+        # gate on the raw consensus, not the rounded display grade: 10.4 is
+        # harder than 10 and must fail even though it displays as "Grade 10".
+        verdict = "fail" if consensus > max_grade else "pass"
         clean_max = int(max_grade) if float(max_grade).is_integer() else max_grade
         threshold = {"max_grade": clean_max}
 
