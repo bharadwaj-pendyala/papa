@@ -1,0 +1,34 @@
+name: Bug report
+description: Something in Papa is wrong or crashes
+labels: ["bug"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened
+      description: What went wrong, and what did you expect instead?
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: How to reproduce
+      description: The exact command and, if possible, a small input file or snippet.
+      placeholder: |
+        papa sample.md --max-grade 10
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Papa version
+      description: Output of `papa --version` (or the commit you are on).
+    validations:
+      required: false
+  - type: input
+    id: python
+    attributes:
+      label: Python version
+      placeholder: "3.11"
+    validations:
+      required: false

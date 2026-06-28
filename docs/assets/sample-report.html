@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>papa — /tmp/papa-sample.md</title>
+<style>
+* { box-sizing: border-box; }
+body { margin: 0; font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #1a1a1a; background: #f6f7f9; }
+.wrap { display: flex; gap: 24px; max-width: 1100px; margin: 0 auto; padding: 32px 24px; align-items: flex-start; }
+main { flex: 1 1 auto; background: #fff; border: 1px solid #e3e6ea; border-radius: 10px; padding: 28px 32px; }
+main pre { white-space: pre-wrap; word-wrap: break-word; font: 16px/1.7 ui-monospace, SFMono-Regular, Menlo, monospace; margin: 0; }
+aside { flex: 0 0 240px; position: sticky; top: 32px; background: #fff; border: 1px solid #e3e6ea; border-radius: 10px; padding: 20px; }
+aside h1 { font-size: 18px; margin: 0 0 4px; }
+aside .file { color: #6b7280; font-size: 13px; margin-bottom: 16px; word-break: break-all; }
+aside .grade { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
+aside .verdict { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 13px; font-weight: 600; }
+aside .pass { background: #d3f9d8; color: #2b8a3e; }
+aside .fail { background: #ffe3e3; color: #c92a2a; }
+aside .formulas { color: #495057; font-size: 14px; margin: 14px 0; }
+aside ul { list-style: none; padding: 0; margin: 14px 0 0; }
+aside li { display: flex; align-items: center; gap: 8px; font-size: 14px; padding: 3px 0; }
+aside .swatch { width: 14px; height: 14px; border-radius: 3px; flex: 0 0 auto; }
+aside .count { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 600; }
+.hl { border-radius: 3px; padding: 0 1px; }
+.hl-hard-sentence{background:#fff3bf;}.hl-very-hard-sentence{background:#ffc9c9;}.hl-passive{background:#b2f2bb;}.hl-adverb{background:#a5d8ff;}.hl-complex-phrase{background:#eebefa;}</style>
+</head>
+<body>
+<div class="wrap">
+<aside>
+<h1>papa</h1>
+<div class="file">/tmp/papa-sample.md</div>
+<div class="grade">Grade 14 — very hard to read</div>
+
+<div class="formulas">ARI 13.5 · FK 12.6 · Fog 15.3<br>3 sentences</div>
+<ul><li><span class="swatch" style="background:#ffc9c9"></span>Very hard sentence<span class="count">1</span></li><li><span class="swatch" style="background:#fff3bf"></span>Hard sentence<span class="count">1</span></li><li><span class="swatch" style="background:#b2f2bb"></span>Passive voice<span class="count">5</span></li><li><span class="swatch" style="background:#a5d8ff"></span>Adverb<span class="count">3</span></li><li><span class="swatch" style="background:#eebefa"></span>Complex phrase<span class="count">1</span></li></ul>
+</aside>
+<main><pre># Release notes
+
+<span class="hl hl-hard-sentence" title="Hard to read (grade 10)">The migration <span class="hl hl-passive" title="Passive voice: &#x27;was carried&#x27;">was carried</span> out by the team <span class="hl hl-complex-phrase" title="Complex phrase: &#x27;in order to&#x27; — consider &#x27;to&#x27;">in order to</span> ensure that the data
+<span class="hl hl-passive" title="Passive voice: &#x27;was successfully transferred&#x27;">was successfully transferred</span>.</span> <span class="hl hl-very-hard-sentence" title="Very hard to read (grade 15)">It should <span class="hl hl-passive" title="Passive voice: &#x27;be noted&#x27;">be noted</span> that the process <span class="hl hl-passive" title="Passive voice: &#x27;was
+completed&#x27;">was
+completed</span> very <span class="hl hl-adverb" title="Adverb: &#x27;quickly&#x27;">quickly</span> and the results <span class="hl hl-passive" title="Passive voice: &#x27;were subsequently verified&#x27;">were subsequently verified</span> by the
+engineers who were responsible for the system.</span>
+</pre></main>
+</div>
+</body>
+</html>
