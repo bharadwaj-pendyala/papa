@@ -1,4 +1,4 @@
-"""papa — Hemingway-grade readability for prose.
+"""papa: Hemingway-grade readability for prose.
 
 Public API:
 

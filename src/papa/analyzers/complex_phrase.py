@@ -53,7 +53,7 @@ def analyze(ctx: AnalyzerContext) -> list[Finding]:
         suggestion = _PHRASES.get(match.group().lower(), "")
         message = f"Complex phrase: '{match.group()}'"
         if suggestion:
-            message += f" — consider '{suggestion}'"
+            message += f", consider '{suggestion}'"
         findings.append(
             Finding(match.start(), match.end(), COMPLEX, COLOR[COMPLEX], "warn",
                     message, "complex-phrase")

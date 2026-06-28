@@ -9,7 +9,7 @@ from ..scoring import sentence_grade
 from . import AnalyzerContext, register
 
 _WORD = re.compile(r"[A-Za-z]+")
-MIN_WORDS = 4  # don't grade fragments (headings, nav, markup) — README `sentences_under_words`
+MIN_WORDS = 4  # don't grade fragments (headings, nav, markup); README `sentences_under_words`
 
 
 @register("readability")

@@ -1,4 +1,4 @@
-"""Self-contained HTML report — Hemingway highlights + grade sidebar (spec §7).
+"""Self-contained HTML report: Hemingway highlights + grade sidebar (spec §7).
 
 No network: all CSS is inline, no external fonts or scripts. The original source
 is rendered in a <pre> with colored <span>s; sentence spans nest word spans.
@@ -63,7 +63,7 @@ def render(analysis: Analysis, *, color: bool = False) -> str:
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>papa — {_html.escape(analysis.path)}</title>
+<title>papa · {_html.escape(analysis.path)}</title>
 <style>{_CSS}{styles}</style>
 </head>
 <body>

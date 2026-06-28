@@ -1,4 +1,4 @@
-"""JSON report — the LLM contract (spec §6, §8). Stable, versioned shape."""
+"""JSON report: the LLM contract (spec §6, §8). Stable, versioned shape."""
 
 from __future__ import annotations
 
