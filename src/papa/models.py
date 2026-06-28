@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import asdict, dataclass
 
-# Highlight categories (the Hemingway view) and their colors — spec §5.
+# Highlight categories (the Hemingway view) and their colors. Spec §5.
 HARD = "hard-sentence"
 VERY_HARD = "very-hard-sentence"
 PASSIVE = "passive"

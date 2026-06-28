@@ -2,7 +2,7 @@
 
 Strips non-prose (YAML frontmatter, fenced + inline code, SVG) from Markdown so
 analyzers see prose only, while keeping an :class:`OffsetMap` so every finding
-maps back to original source offsets — not the stripped text. Stripped regions
+maps back to original source offsets, not the stripped text. Stripped regions
 are removed (clean text is shorter), so the map does real translation work.
 """
 

@@ -11,7 +11,7 @@ from papa.scoring import document_grades, reading_grade
 
 def test_reading_grade_labels():
     assert reading_grade(8)[0].endswith("easy to read")
-    assert reading_grade(11)[0] == "Grade 11 — hard to read"
+    assert reading_grade(11)[0] == "Grade 11, hard to read"
     assert reading_grade(16)[0].endswith("very hard to read")
 
 

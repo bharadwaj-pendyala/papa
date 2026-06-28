@@ -25,7 +25,7 @@ _BADGE = {
 
 def render(analysis: Analysis, *, color: bool = False) -> str:
     score = analysis.score
-    lines = [_c(f"{analysis.path}  —  {score.reading_grade}", "bold", on=color)]
+    lines = [_c(f"{analysis.path}  ·  {score.reading_grade}", "bold", on=color)]
 
     if score.threshold is not None:
         passed = score.verdict == "pass"

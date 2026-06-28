@@ -1,4 +1,4 @@
-"""Readability scoring via textstat — a consensus grade, not one gameable number.
+"""Readability scoring via textstat: a consensus grade, not one gameable number.
 
 A single formula is noisy and easy to game, so the document grade is the mean of
 ARI, Flesch-Kincaid, and Gunning fog (spec §2.5, §6). Per-sentence grades use
@@ -41,4 +41,4 @@ def reading_grade(consensus: float) -> tuple[str, int]:
         label = "hard to read"
     else:
         label = "very hard to read"
-    return f"Grade {grade} — {label}", grade
+    return f"Grade {grade}, {label}", grade

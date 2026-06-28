@@ -1,4 +1,4 @@
-"""Analyzer registry — plugin-ready (spec §6).
+"""Analyzer registry, plugin-ready (spec §6).
 
 Each analyzer is a callable taking an :class:`AnalyzerContext` and returning
 findings in *clean-text* coordinates; the pipeline maps them to original offsets.
