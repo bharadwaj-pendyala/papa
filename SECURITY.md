@@ -17,8 +17,9 @@ report is confirmed.
 
 ## Scope
 
-Papa reads local files and, only with `--suggest`, sends text to a configured
-LLM provider. It does not run untrusted code from the documents it analyzes.
+Papa reads local files and writes reports only to the path requested with
+`--output`. It does not run untrusted code from the documents it analyzes and it
+does not send document contents to a network service.
+
 Reports about untrusted input causing code execution, file writes outside the
-target path, or leaking content to a network when `--suggest` is off are
-in scope and valued.
+target path, or leaking document contents are in scope and valued.

@@ -1,8 +1,8 @@
 # Papa LLM contract
 
 Papa's JSON is built to be handed to an LLM so the draft, measure, revise loop
-closes. This document is the stable contract: the JSON shape Papa emits and the
-prompt an agent uses to rewrite flagged spans.
+can be automated outside Papa. This document describes the JSON shape Papa emits
+and a prompt an agent can use to rewrite flagged spans.
 
 ## 1. Get the findings
 
@@ -14,12 +14,12 @@ papa post.md --report json > findings.json
 
 ```jsonc
 {
-  "version": "1",
+  "version": "0.1",
+  "file": "post.md",
   "score": {
     "ari": 11.2,
     "flesch_kincaid": 10.8,
     "gunning_fog": 12.1,
-    "consensus_grade": 11.4,
     "reading_grade": "Grade 11, hard to read",
     "sentences": 142,
     "hard_sentences": 18,
@@ -44,10 +44,11 @@ papa post.md --report json > findings.json
 }
 ```
 
-- `start` and `end` are byte offsets into the **original** source file, so a span
-  maps back to the exact text the writer sees.
-- `consensus_grade` is the raw (unrounded) grade the `--max-grade` gate compares
-  against. `reading_grade` is the human facing label only.
+- `start` and `end` are offsets into the **original** source file, so a span maps
+  back to the exact text the writer sees.
+- `reading_grade` is the human-facing label. The CLI compares its internal raw
+  consensus grade against `--max-grade`, but that raw value is not currently
+  exposed in the JSON payload.
 - `verdict` is `pass` or `fail`. `threshold` records the gate that produced it.
 
 ## 3. The rewrite prompt
@@ -56,7 +57,7 @@ Hand the model the source file plus `findings.json` with a prompt like this:
 
 ```
 You are editing a document for readability. I will give you the full text and a
-list of findings with byte offsets. For each finding, rewrite only the flagged
+list of findings with source offsets. For each finding, rewrite only the flagged
 span so the issue is resolved, while preserving the author's meaning, voice, and
 any code, links, or formatting.
 
@@ -83,6 +84,5 @@ FINDINGS:
 papa post.revised.md --report json > findings.next.json
 ```
 
-Re run Papa on the revision and compare `consensus_grade`. Repeat until
-`verdict` is `pass` or the grade stops improving. The built in `--suggest` flag
-runs this loop for you against a configured provider.
+Re run Papa on the revision and compare `reading_grade`, finding counts, and
+`verdict`. Repeat until `verdict` is `pass` or the grade stops improving.
