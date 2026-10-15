@@ -17,7 +17,7 @@ from ..models import (
     Analysis,
     Finding,
 )
-from .common import fmt_number, grade_label
+from .common import SKIP_REASON, fmt_number, grade_label
 
 _BG = {
     HARD: "#fff3bf",
@@ -47,6 +47,7 @@ aside .grade { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
 aside .verdict { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 13px; font-weight: 600; }
 aside .pass { background: #d3f9d8; color: #2b8a3e; }
 aside .fail { background: #ffe3e3; color: #c92a2a; }
+aside .skip { background: #e9ecef; color: #495057; }
 aside .formulas { color: #495057; font-size: 14px; margin: 14px 0; }
 aside ul { list-style: none; padding: 0; margin: 14px 0 0; }
 aside li { display: flex; align-items: center; gap: 8px; font-size: 14px; padding: 3px 0; }
@@ -81,11 +82,16 @@ def _sidebar(analysis: Analysis) -> str:
     score = analysis.score
     verdict_html = ""
     if score.threshold is not None:
-        cls = "pass" if score.verdict == "pass" else "fail"
         verdict_html = (
-            f'<span class="verdict {cls}">{score.verdict.upper()}'
+            f'<span class="verdict {score.verdict}">{score.verdict.upper()}'
             f' · --max-grade {fmt_number(score.threshold["max_grade"])}</span>'
         )
+    formulas = (
+        f"ARI {score.ari} · FK {score.flesch_kincaid} · Fog {score.gunning_fog}"
+        f"<br>{score.sentences} sentences"
+    )
+    if score.verdict == "skip":
+        formulas = SKIP_REASON[0].upper() + SKIP_REASON[1:] + "."
     rows = "".join(
         f'<li><span class="swatch" style="background:{_BG[cat]}"></span>'
         f'{_LABEL[cat]}<span class="count">{count}</span></li>'
@@ -102,7 +108,7 @@ def _sidebar(analysis: Analysis) -> str:
 <div class="file">{_html.escape(analysis.path)}</div>
 <div class="grade">{_html.escape(grade_label(score))}</div>
 {verdict_html}
-<div class="formulas">ARI {score.ari} · FK {score.flesch_kincaid} · Fog {score.gunning_fog}<br>{score.sentences} sentences</div>
+<div class="formulas">{formulas}</div>
 <ul>{rows}</ul>
 """
 

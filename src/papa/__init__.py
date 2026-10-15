@@ -12,7 +12,7 @@ from __future__ import annotations
 
 from dataclasses import replace
 
-from .aggregate import build_score, merge_findings
+from .aggregate import build_score, merge_findings, prose_sentences
 from .analyzers import ANALYZERS, AnalyzerContext
 from .ingest import OffsetMap, ingest
 from .models import Analysis, DocumentScore, Finding
@@ -43,7 +43,8 @@ def analyze(
     raw = [_remap(_remap(finding, offset_map), eol_map) for finding in raw]
 
     grades = document_grades(clean)
-    score = build_score(raw, len(sentences), grades, max_grade)
+    has_prose = prose_sentences(sentences) > 0
+    score = build_score(raw, len(sentences), grades, max_grade, has_prose=has_prose)
     findings = merge_findings(raw)
     return Analysis(path=path, source=source, clean=clean, score=score, findings=findings)
 

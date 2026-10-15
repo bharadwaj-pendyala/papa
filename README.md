@@ -107,9 +107,14 @@ For local development, run the same command before opening a PR.
 | Code | Meaning |
 | ---- | ------- |
 | `0` | Every file passed, or no `--max-grade` was set. |
-| `1` | A file is harder than `--max-grade`. |
+| `1` | A file is harder than `--max-grade`, or has no prose and `--fail-on-empty` is set. |
 | `2` | Usage or file error: a bad option, or a missing or unreadable file. |
 | `3` | Internal error in Papa. Set `PAPA_DEBUG=1` to print the traceback. |
+
+A file with no prose to grade (empty, or only headings, code, or frontmatter;
+no sentence of 4 or more words) reports "No prose found" and gets the JSON
+verdict `"skip"`. It does not fail `--max-grade` unless you pass
+`--fail-on-empty`.
 
 ## 🤖 LLM workflow
 

@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import math
+import re
 
+from .analyzers.readability import MIN_WORDS
 from .models import (
     ADVERB,
     COMPLEX,
@@ -17,6 +19,14 @@ from .models import (
 from .scoring import reading_grade
 
 _SENTENCE_CATS = {HARD, VERY_HARD}
+_WORD = re.compile(r"[A-Za-z]+")
+
+NO_PROSE = "No prose found"
+
+
+def prose_sentences(sentences: list[tuple[int, int, str]]) -> int:
+    """Sentences long enough to grade (the same MIN_WORDS bar as readability)."""
+    return sum(1 for _, _, text in sentences if len(_WORD.findall(text)) >= MIN_WORDS)
 
 
 def _overlaps(a: Finding, b: Finding) -> bool:
@@ -46,7 +56,10 @@ def build_score(
     sentence_count: int,
     grades: tuple[float, float, float, float],
     max_grade: float | None,
+    *,
+    has_prose: bool = True,
 ) -> DocumentScore:
+    """``verdict`` is "pass", "fail", or "skip" when there is no prose to grade."""
     ari, fk, fog, consensus = grades
     label, _ = reading_grade(consensus)  # rounded grade is display-only
     if max_grade is None:
@@ -57,13 +70,16 @@ def build_score(
         verdict = "fail" if consensus > max_grade else "pass"
         clean_max = int(max_grade) if float(max_grade).is_integer() else max_grade
         threshold = {"max_grade": clean_max}
+    grade = _display_grade(consensus, max_grade)
+    if not has_prose:
+        verdict, label, grade = "skip", NO_PROSE, 0.0
 
     return DocumentScore(
         ari=round(ari, 1),
         flesch_kincaid=round(fk, 1),
         gunning_fog=round(fog, 1),
         reading_grade=label,
-        grade=_display_grade(consensus, max_grade),
+        grade=grade,
         sentences=sentence_count,
         hard_sentences=_count(findings, HARD),
         very_hard_sentences=_count(findings, VERY_HARD),

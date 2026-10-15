@@ -20,7 +20,7 @@ EXIT_PASS, EXIT_FAIL, EXIT_USAGE, EXIT_INTERNAL = 0, 1, 2, 3
 EPILOG = """\
 exit codes:
   0  every file passed (or no --max-grade was set)
-  1  a file is harder than --max-grade
+  1  a file is harder than --max-grade (or has no prose, with --fail-on-empty)
   2  usage or file error (bad option, missing or unreadable file)
   3  internal error in papa (set PAPA_DEBUG=1 for a traceback)
 """
@@ -42,6 +42,10 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--max-grade", type=float, metavar="N",
         help="exit 1 if the consensus grade is harder than N",
+    )
+    parser.add_argument(
+        "--fail-on-empty", action="store_true",
+        help="exit 1 if a file has no prose to grade (default: skip it)",
     )
     parser.add_argument("--format", choices=["md", "txt"], help="override format detection")
     parser.add_argument("--version", action="version", version=f"papa {__version__}")
@@ -77,7 +81,8 @@ def _run(args: argparse.Namespace) -> int:
     else:
         sys.stdout.write(rendered)
 
-    return EXIT_FAIL if any(a.score.verdict == "fail" for a in analyses) else EXIT_PASS
+    failing = {"fail", "skip"} if args.fail_on_empty else {"fail"}
+    return EXIT_FAIL if any(a.score.verdict in failing for a in analyses) else EXIT_PASS
 
 
 def _user_error(message: str) -> int:
