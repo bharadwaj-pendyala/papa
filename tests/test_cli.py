@@ -32,8 +32,46 @@ def test_gate_passes_on_easy_text(tmp_path, capsys):
     assert main([_write(tmp_path, "easy.md", EASY), "--max-grade", "12"]) == 0
 
 
-def test_missing_file_returns_two(tmp_path):
+def test_missing_file_returns_two(tmp_path, capsys):
     assert main([str(tmp_path / "nope.md")]) == 2
+    assert capsys.readouterr().err == f"papa: {tmp_path / 'nope.md'} not found.\n"
+
+
+def test_folder_gets_a_hint(tmp_path, capsys, monkeypatch):
+    (tmp_path / "docs").mkdir()
+    monkeypatch.chdir(tmp_path)
+    for arg in ("docs", "docs/"):
+        assert main([arg]) == 2
+        assert capsys.readouterr().err == (
+            "papa: docs/ is a folder. Pass the files inside it, e.g. papa docs/*.md\n"
+        )
+
+
+def test_non_utf8_file_is_a_user_error(tmp_path, capsys):
+    path = tmp_path / "latin.md"
+    path.write_bytes("Caf\xe9 au lait is nice.".encode("latin-1"))
+    assert main([str(path)]) == 2
+    err = capsys.readouterr().err
+    assert err == f"papa: {path} is not UTF-8 text. Save it as UTF-8 and try again.\n"
+
+
+def test_unreadable_file_is_a_user_error(tmp_path, capsys, monkeypatch):
+    def deny(*args, **kwargs):
+        raise PermissionError(13, "Permission denied")
+
+    path = _write(tmp_path, "secret.md", EASY)
+    monkeypatch.setattr("builtins.open", deny)
+    assert main([path]) == 2
+    assert capsys.readouterr().err == (
+        f"papa: no permission to read {path}. Check its file permissions.\n"
+    )
+
+
+def test_output_into_missing_folder_is_a_user_error(tmp_path, capsys):
+    out = tmp_path / "nope" / "report.html"
+    assert main([_write(tmp_path, "easy.md", EASY), "--report", "html", "-o", str(out)]) == 2
+    err = capsys.readouterr().err
+    assert err.startswith("papa: cannot write") and err.count("\n") == 1
 
 
 def test_json_report_has_stable_shape(tmp_path, capsys):

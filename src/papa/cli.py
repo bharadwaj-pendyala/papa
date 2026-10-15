@@ -61,9 +61,8 @@ def _run(args: argparse.Namespace) -> int:
     for path in args.files:
         try:
             source = _read(path)
-        except OSError as error:
-            print(f"papa: cannot read {path}: {error}", file=sys.stderr)
-            return EXIT_USAGE
+        except (OSError, UnicodeDecodeError) as error:
+            return _user_error(_read_error(path, error))
         fmt = _detect_format(path, args.format)
         analyses.append(analyze(source, path=path, fmt=fmt, max_grade=args.max_grade))
 
@@ -71,11 +70,47 @@ def _run(args: argparse.Namespace) -> int:
     rendered = _render(args.report, analyses, color)
 
     if args.output:
-        Path(args.output).write_text(rendered, encoding="utf-8")
+        try:
+            Path(args.output).write_text(rendered, encoding="utf-8")
+        except OSError as error:
+            return _user_error(_write_error(args.output, error))
     else:
         sys.stdout.write(rendered)
 
     return EXIT_FAIL if any(a.score.verdict == "fail" for a in analyses) else EXIT_PASS
+
+
+def _user_error(message: str) -> int:
+    print(f"papa: {message}", file=sys.stderr)
+    return EXIT_USAGE
+
+
+def _read_error(path: str, error: Exception) -> str:
+    if isinstance(error, IsADirectoryError):
+        folder = path.rstrip("/\\") + "/"
+        return f"{folder} is a folder. Pass the files inside it, e.g. papa {folder}*.md"
+    if isinstance(error, FileNotFoundError):
+        return f"{path} not found."
+    if isinstance(error, PermissionError):
+        return f"no permission to read {path}. Check its file permissions."
+    if isinstance(error, UnicodeDecodeError):
+        return f"{path} is not UTF-8 text. Save it as UTF-8 and try again."
+    return f"cannot read {path} ({_reason(error)})."
+
+
+def _write_error(path: str, error: OSError) -> str:
+    if isinstance(error, IsADirectoryError):
+        folder = path.rstrip("/\\") + "/"
+        return f"{folder} is a folder. Give -o a file name, e.g. -o {folder}report.html"
+    if isinstance(error, FileNotFoundError):
+        return f"cannot write {path} because its folder does not exist."
+    if isinstance(error, PermissionError):
+        return f"no permission to write {path}. Check the folder's permissions."
+    return f"cannot write {path} ({_reason(error)})."
+
+
+def _reason(error: Exception) -> str:
+    return (getattr(error, "strerror", None) or str(error)).lower()
 
 
 def _internal_error(error: Exception) -> int:
