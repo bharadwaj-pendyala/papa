@@ -38,7 +38,7 @@ def main(argv: list[str] | None = None) -> int:
     analyses = []
     for path in args.files:
         try:
-            source = Path(path).read_text(encoding="utf-8")
+            source = _read(path)
         except OSError as error:
             print(f"papa: cannot read {path}: {error}", file=sys.stderr)
             return 2
@@ -54,6 +54,12 @@ def main(argv: list[str] | None = None) -> int:
         sys.stdout.write(rendered)
 
     return 1 if any(a.score.verdict == "fail" for a in analyses) else 0
+
+
+def _read(path: str) -> str:
+    # newline="" keeps CRLF intact so finding offsets index the bytes on disk.
+    with open(path, encoding="utf-8", newline="") as handle:
+        return handle.read()
 
 
 def _detect_format(path: str, override: str | None) -> str:

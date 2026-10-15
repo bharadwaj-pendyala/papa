@@ -61,7 +61,7 @@ def _flagged_line(source: str, finding: Finding, color: bool) -> str:
     badge = _c(f"{_BADGE[finding.category]:<10}", COLOR[finding.category], on=color)
     message = finding.message
     if finding.category in (HARD, VERY_HARD):
-        quote = source[finding.start:finding.end].replace("\n", " ").strip()
+        quote = " ".join(source[finding.start:finding.end].split())
         if len(quote) > 64:
             quote = quote[:63] + "…"
         message = f'{message}: "{quote}"'

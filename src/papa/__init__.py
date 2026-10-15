@@ -30,13 +30,17 @@ def analyze(
     fmt: str = "md",
     max_grade: float | None = None,
 ) -> Analysis:
-    """Run the full Ingestor → Analyzers → Aggregator pipeline on ``source``."""
-    clean, offset_map = ingest(source, fmt)
+    """Run the full Ingestor → Analyzers → Aggregator pipeline on ``source``.
+
+    Finding offsets index ``source`` exactly, including any CRLF line endings.
+    """
+    text, eol_map = _to_lf(source)
+    clean, offset_map = ingest(text, fmt)
     sentences = split_sentences(clean)
     ctx = AnalyzerContext(clean=clean, sentences=sentences)
 
     raw = [finding for analyzer in ANALYZERS.values() for finding in analyzer(ctx)]
-    raw = [_remap(finding, offset_map) for finding in raw]
+    raw = [_remap(_remap(finding, offset_map), eol_map) for finding in raw]
 
     grades = document_grades(clean)
     score = build_score(raw, len(sentences), grades, max_grade)
@@ -50,3 +54,18 @@ def _remap(finding: Finding, offset_map: OffsetMap) -> Finding:
         start=offset_map.to_original(finding.start),
         end=offset_map.to_original_end(finding.end),
     )
+
+
+def _to_lf(source: str) -> tuple[str, OffsetMap]:
+    """Turn CRLF into LF so every stage sees one line ending, with a map back."""
+    segments: list[tuple[int, int, int]] = []
+    clean = pos = 0
+    while (cr := source.find("\r\n", pos)) >= 0:
+        if cr > pos:
+            segments.append((clean, pos, cr - pos))
+            clean += cr - pos
+        segments.append((clean, cr + 1, 1))
+        clean += 1
+        pos = cr + 2
+    segments.append((clean, pos, len(source) - pos))
+    return source.replace("\r\n", "\n"), OffsetMap(segments)
