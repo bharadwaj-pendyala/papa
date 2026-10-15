@@ -12,7 +12,7 @@ from ..models import (
     Analysis,
     Finding,
 )
-from .common import SKIP_REASON, fmt_number, grade_label
+from .common import SKIP_REASON, fmt_number, grade_label, plural
 
 _ANSI = {
     "yellow": "33", "red": "31", "blue": "34", "green": "32",
@@ -45,12 +45,12 @@ def render(analysis: Analysis, *, color: bool = False) -> str:
         _c(f"{score.hard_sentences} hard", "yellow", on=color),
         _c(f"{score.very_hard_sentences} very hard", "red", on=color),
         _c(f"{score.passive} passive", "green", on=color),
-        _c(f"{score.adverbs} adverbs", "blue", on=color),
+        _c(plural(score.adverbs, "adverb"), "blue", on=color),
         _c(f"{score.complex_phrases} complex", "purple", on=color),
     ]))
     lines.append(_c(
         f"  ARI {score.ari} · FK {score.flesch_kincaid} · Fog {score.gunning_fog}"
-        f"  ({score.sentences} sentences)", "grey", on=color,
+        f"  ({plural(score.sentences, 'sentence')})", "grey", on=color,
     ))
 
     return _with_findings(lines, analysis, color)

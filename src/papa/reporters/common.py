@@ -8,6 +8,15 @@ from ..models import DocumentScore
 SKIP_REASON = f"nothing to grade: no sentence has {MIN_WORDS} or more words"
 
 
+def noun(count: int, singular: str, many: str | None = None) -> str:
+    return singular if count == 1 else many or singular + "s"
+
+
+def plural(count: int, singular: str, many: str | None = None) -> str:
+    """``1 sentence`` / ``2 sentences``; pass ``many`` for irregular plurals."""
+    return f"{count} {noun(count, singular, many)}"
+
+
 def fmt_number(value: float) -> str:
     return str(int(value)) if float(value).is_integer() else str(value)
 

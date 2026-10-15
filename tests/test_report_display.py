@@ -46,3 +46,30 @@ def test_html_shows_decimal_grade_and_limit():
     assert '<div class="grade">Grade 6.3 · limit 6 ✗</div>' in html
     html = render_html(_analysis(_score(6.3)))
     assert '<div class="grade">Grade 6, easy to read</div>' in html
+
+
+def _counted(**counts):
+    score = _score(5.0, sentences=counts.pop("sentences", 5))
+    for name, value in counts.items():
+        setattr(score, name, value)
+    return _analysis(score)
+
+
+def test_cli_counts_use_singular_for_one():
+    out = render_cli(_counted(sentences=1, adverbs=1, hard_sentences=1))
+    assert "1 hard · 0 very hard · 0 passive · 1 adverb · 0 complex" in out
+    assert "(1 sentence)" in out
+
+
+def test_cli_counts_use_plural_otherwise():
+    out = render_cli(_counted(sentences=2, adverbs=0))
+    assert "0 adverbs" in out and "(2 sentences)" in out
+
+
+def test_html_counts_agree_with_number():
+    html = render_html(_counted(sentences=1, adverbs=1, complex_phrases=2, passive=2))
+    assert "<br>1 sentence</div>" in html
+    assert 'Adverb<span class="count">1</span>' in html
+    assert 'Complex phrases<span class="count">2</span>' in html
+    assert 'Passive voice<span class="count">2</span>' in html
+    assert 'Very hard sentences<span class="count">0</span>' in html

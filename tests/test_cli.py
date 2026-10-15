@@ -98,7 +98,7 @@ def test_cli_report_shows_grade_and_counts(tmp_path, capsys):
     main([_write(tmp_path, "doc.md", HARD)])
     out = capsys.readouterr().out
     assert "Grade" in out
-    assert "passive" in out and "adverbs" in out
+    assert "passive" in out and "1 adverb ·" in out
 
 
 def test_offsets_round_trip_through_a_code_block():

@@ -17,7 +17,7 @@ from ..models import (
     Analysis,
     Finding,
 )
-from .common import SKIP_REASON, fmt_number, grade_label
+from .common import SKIP_REASON, fmt_number, grade_label, noun, plural
 
 _BG = {
     HARD: "#fff3bf",
@@ -33,6 +33,7 @@ _LABEL = {
     ADVERB: "Adverb",
     COMPLEX: "Complex phrase",
 }
+_MANY = {PASSIVE: "Passive voice"}
 
 _CSS = """
 * { box-sizing: border-box; }
@@ -88,13 +89,13 @@ def _sidebar(analysis: Analysis) -> str:
         )
     formulas = (
         f"ARI {score.ari} · FK {score.flesch_kincaid} · Fog {score.gunning_fog}"
-        f"<br>{score.sentences} sentences"
+        f"<br>{plural(score.sentences, 'sentence')}"
     )
     if score.verdict == "skip":
         formulas = SKIP_REASON[0].upper() + SKIP_REASON[1:] + "."
     rows = "".join(
         f'<li><span class="swatch" style="background:{_BG[cat]}"></span>'
-        f'{_LABEL[cat]}<span class="count">{count}</span></li>'
+        f'{noun(count, _LABEL[cat], _MANY.get(cat))}<span class="count">{count}</span></li>'
         for cat, count in [
             (VERY_HARD, score.very_hard_sentences),
             (HARD, score.hard_sentences),
