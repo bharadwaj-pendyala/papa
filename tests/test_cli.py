@@ -79,7 +79,7 @@ def test_json_report_has_stable_shape(tmp_path, capsys):
     data = json.loads(capsys.readouterr().out)
     assert set(data) == {"version", "file", "score", "findings"}
     assert set(data["score"]) == {
-        "ari", "flesch_kincaid", "gunning_fog", "reading_grade", "sentences",
+        "ari", "flesch_kincaid", "gunning_fog", "reading_grade", "grade", "sentences",
         "hard_sentences", "very_hard_sentences", "adverbs", "passive",
         "complex_phrases", "verdict", "threshold",
     }

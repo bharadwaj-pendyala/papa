@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import math
+
 from .models import (
     ADVERB,
     COMPLEX,
@@ -61,6 +63,7 @@ def build_score(
         flesch_kincaid=round(fk, 1),
         gunning_fog=round(fog, 1),
         reading_grade=label,
+        grade=_display_grade(consensus, max_grade),
         sentences=sentence_count,
         hard_sentences=_count(findings, HARD),
         very_hard_sentences=_count(findings, VERY_HARD),
@@ -70,6 +73,18 @@ def build_score(
         verdict=verdict,
         threshold=threshold,
     )
+
+
+def _display_grade(consensus: float, max_grade: float | None) -> float:
+    # One decimal, nudged so 6.04 over a limit of 6 shows 6.1, never "6.0 fails 6".
+    grade = round(max(consensus, 0.0), 1)
+    if max_grade is None:
+        return grade
+    if consensus > max_grade and grade <= max_grade:
+        return math.ceil(consensus * 10) / 10
+    if consensus <= max_grade and grade > max_grade:
+        return math.floor(consensus * 10) / 10
+    return grade
 
 
 def _count(findings: list[Finding], category: str) -> int:

@@ -12,6 +12,7 @@ from ..models import (
     Analysis,
     Finding,
 )
+from .common import fmt_number, grade_label
 
 _ANSI = {
     "yellow": "33", "red": "31", "blue": "34", "green": "32",
@@ -25,13 +26,13 @@ _BADGE = {
 
 def render(analysis: Analysis, *, color: bool = False) -> str:
     score = analysis.score
-    lines = [_c(f"{analysis.path}  ·  {score.reading_grade}", "bold", on=color)]
+    lines = [_c(f"{analysis.path}  ·  {grade_label(score)}", "bold", on=color)]
 
     if score.threshold is not None:
         passed = score.verdict == "pass"
         mark = "✓ passes" if passed else "✗ fails"
         lines.append(
-            _c(f"  {mark} --max-grade {_fmt(score.threshold['max_grade'])}",
+            _c(f"  {mark} --max-grade {fmt_number(score.threshold['max_grade'])}",
                "green" if passed else "red", on=color)
         )
 
@@ -66,10 +67,6 @@ def _flagged_line(source: str, finding: Finding, color: bool) -> str:
             quote = quote[:63] + "…"
         message = f'{message}: "{quote}"'
     return f"  L{line_no:<4} {badge} {message}"
-
-
-def _fmt(value: float) -> str:
-    return str(int(value)) if float(value).is_integer() else str(value)
 
 
 def _c(text: str, code: str, *, on: bool) -> str:

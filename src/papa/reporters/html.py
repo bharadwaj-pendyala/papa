@@ -17,6 +17,7 @@ from ..models import (
     Analysis,
     Finding,
 )
+from .common import fmt_number, grade_label
 
 _BG = {
     HARD: "#fff3bf",
@@ -83,7 +84,7 @@ def _sidebar(analysis: Analysis) -> str:
         cls = "pass" if score.verdict == "pass" else "fail"
         verdict_html = (
             f'<span class="verdict {cls}">{score.verdict.upper()}'
-            f' · max {score.threshold["max_grade"]}</span>'
+            f' · --max-grade {fmt_number(score.threshold["max_grade"])}</span>'
         )
     rows = "".join(
         f'<li><span class="swatch" style="background:{_BG[cat]}"></span>'
@@ -99,7 +100,7 @@ def _sidebar(analysis: Analysis) -> str:
     return f"""
 <h1>papa</h1>
 <div class="file">{_html.escape(analysis.path)}</div>
-<div class="grade">{_html.escape(score.reading_grade)}</div>
+<div class="grade">{_html.escape(grade_label(score))}</div>
 {verdict_html}
 <div class="formulas">ARI {score.ari} · FK {score.flesch_kincaid} · Fog {score.gunning_fog}<br>{score.sentences} sentences</div>
 <ul>{rows}</ul>

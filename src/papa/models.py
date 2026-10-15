@@ -53,6 +53,7 @@ class DocumentScore:
     flesch_kincaid: float
     gunning_fog: float
     reading_grade: str
+    grade: float  # raw consensus to one decimal; agrees with the verdict at the limit
     sentences: int
     hard_sentences: int
     very_hard_sentences: int
