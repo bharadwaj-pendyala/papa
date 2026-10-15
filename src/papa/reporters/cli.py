@@ -12,7 +12,7 @@ from ..models import (
     Analysis,
     Finding,
 )
-from .common import SKIP_REASON, fmt_number, grade_label, plural
+from .common import SKIP_REASON, display_path, fmt_number, grade_label, plural
 
 _ANSI = {
     "yellow": "33", "red": "31", "blue": "34", "green": "32",
@@ -26,7 +26,7 @@ _BADGE = {
 
 def render(analysis: Analysis, *, color: bool = False) -> str:
     score = analysis.score
-    lines = [_c(f"{analysis.path}  ·  {grade_label(score)}", "bold", on=color)]
+    lines = [_c(f"{display_path(analysis.path)}  ·  {grade_label(score)}", "bold", on=color)]
 
     if score.verdict == "skip":
         lines.append(_c(f"  {SKIP_REASON}", "grey", on=color))

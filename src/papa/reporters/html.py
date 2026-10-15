@@ -17,7 +17,7 @@ from ..models import (
     Analysis,
     Finding,
 )
-from .common import SKIP_REASON, fmt_number, grade_label, noun, plural
+from .common import SKIP_REASON, display_path, fmt_number, grade_label, noun, plural
 
 _BG = {
     HARD: "#fff3bf",
@@ -66,7 +66,7 @@ def render(analysis: Analysis, *, color: bool = False) -> str:
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>papa · {_html.escape(analysis.path)}</title>
+<title>papa · {_html.escape(display_path(analysis.path))}</title>
 <style>{_CSS}{styles}</style>
 </head>
 <body>
@@ -106,7 +106,7 @@ def _sidebar(analysis: Analysis) -> str:
     )
     return f"""
 <h1>papa</h1>
-<div class="file">{_html.escape(analysis.path)}</div>
+<div class="file">{_html.escape(display_path(analysis.path))}</div>
 <div class="grade">{_html.escape(grade_label(score))}</div>
 {verdict_html}
 <div class="formulas">{formulas}</div>

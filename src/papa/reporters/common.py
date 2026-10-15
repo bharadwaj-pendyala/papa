@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from ..analyzers.readability import MIN_WORDS
 from ..models import DocumentScore
 
@@ -15,6 +17,20 @@ def noun(count: int, singular: str, many: str | None = None) -> str:
 def plural(count: int, singular: str, many: str | None = None) -> str:
     """``1 sentence`` / ``2 sentences``; pass ``many`` for irregular plurals."""
     return f"{count} {noun(count, singular, many)}"
+
+
+def display_path(path: str) -> str:
+    """Relative to the working directory when inside it, else as given."""
+    given = Path(path)
+    if not given.is_absolute():
+        return path
+    cwd = Path.cwd()
+    for candidate, base in ((given, cwd), (given.resolve(), cwd.resolve())):
+        try:
+            return str(candidate.relative_to(base))
+        except ValueError:
+            continue
+    return path
 
 
 def fmt_number(value: float) -> str:
