@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [project]
 name = "papa-lint"
 version = "0.1.0"
-description = "Hemingway-grade readability for your docs pipeline — CLI, library, and CI gate."
+description = "Hemingway-grade readability for your docs pipeline: CLI, library, and CI gate."
 readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
@@ -16,7 +16,10 @@ classifiers = [
     "Environment :: Console",
     "Intended Audience :: Developers",
     "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
     "Topic :: Text Processing :: Linguistic",
 ]
 dependencies = ["textstat>=0.7.3"]

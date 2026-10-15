@@ -61,6 +61,10 @@ The data flow is `Ingestor -> Analyzers -> Aggregator -> Reporters`. See `spec.m
 - Match the patterns already in the file you are editing.
 - No em dashes in prose files. Use a comma, a period, or rewrite.
 
+## Releasing
+
+Maintainers publish to PyPI by following [RELEASING.md](RELEASING.md).
+
 ## Conduct
 
 By participating you agree to the [Code of Conduct](CODE_OF_CONDUCT.md).
