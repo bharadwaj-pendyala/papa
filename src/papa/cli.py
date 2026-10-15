@@ -6,16 +6,32 @@ import argparse
 import json
 import os
 import sys
+import traceback
 from pathlib import Path
 
 from . import __version__, analyze
 from .reporters import REPORTERS
 from .reporters.json_report import payload
 
+ISSUES_URL = "https://github.com/bharadwaj-pendyala/papa/issues"
+
+EXIT_PASS, EXIT_FAIL, EXIT_USAGE, EXIT_INTERNAL = 0, 1, 2, 3
+
+EPILOG = """\
+exit codes:
+  0  every file passed (or no --max-grade was set)
+  1  a file is harder than --max-grade
+  2  usage or file error (bad option, missing or unreadable file)
+  3  internal error in papa (set PAPA_DEBUG=1 for a traceback)
+"""
+
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="papa", description="Hemingway-grade readability for prose."
+        prog="papa",
+        description="Hemingway-grade readability for prose.",
+        epilog=EPILOG,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("files", nargs="+", help="prose file(s): .md or .txt")
     parser.add_argument(
@@ -34,14 +50,20 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    try:
+        return _run(args)
+    except Exception as error:
+        return _internal_error(error)
 
+
+def _run(args: argparse.Namespace) -> int:
     analyses = []
     for path in args.files:
         try:
             source = _read(path)
         except OSError as error:
             print(f"papa: cannot read {path}: {error}", file=sys.stderr)
-            return 2
+            return EXIT_USAGE
         fmt = _detect_format(path, args.format)
         analyses.append(analyze(source, path=path, fmt=fmt, max_grade=args.max_grade))
 
@@ -53,7 +75,15 @@ def main(argv: list[str] | None = None) -> int:
     else:
         sys.stdout.write(rendered)
 
-    return 1 if any(a.score.verdict == "fail" for a in analyses) else 0
+    return EXIT_FAIL if any(a.score.verdict == "fail" for a in analyses) else EXIT_PASS
+
+
+def _internal_error(error: Exception) -> int:
+    if os.environ.get("PAPA_DEBUG") == "1":
+        traceback.print_exc()
+    print(f"papa: internal error: {type(error).__name__}: {error}", file=sys.stderr)
+    print(f"papa: this is a bug, please report it at {ISSUES_URL}", file=sys.stderr)
+    return EXIT_INTERNAL
 
 
 def _read(path: str) -> str:

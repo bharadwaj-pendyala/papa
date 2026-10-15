@@ -1,5 +1,7 @@
 import json
 
+import pytest
+
 from papa import analyze
 from papa.cli import main
 
@@ -66,3 +68,42 @@ def test_offsets_round_trip_through_a_code_block():
     findings = [f for f in analyze(md, path="t.md").findings if f.category == "passive"]
     assert findings
     assert md[findings[0].start:findings[0].end] == "was written"
+
+
+def _boom(*args, **kwargs):
+    raise RuntimeError("kaboom")
+
+
+def test_exit_codes_listed_in_help(capsys):
+    with pytest.raises(SystemExit) as exc:
+        main(["--help"])
+    assert exc.value.code == 0
+    out = capsys.readouterr().out
+    for line in ("0  every file passed", "1  a file is harder", "2  usage or file error",
+                 "3  internal error"):
+        assert line in out
+
+
+def test_bad_option_exits_two(capsys):
+    with pytest.raises(SystemExit) as exc:
+        main(["--no-such-flag", "x.md"])
+    assert exc.value.code == 2
+
+
+def test_internal_error_exits_three(tmp_path, capsys, monkeypatch):
+    monkeypatch.setattr("papa.cli.analyze", _boom)
+    monkeypatch.delenv("PAPA_DEBUG", raising=False)
+    assert main([_write(tmp_path, "easy.md", EASY)]) == 3
+    err = capsys.readouterr().err
+    assert err.splitlines()[0] == "papa: internal error: RuntimeError: kaboom"
+    assert "https://github.com/bharadwaj-pendyala/papa/issues" in err
+    assert "Traceback" not in err
+
+
+def test_internal_error_traceback_with_papa_debug(tmp_path, capsys, monkeypatch):
+    monkeypatch.setattr("papa.cli.analyze", _boom)
+    monkeypatch.setenv("PAPA_DEBUG", "1")
+    assert main([_write(tmp_path, "easy.md", EASY)]) == 3
+    err = capsys.readouterr().err
+    assert "Traceback" in err
+    assert "papa: internal error: RuntimeError: kaboom" in err

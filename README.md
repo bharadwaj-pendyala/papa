@@ -102,6 +102,15 @@ jobs:
 
 For local development, run the same command before opening a PR.
 
+## Exit codes
+
+| Code | Meaning |
+| ---- | ------- |
+| `0` | Every file passed, or no `--max-grade` was set. |
+| `1` | A file is harder than `--max-grade`. |
+| `2` | Usage or file error: a bad option, or a missing or unreadable file. |
+| `3` | Internal error in Papa. Set `PAPA_DEBUG=1` to print the traceback. |
+
 ## 🤖 LLM workflow
 
 Papa does not call an LLM directly. It emits structured JSON that you can hand to
