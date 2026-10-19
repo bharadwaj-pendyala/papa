@@ -1,3 +1,5 @@
+import pytest
+
 from papa.aggregate import build_score, merge_findings
 from papa.models import (
     ADVERB,
@@ -6,7 +8,63 @@ from papa.models import (
     PASSIVE,
     Finding,
 )
-from papa.scoring import document_grades, reading_grade
+from papa.scoring import (
+    automated_readability_index,
+    document_grades,
+    flesch_kincaid_grade,
+    gunning_fog,
+    reading_grade,
+    sentence_grade,
+)
+
+# 6 one-syllable words, 18 non-space characters, 1 sentence.
+SHORT = "The cat sat on the mat."
+# 8 words, 2 sentences, 61 non-space characters, 19 syllables
+# (4+5+2+2+2 + 2+1+1), 2 complex words (complicated, documentation).
+TWO = "Complicated documentation frustrates many people. Simple words help."
+
+
+def test_ari_by_hand():
+    assert automated_readability_index(SHORT) == pytest.approx(4.71 * 18 / 6 + 0.5 * 6 - 21.43)
+    assert automated_readability_index(TWO) == pytest.approx(4.71 * 61 / 8 + 0.5 * 4 - 21.43)
+
+
+def test_flesch_kincaid_by_hand():
+    assert flesch_kincaid_grade(SHORT) == pytest.approx(0.39 * 6 + 11.8 * 1 - 15.59)
+    assert flesch_kincaid_grade(TWO) == pytest.approx(0.39 * 4 + 11.8 * 19 / 8 - 15.59)
+
+
+def test_gunning_fog_by_hand():
+    assert gunning_fog(SHORT) == pytest.approx(0.4 * 6)
+    assert gunning_fog(TWO) == pytest.approx(0.4 * (4 + 100 * 2 / 8))
+
+
+def test_fog_skips_familiar_long_words():
+    # "everybody" and "important" have 3+ syllables but are familiar words.
+    assert gunning_fog("Everybody knows this is important work.") == pytest.approx(0.4 * 6)
+    assert gunning_fog("Everybody knows this is significant work.") == pytest.approx(
+        0.4 * (6 + 100 / 6)
+    )
+
+
+def test_fragments_of_two_words_are_not_sentences():
+    # "Simple words help." counts; "Read this." is folded into the word total only.
+    assert flesch_kincaid_grade("Simple words help. Read this.") == pytest.approx(
+        0.39 * 5 + 11.8 * 6 / 5 - 15.59
+    )
+
+
+def test_empty_text_scores_zero():
+    assert document_grades("") == (0.0, 0.0, 0.0, 0.0)
+    assert sentence_grade("   ") == 0.0
+
+
+def test_grades_are_deterministic_and_dependency_free():
+    first = document_grades(TWO)
+    assert document_grades(TWO) == first
+    assert first[:3] == (
+        automated_readability_index(TWO), flesch_kincaid_grade(TWO), gunning_fog(TWO)
+    )
 
 
 def test_reading_grade_labels():

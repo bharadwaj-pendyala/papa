@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "Bharadwaj Pendyala" }]
-keywords = ["readability", "hemingway", "linter", "prose", "writing", "ci", "textstat"]
+keywords = ["readability", "hemingway", "linter", "prose", "writing", "ci", "flesch-kincaid"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Environment :: Console",
@@ -19,7 +19,7 @@ classifiers = [
     "Programming Language :: Python :: 3.11",
     "Topic :: Text Processing :: Linguistic",
 ]
-dependencies = ["textstat>=0.7.3"]
+dependencies = []
 
 [project.optional-dependencies]
 dev = ["pytest>=7"]
