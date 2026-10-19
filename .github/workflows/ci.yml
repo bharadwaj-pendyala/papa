@@ -22,3 +22,28 @@ jobs:
         run: pip install -e ".[dev]"
       - name: Test
         run: pytest -q
+
+  quickstart:
+    name: README quickstart
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install from source with pipx
+        run: pipx install --python python .
+      - name: Run README quickstart commands
+        run: |
+          papa --version
+          papa README.md
+          papa README.md --report json > findings.json
+          python -m json.tool findings.json > /dev/null
+          papa README.md --report html -o report.html
+          test -s report.html
+          set +e
+          papa README.md --max-grade 10
+          code=$?
+          set -e
+          echo "papa --max-grade 10 exited with $code"
+          [ "$code" -eq 0 ] || [ "$code" -eq 1 ]

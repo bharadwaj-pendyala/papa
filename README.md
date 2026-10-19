@@ -10,9 +10,7 @@ can run locally or in CI, emit JSON for automation, and generate a self-containe
 HTML report.
 
 [![CI](https://img.shields.io/github/actions/workflow/status/bharadwaj-pendyala/papa/ci.yml?branch=main)](https://github.com/bharadwaj-pendyala/papa/actions)
-[![PyPI](https://img.shields.io/pypi/v/papa-lint.svg)](https://pypi.org/project/papa-lint/)
-[![Downloads](https://img.shields.io/pypi/dm/papa-lint.svg)](https://pypi.org/project/papa-lint/)
-[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/bharadwaj-pendyala/papa/blob/main/LICENSE)
 [![Stars](https://img.shields.io/github/stars/bharadwaj-pendyala/papa?style=social)](https://github.com/bharadwaj-pendyala/papa/stargazers)
 
 [**Quickstart**](#-quickstart) · [**CI usage**](#-ci-usage) · [**LLM workflow**](#-llm-workflow) · [**How it works**](#-how-it-works) · [**Roadmap**](#-roadmap)
@@ -58,14 +56,18 @@ Papa focuses on a narrow first job: make prose readability checks scriptable.
 
 ## ⚡ Quickstart
 
+Papa is not on PyPI yet, so install it from GitHub:
+
 ```bash
-pipx install papa-lint
+pipx install git+https://github.com/bharadwaj-pendyala/papa
 
 papa post.md
 papa post.md --report html -o report.html
 papa post.md --report json > findings.json
 papa post.md --max-grade 10
 ```
+
+`pipx install papa-lint` will work once the first release is published to PyPI.
 
 Example terminal output:
 
@@ -96,9 +98,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-      - run: python -m pip install papa-lint
+      - run: python -m pip install git+https://github.com/bharadwaj-pendyala/papa
       - run: papa README.md docs/*.md --max-grade 10
 ```
+
+After the first PyPI release, use `python -m pip install papa-lint` instead.
 
 For local development, run the same command before opening a PR.
 
