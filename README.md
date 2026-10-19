@@ -130,13 +130,14 @@ the original source:
 
 ```jsonc
 {
-  "version": "0.1",
+  "version": "0.2",
   "file": "post.md",
   "score": {
     "ari": 11.2,
     "flesch_kincaid": 10.8,
     "gunning_fog": 12.1,
     "reading_grade": "Grade 11, hard to read",
+    "grade": 11.4,
     "verdict": "fail"
   },
   "findings": [

@@ -10,6 +10,7 @@ Public API:
 
 from __future__ import annotations
 
+import re
 from dataclasses import replace
 
 from .aggregate import build_score, merge_findings, prose_sentences
@@ -22,6 +23,8 @@ from .sentences import split_sentences
 __version__ = "0.1.0"
 __all__ = ["analyze", "Analysis", "DocumentScore", "Finding"]
 
+_LINE_BREAK = re.compile(r"\r\n?")
+
 
 def analyze(
     source: str,
@@ -32,7 +35,7 @@ def analyze(
 ) -> Analysis:
     """Run the full Ingestor → Analyzers → Aggregator pipeline on ``source``.
 
-    Finding offsets index ``source`` exactly, including any CRLF line endings.
+    Finding offsets index ``source`` exactly, including any CRLF or CR line endings.
     """
     text, eol_map = _to_lf(source)
     clean, offset_map = ingest(text, fmt)
@@ -58,15 +61,20 @@ def _remap(finding: Finding, offset_map: OffsetMap) -> Finding:
 
 
 def _to_lf(source: str) -> tuple[str, OffsetMap]:
-    """Turn CRLF into LF so every stage sees one line ending, with a map back."""
+    """Turn CRLF and lone CR into LF so every stage sees one line ending, with a map back."""
     segments: list[tuple[int, int, int]] = []
+    parts: list[str] = []
     clean = pos = 0
-    while (cr := source.find("\r\n", pos)) >= 0:
-        if cr > pos:
-            segments.append((clean, pos, cr - pos))
-            clean += cr - pos
-        segments.append((clean, cr + 1, 1))
+    for match in _LINE_BREAK.finditer(source):
+        start = match.start()
+        if start > pos:
+            segments.append((clean, pos, start - pos))
+            parts.append(source[pos:start])
+            clean += start - pos
+        segments.append((clean, match.end() - 1, 1))
+        parts.append("\n")
         clean += 1
-        pos = cr + 2
+        pos = match.end()
     segments.append((clean, pos, len(source) - pos))
-    return source.replace("\r\n", "\n"), OffsetMap(segments)
+    parts.append(source[pos:])
+    return "".join(parts), OffsetMap(segments)

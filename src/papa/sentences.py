@@ -7,7 +7,7 @@ import re
 # A sentence ends at .!? or at a blank line. The blank-line boundary keeps
 # headings, list items, and the gaps left by stripped code blocks from being
 # glued onto the prose around them.
-_BOUNDARY = re.compile(r"[.!?]+(?=\s|$)|\r?\n[ \t]*\r?\n")
+_BOUNDARY = re.compile(r"[.!?]+(?=\s|$)|\n[ \t]*\n")
 
 
 def split_sentences(text: str) -> list[tuple[int, int, str]]:

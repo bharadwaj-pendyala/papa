@@ -17,6 +17,7 @@ LF = (
     "We did this in order to help.\n"
 )
 CRLF = LF.replace("\n", "\r\n")
+CR = LF.replace("\n", "\r")
 MIXED = "".join(
     line + ("\r\n" if i % 2 else "\n")
     for i, line in enumerate(LF.split("\n")[:-1])
@@ -32,25 +33,26 @@ def _check_offsets(source, findings):
         assert source[finding.start:finding.end] == word, finding
 
 
-@pytest.mark.parametrize("source", [LF, CRLF, MIXED], ids=["lf", "crlf", "mixed"])
+@pytest.mark.parametrize("source", [LF, CRLF, CR, MIXED], ids=["lf", "crlf", "cr", "mixed"])
 def test_offsets_index_the_exact_source(source):
     _check_offsets(source, analyze(source, path="t.md").findings)
 
 
-@pytest.mark.parametrize("source", [CRLF, MIXED], ids=["crlf", "mixed"])
+@pytest.mark.parametrize("source", [CRLF, CR, MIXED], ids=["crlf", "cr", "mixed"])
 def test_same_findings_as_lf(source):
     lf = [(f.category, f.message) for f in analyze(LF).findings]
     other = [(f.category, f.message) for f in analyze(source).findings]
     assert other == lf
 
 
-def test_crlf_code_and_frontmatter_still_stripped():
-    messages = " ".join(f.message for f in analyze(CRLF).findings)
+@pytest.mark.parametrize("source", [CRLF, CR], ids=["crlf", "cr"])
+def test_code_and_frontmatter_still_stripped(source):
+    messages = " ".join(f.message for f in analyze(source).findings)
     assert "badly" not in messages
-    assert "Notes" not in analyze(CRLF).clean
+    assert "Notes" not in analyze(source).clean
 
 
-@pytest.mark.parametrize("source", [CRLF, MIXED], ids=["crlf", "mixed"])
+@pytest.mark.parametrize("source", [CRLF, CR, MIXED], ids=["crlf", "cr", "mixed"])
 def test_cli_reads_bytes_as_on_disk(tmp_path, capsys, source):
     path = tmp_path / "doc.md"
     path.write_bytes(source.encode("utf-8"))
@@ -64,9 +66,10 @@ def test_cli_reads_bytes_as_on_disk(tmp_path, capsys, source):
             assert on_disk[finding["start"]:finding["end"]] == match.group(1)
 
 
-def test_cli_line_numbers_match_crlf_lines(tmp_path, capsys):
+@pytest.mark.parametrize("source", [CRLF, CR], ids=["crlf", "cr"])
+def test_cli_line_numbers_match_source_lines(tmp_path, capsys, source):
     path = tmp_path / "doc.md"
-    path.write_bytes(CRLF.encode("utf-8"))
+    path.write_bytes(source.encode("utf-8"))
     main([str(path)])
     out = capsys.readouterr().out
     assert re.search(r"L7\s+adverb\s+Adverb: 'extremely'", out)
@@ -74,6 +77,6 @@ def test_cli_line_numbers_match_crlf_lines(tmp_path, capsys):
     assert re.search(r"L14\s+passive\s+Passive voice: 'was written'", out)
 
 
-def test_splitter_treats_crlf_blank_line_as_boundary():
-    text = "A heading\r\n\r\nSome prose here"
-    assert [s[2] for s in split_sentences(text)] == ["A heading", "Some prose here"]
+def test_crlf_blank_line_is_a_sentence_boundary():
+    clean = analyze("A heading here\r\n\r\nSome prose here").clean
+    assert [s[2] for s in split_sentences(clean)] == ["A heading here", "Some prose here"]

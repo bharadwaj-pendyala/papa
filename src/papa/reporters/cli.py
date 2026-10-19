@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 from ..models import (
     ADVERB,
     COLOR,
@@ -18,6 +20,7 @@ _ANSI = {
     "yellow": "33", "red": "31", "blue": "34", "green": "32",
     "purple": "35", "grey": "90", "bold": "1",
 }
+_LINE_BREAK = re.compile(r"\r\n?|\n")
 _BADGE = {
     HARD: "hard", VERY_HARD: "very hard", PASSIVE: "passive",
     ADVERB: "adverb", COMPLEX: "complex",
@@ -65,7 +68,7 @@ def _with_findings(lines: list[str], analysis: Analysis, color: bool) -> str:
 
 
 def _flagged_line(source: str, finding: Finding, color: bool) -> str:
-    line_no = source.count("\n", 0, finding.start) + 1
+    line_no = len(_LINE_BREAK.findall(source, 0, finding.start)) + 1
     badge = _c(f"{_BADGE[finding.category]:<10}", COLOR[finding.category], on=color)
     message = finding.message
     if finding.category in (HARD, VERY_HARD):
