@@ -14,13 +14,14 @@ papa post.md --report json > findings.json
 
 ```jsonc
 {
-  "version": "0.1",
+  "version": "0.2",
   "file": "post.md",
   "score": {
     "ari": 11.2,
     "flesch_kincaid": 10.8,
     "gunning_fog": 12.1,
     "reading_grade": "Grade 11, hard to read",
+    "grade": 11.4,
     "sentences": 142,
     "hard_sentences": 18,
     "very_hard_sentences": 4,
@@ -46,10 +47,15 @@ papa post.md --report json > findings.json
 
 - `start` and `end` are offsets into the **original** source file, so a span maps
   back to the exact text the writer sees.
-- `reading_grade` is the human-facing label. The CLI compares its internal raw
-  consensus grade against `--max-grade`, but that raw value is not currently
-  exposed in the JSON payload.
-- `verdict` is `pass` or `fail`. `threshold` records the gate that produced it.
+- `reading_grade` is the human-facing label. `grade` is the consensus grade to
+  one decimal, the number the CLI compares against `--max-grade`. At the limit
+  it is rounded in the direction that agrees with `verdict`.
+- `verdict` is `pass`, `fail`, or `skip`. `skip` means the file has no prose to
+  grade (empty, code only, or frontmatter only). It never fails `--max-grade`
+  unless you pass `--fail-on-empty`. `threshold` records the gate that produced
+  the verdict.
+- Schema `0.2` added `grade` and the `skip` verdict to `0.1`. Nothing was
+  renamed or removed.
 
 ## 3. The rewrite prompt
 
@@ -85,4 +91,5 @@ papa post.revised.md --report json > findings.next.json
 ```
 
 Re run Papa on the revision and compare `reading_grade`, finding counts, and
-`verdict`. Repeat until `verdict` is `pass` or the grade stops improving.
+`verdict`. Repeat until `verdict` is `pass` or `skip`, or the grade stops
+improving.

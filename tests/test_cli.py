@@ -1,5 +1,7 @@
 import json
 
+import pytest
+
 from papa import analyze
 from papa.cli import main
 
@@ -30,8 +32,46 @@ def test_gate_passes_on_easy_text(tmp_path, capsys):
     assert main([_write(tmp_path, "easy.md", EASY), "--max-grade", "12"]) == 0
 
 
-def test_missing_file_returns_two(tmp_path):
+def test_missing_file_returns_two(tmp_path, capsys):
     assert main([str(tmp_path / "nope.md")]) == 2
+    assert capsys.readouterr().err == f"papa: {tmp_path / 'nope.md'} not found.\n"
+
+
+def test_folder_gets_a_hint(tmp_path, capsys, monkeypatch):
+    (tmp_path / "docs").mkdir()
+    monkeypatch.chdir(tmp_path)
+    for arg in ("docs", "docs/"):
+        assert main([arg]) == 2
+        assert capsys.readouterr().err == (
+            "papa: docs/ is a folder. Pass the files inside it, e.g. papa docs/*.md\n"
+        )
+
+
+def test_non_utf8_file_is_a_user_error(tmp_path, capsys):
+    path = tmp_path / "latin.md"
+    path.write_bytes("Caf\xe9 au lait is nice.".encode("latin-1"))
+    assert main([str(path)]) == 2
+    err = capsys.readouterr().err
+    assert err == f"papa: {path} is not UTF-8 text. Save it as UTF-8 and try again.\n"
+
+
+def test_unreadable_file_is_a_user_error(tmp_path, capsys, monkeypatch):
+    def deny(*args, **kwargs):
+        raise PermissionError(13, "Permission denied")
+
+    path = _write(tmp_path, "secret.md", EASY)
+    monkeypatch.setattr("builtins.open", deny)
+    assert main([path]) == 2
+    assert capsys.readouterr().err == (
+        f"papa: no permission to read {path}. Check its file permissions.\n"
+    )
+
+
+def test_output_into_missing_folder_is_a_user_error(tmp_path, capsys):
+    out = tmp_path / "nope" / "report.html"
+    assert main([_write(tmp_path, "easy.md", EASY), "--report", "html", "-o", str(out)]) == 2
+    err = capsys.readouterr().err
+    assert err.startswith("papa: cannot write") and err.count("\n") == 1
 
 
 def test_json_report_has_stable_shape(tmp_path, capsys):
@@ -39,7 +79,7 @@ def test_json_report_has_stable_shape(tmp_path, capsys):
     data = json.loads(capsys.readouterr().out)
     assert set(data) == {"version", "file", "score", "findings"}
     assert set(data["score"]) == {
-        "ari", "flesch_kincaid", "gunning_fog", "reading_grade", "sentences",
+        "ari", "flesch_kincaid", "gunning_fog", "reading_grade", "grade", "sentences",
         "hard_sentences", "very_hard_sentences", "adverbs", "passive",
         "complex_phrases", "verdict", "threshold",
     }
@@ -58,7 +98,7 @@ def test_cli_report_shows_grade_and_counts(tmp_path, capsys):
     main([_write(tmp_path, "doc.md", HARD)])
     out = capsys.readouterr().out
     assert "Grade" in out
-    assert "passive" in out and "adverbs" in out
+    assert "passive" in out and "1 adverb ·" in out
 
 
 def test_offsets_round_trip_through_a_code_block():
@@ -66,3 +106,42 @@ def test_offsets_round_trip_through_a_code_block():
     findings = [f for f in analyze(md, path="t.md").findings if f.category == "passive"]
     assert findings
     assert md[findings[0].start:findings[0].end] == "was written"
+
+
+def _boom(*args, **kwargs):
+    raise RuntimeError("kaboom")
+
+
+def test_exit_codes_listed_in_help(capsys):
+    with pytest.raises(SystemExit) as exc:
+        main(["--help"])
+    assert exc.value.code == 0
+    out = capsys.readouterr().out
+    for line in ("0  every file passed", "1  a file is harder", "2  usage or file error",
+                 "3  internal error"):
+        assert line in out
+
+
+def test_bad_option_exits_two(capsys):
+    with pytest.raises(SystemExit) as exc:
+        main(["--no-such-flag", "x.md"])
+    assert exc.value.code == 2
+
+
+def test_internal_error_exits_three(tmp_path, capsys, monkeypatch):
+    monkeypatch.setattr("papa.cli.analyze", _boom)
+    monkeypatch.delenv("PAPA_DEBUG", raising=False)
+    assert main([_write(tmp_path, "easy.md", EASY)]) == 3
+    err = capsys.readouterr().err
+    assert err.splitlines()[0] == "papa: internal error: RuntimeError: kaboom"
+    assert "https://github.com/bharadwaj-pendyala/papa/issues" in err
+    assert "Traceback" not in err
+
+
+def test_internal_error_traceback_with_papa_debug(tmp_path, capsys, monkeypatch):
+    monkeypatch.setattr("papa.cli.analyze", _boom)
+    monkeypatch.setenv("PAPA_DEBUG", "1")
+    assert main([_write(tmp_path, "easy.md", EASY)]) == 3
+    err = capsys.readouterr().err
+    assert "Traceback" in err
+    assert "papa: internal error: RuntimeError: kaboom" in err

@@ -6,16 +6,32 @@ import argparse
 import json
 import os
 import sys
+import traceback
 from pathlib import Path
 
 from . import __version__, analyze
 from .reporters import REPORTERS
 from .reporters.json_report import payload
 
+ISSUES_URL = "https://github.com/bharadwaj-pendyala/papa/issues"
+
+EXIT_PASS, EXIT_FAIL, EXIT_USAGE, EXIT_INTERNAL = 0, 1, 2, 3
+
+EPILOG = """\
+exit codes:
+  0  every file passed (or no --max-grade was set)
+  1  a file is harder than --max-grade (or has no prose, with --fail-on-empty)
+  2  usage or file error (bad option, missing or unreadable file)
+  3  internal error in papa (set PAPA_DEBUG=1 for a traceback)
+"""
+
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="papa", description="Hemingway-grade readability for prose."
+        prog="papa",
+        description="Hemingway-grade readability for prose.",
+        epilog=EPILOG,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     parser.add_argument("files", nargs="+", help="prose file(s): .md or .txt")
     parser.add_argument(
@@ -27,6 +43,10 @@ def build_parser() -> argparse.ArgumentParser:
         "--max-grade", type=float, metavar="N",
         help="exit 1 if the consensus grade is harder than N",
     )
+    parser.add_argument(
+        "--fail-on-empty", action="store_true",
+        help="exit 1 if a file has no prose to grade (default: skip it)",
+    )
     parser.add_argument("--format", choices=["md", "txt"], help="override format detection")
     parser.add_argument("--version", action="version", version=f"papa {__version__}")
     return parser
@@ -34,14 +54,19 @@ def build_parser() -> argparse.ArgumentParser:
 
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
+    try:
+        return _run(args)
+    except Exception as error:
+        return _internal_error(error)
 
+
+def _run(args: argparse.Namespace) -> int:
     analyses = []
     for path in args.files:
         try:
-            source = Path(path).read_text(encoding="utf-8")
-        except OSError as error:
-            print(f"papa: cannot read {path}: {error}", file=sys.stderr)
-            return 2
+            source = _read(path)
+        except (OSError, UnicodeDecodeError) as error:
+            return _user_error(_read_error(path, error))
         fmt = _detect_format(path, args.format)
         analyses.append(analyze(source, path=path, fmt=fmt, max_grade=args.max_grade))
 
@@ -49,11 +74,62 @@ def main(argv: list[str] | None = None) -> int:
     rendered = _render(args.report, analyses, color)
 
     if args.output:
-        Path(args.output).write_text(rendered, encoding="utf-8")
+        try:
+            Path(args.output).write_text(rendered, encoding="utf-8")
+        except OSError as error:
+            return _user_error(_write_error(args.output, error))
     else:
         sys.stdout.write(rendered)
 
-    return 1 if any(a.score.verdict == "fail" for a in analyses) else 0
+    failing = {"fail", "skip"} if args.fail_on_empty else {"fail"}
+    return EXIT_FAIL if any(a.score.verdict in failing for a in analyses) else EXIT_PASS
+
+
+def _user_error(message: str) -> int:
+    print(f"papa: {message}", file=sys.stderr)
+    return EXIT_USAGE
+
+
+def _read_error(path: str, error: Exception) -> str:
+    if isinstance(error, IsADirectoryError):
+        folder = path.rstrip("/\\") + "/"
+        return f"{folder} is a folder. Pass the files inside it, e.g. papa {folder}*.md"
+    if isinstance(error, FileNotFoundError):
+        return f"{path} not found."
+    if isinstance(error, PermissionError):
+        return f"no permission to read {path}. Check its file permissions."
+    if isinstance(error, UnicodeDecodeError):
+        return f"{path} is not UTF-8 text. Save it as UTF-8 and try again."
+    return f"cannot read {path} ({_reason(error)})."
+
+
+def _write_error(path: str, error: OSError) -> str:
+    if isinstance(error, IsADirectoryError):
+        folder = path.rstrip("/\\") + "/"
+        return f"{folder} is a folder. Give -o a file name, e.g. -o {folder}report.html"
+    if isinstance(error, FileNotFoundError):
+        return f"cannot write {path} because its folder does not exist."
+    if isinstance(error, PermissionError):
+        return f"no permission to write {path}. Check the folder's permissions."
+    return f"cannot write {path} ({_reason(error)})."
+
+
+def _reason(error: Exception) -> str:
+    return (getattr(error, "strerror", None) or str(error)).lower()
+
+
+def _internal_error(error: Exception) -> int:
+    if os.environ.get("PAPA_DEBUG") == "1":
+        traceback.print_exc()
+    print(f"papa: internal error: {type(error).__name__}: {error}", file=sys.stderr)
+    print(f"papa: this is a bug, please report it at {ISSUES_URL}", file=sys.stderr)
+    return EXIT_INTERNAL
+
+
+def _read(path: str) -> str:
+    # newline="" keeps CRLF intact so finding offsets index the bytes on disk.
+    with open(path, encoding="utf-8", newline="") as handle:
+        return handle.read()
 
 
 def _detect_format(path: str, override: str | None) -> str:

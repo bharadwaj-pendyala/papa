@@ -17,6 +17,7 @@ from ..models import (
     Analysis,
     Finding,
 )
+from .common import SKIP_REASON, display_path, fmt_number, grade_label, noun, plural
 
 _BG = {
     HARD: "#fff3bf",
@@ -32,6 +33,7 @@ _LABEL = {
     ADVERB: "Adverb",
     COMPLEX: "Complex phrase",
 }
+_MANY = {PASSIVE: "Passive voice"}
 
 _CSS = """
 * { box-sizing: border-box; }
@@ -46,6 +48,7 @@ aside .grade { font-size: 22px; font-weight: 700; margin: 0 0 8px; }
 aside .verdict { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 13px; font-weight: 600; }
 aside .pass { background: #d3f9d8; color: #2b8a3e; }
 aside .fail { background: #ffe3e3; color: #c92a2a; }
+aside .skip { background: #e9ecef; color: #495057; }
 aside .formulas { color: #495057; font-size: 14px; margin: 14px 0; }
 aside ul { list-style: none; padding: 0; margin: 14px 0 0; }
 aside li { display: flex; align-items: center; gap: 8px; font-size: 14px; padding: 3px 0; }
@@ -63,7 +66,7 @@ def render(analysis: Analysis, *, color: bool = False) -> str:
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>papa · {_html.escape(analysis.path)}</title>
+<title>papa · {_html.escape(display_path(analysis.path))}</title>
 <style>{_CSS}{styles}</style>
 </head>
 <body>
@@ -80,14 +83,19 @@ def _sidebar(analysis: Analysis) -> str:
     score = analysis.score
     verdict_html = ""
     if score.threshold is not None:
-        cls = "pass" if score.verdict == "pass" else "fail"
         verdict_html = (
-            f'<span class="verdict {cls}">{score.verdict.upper()}'
-            f' · max {score.threshold["max_grade"]}</span>'
+            f'<span class="verdict {score.verdict}">{score.verdict.upper()}'
+            f' · --max-grade {fmt_number(score.threshold["max_grade"])}</span>'
         )
+    formulas = (
+        f"ARI {score.ari} · FK {score.flesch_kincaid} · Fog {score.gunning_fog}"
+        f"<br>{plural(score.sentences, 'sentence')}"
+    )
+    if score.verdict == "skip":
+        formulas = SKIP_REASON[0].upper() + SKIP_REASON[1:] + "."
     rows = "".join(
         f'<li><span class="swatch" style="background:{_BG[cat]}"></span>'
-        f'{_LABEL[cat]}<span class="count">{count}</span></li>'
+        f'{noun(count, _LABEL[cat], _MANY.get(cat))}<span class="count">{count}</span></li>'
         for cat, count in [
             (VERY_HARD, score.very_hard_sentences),
             (HARD, score.hard_sentences),
@@ -98,10 +106,10 @@ def _sidebar(analysis: Analysis) -> str:
     )
     return f"""
 <h1>papa</h1>
-<div class="file">{_html.escape(analysis.path)}</div>
-<div class="grade">{_html.escape(score.reading_grade)}</div>
+<div class="file">{_html.escape(display_path(analysis.path))}</div>
+<div class="grade">{_html.escape(grade_label(score))}</div>
 {verdict_html}
-<div class="formulas">ARI {score.ari} · FK {score.flesch_kincaid} · Fog {score.gunning_fog}<br>{score.sentences} sentences</div>
+<div class="formulas">{formulas}</div>
 <ul>{rows}</ul>
 """
 

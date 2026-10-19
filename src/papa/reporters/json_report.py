@@ -6,7 +6,7 @@ import json
 
 from ..models import Analysis
 
-SCHEMA_VERSION = "0.1"
+SCHEMA_VERSION = "0.2"
 
 
 def payload(analysis: Analysis) -> dict:
