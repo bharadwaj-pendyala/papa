@@ -37,6 +37,8 @@ _EXCEPTIONS = {
     "interest": 2,
     "interested": 3,
     "interesting": 3,
+    "lineage": 3,
+    "linear": 3,
     "maybe": 2,
     "mr": 2,
     "mrs": 2,
@@ -48,6 +50,10 @@ _EXCEPTIONS = {
     "priest": 1,
     "reality": 4,
     "recipe": 3,
+    "museum": 3,
+    "reuse": 2,
+    "reused": 2,
+    "reuses": 3,
     "sour": 2,
     "whereas": 2,
     "wednesday": 2,
@@ -63,6 +69,12 @@ _COMPOUND_HEADS = {
     "pipe": 1, "rose": 1, "safe": 1, "side": 1, "some": 1, "space": 1,
     "store": 1, "there": 1, "time": 1, "type": 1, "where": 1, "white": 1,
 }
+
+# Second halves that start with a vowel but still join a compound: time-out, home-owner.
+_VOWEL_TAILS = frozenset((
+    "in", "ins", "off", "offs", "on", "one", "ones", "out", "outs",
+    "over", "overs", "owner", "owners", "up", "ups",
+))
 
 # Spellings that add a syllable the vowel-group count misses.
 _SPLITS = [re.compile(p) for p in (
@@ -119,11 +131,13 @@ def _count(word: str) -> int:
         return _EXCEPTIONS[word]
     if word.endswith("s") and word[:-1] in _EXCEPTIONS:
         return _EXCEPTIONS[word[:-1]]
+    if word.endswith("es") and word[:-2] in _EXCEPTIONS and _sibilant(word[:-2]):
+        return _EXCEPTIONS[word[:-2]] + 1  # businesses, buses
     for head, syllables in _COMPOUND_HEADS.items():
         rest = word[len(head):]
         if not word.startswith(head) or not _vowel_groups(rest):
             continue
-        if rest == "one" or not _is_vowel(rest, 0):
+        if rest in _VOWEL_TAILS or not _is_vowel(rest, 0):
             return syllables + _count(rest)
     for suffix in _SUFFIXES:
         stem = word[: -len(suffix)]
@@ -133,6 +147,10 @@ def _count(word: str) -> int:
     if _vowel_groups(word) > 1 and _silent_ending(word):
         count -= 1
     return max(1, count)
+
+
+def _sibilant(word: str) -> bool:
+    return word[-1:] in ("s", "x", "z") or word[-2:] in ("ch", "sh")
 
 
 def _is_vowel(word: str, i: int) -> bool:

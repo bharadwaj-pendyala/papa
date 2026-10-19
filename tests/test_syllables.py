@@ -69,6 +69,20 @@ def test_contractions_possessives_and_hyphens():
     })
 
 
+def test_compounds_with_a_vowel_second_half():
+    _check({
+        "timeout": 2, "timeouts": 2, "homeowner": 3, "homeowners": 3,
+        "makeup": 2, "someone": 2, "linear": 3, "lineage": 3,
+    })
+
+
+def test_plurals_and_forms_of_exception_words():
+    _check({
+        "business": 2, "businesses": 3, "reuse": 2, "reused": 2, "reuses": 3,
+        "museum": 3, "museums": 3,
+    })
+
+
 def test_case_and_punctuation_are_ignored():
     assert count_syllables("Readability,") == count_syllables("readability") == 5
 

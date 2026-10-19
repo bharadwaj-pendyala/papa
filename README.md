@@ -192,9 +192,11 @@ print(result.score.verdict)
 
 ## 🙏 Built on the shoulders of
 
-Papa currently uses [textstat](https://github.com/textstat/textstat) for
-readability formulas and includes small built-in heuristics for the Hemingway
-style findings. Future optional integrations may include
+Papa computes ARI, Flesch-Kincaid and Gunning fog itself, with a built-in
+syllable counter, following the conventions of
+[textstat](https://github.com/textstat/textstat), which earlier versions used. It
+has no runtime dependencies and needs no network, and it includes small built-in
+heuristics for the Hemingway style findings. Future optional integrations may include
 [proselint](https://github.com/amperser/proselint),
 [write-good](https://github.com/btford/write-good),
 [vale](https://github.com/errata-ai/vale), and

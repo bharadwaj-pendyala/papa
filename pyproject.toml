@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.11"
 license = { text = "MIT" }
 authors = [{ name = "Bharadwaj Pendyala" }]
-keywords = ["readability", "hemingway", "linter", "prose", "writing", "ci", "textstat"]
+keywords = ["readability", "hemingway", "linter", "prose", "writing", "ci", "flesch-kincaid"]
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Environment :: Console",
