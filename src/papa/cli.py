@@ -36,6 +36,16 @@ Exit codes:
 """
 
 
+class _HelpFormatter(argparse.RawDescriptionHelpFormatter):
+    # Python 3.13 prints "-o, --output FILE"; older versions print "-o FILE, --output FILE".
+    # Use the short form everywhere so help reads the same on every supported Python.
+    def _format_action_invocation(self, action: argparse.Action) -> str:
+        if not action.option_strings or action.nargs == 0:
+            return super()._format_action_invocation(action)
+        metavar = self._format_args(action, self._get_default_metavar_for_optional(action))
+        return f"{', '.join(action.option_strings)} {metavar}"
+
+
 class _Parser(argparse.ArgumentParser):
     def error(self, message: str) -> None:
         if message.startswith("unrecognized arguments:"):
@@ -57,7 +67,7 @@ def build_parser() -> argparse.ArgumentParser:
         prog="papa",
         description="Hemingway-style readability linting for Markdown and plain text.",
         epilog=EXAMPLES,
-        formatter_class=argparse.RawDescriptionHelpFormatter,
+        formatter_class=_HelpFormatter,
     )
     parser.add_argument("files", nargs="*", metavar="PATH",
                         help="files, folders, or quoted globs; '-' or a pipe reads stdin")
