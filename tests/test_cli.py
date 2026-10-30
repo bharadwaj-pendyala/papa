@@ -113,3 +113,12 @@ def test_exclude_accepts_any_valid_glob_class(tmp_path, capsys):
     path = _write(tmp_path, "easy.md", EASY)
     assert main([path, "--exclude", "[!]].txt", "--report", "json"]) == 0
     assert main([path, "--exclude", str(tmp_path / "[!x]asy.md")]) == 2
+
+
+def test_exclude_classes_follow_fnmatch_rules(tmp_path, capsys):
+    for name in ("A.txt", "-.txt", "x.txt"):
+        _write(tmp_path, name, EASY)
+    main([str(tmp_path), "--exclude", str(tmp_path / "[!-a].txt")])
+    out = capsys.readouterr().out
+    assert "-.txt" in out and "A.txt" not in out and "x.txt" not in out
+    assert main([str(tmp_path), "--exclude", str(tmp_path / "[z-a].txt"), "--report", "json"]) == 0

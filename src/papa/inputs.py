@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import fnmatch
 import glob
 import os
 import re
@@ -121,10 +122,9 @@ def _class_end(pattern: str, start: int) -> int:
 
 
 def _class_regex(body: str) -> str:
-    negate = body.startswith("!")
-    members = body[1:] if negate else body
-    escaped = members.replace("\\", "\\\\").replace("^", "\\^").replace("[", "\\[").replace("]", "\\]")
-    return f"[^/{escaped}]" if negate else f"[{escaped}]"
+    # fnmatch owns the edge cases (leading '-', reversed ranges); a class never matches '/'.
+    translated = fnmatch.translate(f"[{body}]")
+    return "(?!/)" + re.fullmatch(r"\(\?s:(.*)\)\\[zZ]", translated, re.DOTALL).group(1)
 
 
 def anchor(pattern: str, base: Path) -> str:
