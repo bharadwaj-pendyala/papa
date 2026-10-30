@@ -24,7 +24,7 @@ jobs:
         run: pytest -q
       - name: UX checks (eyes)
         run: |
-          pip install userlens
+          pip install "userlens @ git+https://github.com/bharadwaj-pendyala/userlens"
           eyes run
       - name: Upload eyes report
         if: failure()
