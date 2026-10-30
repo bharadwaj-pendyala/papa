@@ -34,7 +34,7 @@ papa README.md --report json
 ## Check the UX with eyes
 
 Papa's UX checks run the CLI like a user does and check the output. They use
-[agent-eyes](https://github.com/bharadwaj-pendyala/agent-eyes). Run them before
+[userlens](https://github.com/bharadwaj-pendyala/userlens). Run them before
 you open a PR that changes what users see:
 
 ```bash

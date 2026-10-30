@@ -1,6 +1,6 @@
-# UX checks with agent-eyes
+# UX checks with userlens
 
-Papa's UX checks run on [agent-eyes](https://github.com/bharadwaj-pendyala/agent-eyes),
+Papa's UX checks run on [userlens](https://github.com/bharadwaj-pendyala/userlens),
 a separate tool that lets a coding agent see a CLI the way a user sees it. Read
 its README for every config key, the report format, and the agent loop.
 

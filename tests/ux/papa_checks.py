@@ -6,7 +6,7 @@ import json
 import math
 from pathlib import Path
 
-from agent_eyes import Check
+from userlens import Check
 
 SOURCE = "src/papa/reporters/json_report.py"
 SCORE_NUMBERS = {"ari", "flesch_kincaid", "gunning_fog", "consensus"}

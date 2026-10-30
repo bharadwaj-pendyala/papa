@@ -24,7 +24,7 @@ jobs:
         run: pytest -q
       - name: UX checks (eyes)
         run: |
-          pip install "agent-eyes @ git+https://github.com/bharadwaj-pendyala/agent-eyes"
+          pip install userlens
           eyes run
       - name: Upload eyes report
         if: failure()
