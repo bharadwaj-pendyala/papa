@@ -1,0 +1,13 @@
+$ all-findings.md --report concise
+[exit 0]
+--- stdout
+all-findings.md:7:15: warning: Passive voice: 'was shipped' [passive]
+all-findings.md:7:39: warning: Complex phrase: 'in order to', consider 'to' [complex-phrase]
+all-findings.md:8:4: note: Adverb: 'basically' [adverb]
+all-findings.md:8:55: note: Adverb: 'really' [adverb]
+all-findings.md:15:1: error: Very hard to read (grade 32) [very-hard-sentence]
+all-findings.md:15:1: warning: Complex phrase: 'Due to the fact that', consider 'because' [complex-phrase]
+all-findings.md:15:172: note: Adverb: 'consistently' [adverb]
+all-findings.md:15:279: warning: Passive voice: 'was postponed' [passive]
+--- stderr
+

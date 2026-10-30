@@ -1,0 +1,234 @@
+$ easy.txt all-findings.md unicode-crlf.txt --report json
+[exit 0]
+--- stdout
+{
+  "version": "0.2",
+  "files": [
+    {
+      "file": "easy.txt",
+      "score": {
+        "ari": -4.0,
+        "flesch_kincaid": -1.0,
+        "gunning_fog": 2.1,
+        "consensus": -1.0,
+        "reading_grade": "Grade 0, easy to read",
+        "sentences": 3,
+        "hard_sentences": 0,
+        "very_hard_sentences": 0,
+        "adverbs": 0,
+        "passive": 0,
+        "complex_phrases": 0,
+        "verdict": "pass",
+        "threshold": null
+      },
+      "findings": []
+    },
+    {
+      "file": "all-findings.md",
+      "score": {
+        "ari": 14.4,
+        "flesch_kincaid": 13.4,
+        "gunning_fog": 16.7,
+        "consensus": 14.8,
+        "reading_grade": "Grade 15, very hard to read",
+        "sentences": 6,
+        "hard_sentences": 0,
+        "very_hard_sentences": 1,
+        "adverbs": 3,
+        "passive": 2,
+        "complex_phrases": 2,
+        "verdict": "pass",
+        "threshold": null
+      },
+      "findings": [
+        {
+          "start": 61,
+          "end": 72,
+          "line": 7,
+          "column": 15,
+          "end_line": 7,
+          "end_column": 26,
+          "category": "passive",
+          "color": "green",
+          "severity": "warn",
+          "message": "Passive voice: 'was shipped'",
+          "analyzer": "passive",
+          "hint": "Name who does the action and make them the subject."
+        },
+        {
+          "start": 85,
+          "end": 96,
+          "line": 7,
+          "column": 39,
+          "end_line": 7,
+          "end_column": 50,
+          "category": "complex-phrase",
+          "color": "purple",
+          "severity": "warn",
+          "message": "Complex phrase: 'in order to', consider 'to'",
+          "analyzer": "complex-phrase",
+          "hint": "Use 'to'."
+        },
+        {
+          "start": 119,
+          "end": 128,
+          "line": 8,
+          "column": 4,
+          "end_line": 8,
+          "end_column": 13,
+          "category": "adverb",
+          "color": "blue",
+          "severity": "info",
+          "message": "Adverb: 'basically'",
+          "analyzer": "adverbs",
+          "hint": "Cut the adverb or use a stronger verb."
+        },
+        {
+          "start": 170,
+          "end": 176,
+          "line": 8,
+          "column": 55,
+          "end_line": 8,
+          "end_column": 61,
+          "category": "adverb",
+          "color": "blue",
+          "severity": "info",
+          "message": "Adverb: 'really'",
+          "analyzer": "adverbs",
+          "hint": "Cut the adverb or use a stronger verb."
+        },
+        {
+          "start": 278,
+          "end": 570,
+          "line": 15,
+          "column": 1,
+          "end_line": 15,
+          "end_column": 293,
+          "category": "very-hard-sentence",
+          "color": "red",
+          "severity": "error",
+          "message": "Very hard to read (grade 32)",
+          "analyzer": "readability",
+          "hint": "Split the sentence or cut words. Aim for one idea per sentence."
+        },
+        {
+          "start": 278,
+          "end": 298,
+          "line": 15,
+          "column": 1,
+          "end_line": 15,
+          "end_column": 21,
+          "category": "complex-phrase",
+          "color": "purple",
+          "severity": "warn",
+          "message": "Complex phrase: 'Due to the fact that', consider 'because'",
+          "analyzer": "complex-phrase",
+          "hint": "Use 'because'."
+        },
+        {
+          "start": 449,
+          "end": 461,
+          "line": 15,
+          "column": 172,
+          "end_line": 15,
+          "end_column": 184,
+          "category": "adverb",
+          "color": "blue",
+          "severity": "info",
+          "message": "Adverb: 'consistently'",
+          "analyzer": "adverbs",
+          "hint": "Cut the adverb or use a stronger verb."
+        },
+        {
+          "start": 556,
+          "end": 569,
+          "line": 15,
+          "column": 279,
+          "end_line": 15,
+          "end_column": 292,
+          "category": "passive",
+          "color": "green",
+          "severity": "warn",
+          "message": "Passive voice: 'was postponed'",
+          "analyzer": "passive",
+          "hint": "Name who does the action and make them the subject."
+        }
+      ]
+    },
+    {
+      "file": "unicode-crlf.txt",
+      "score": {
+        "ari": 5.3,
+        "flesch_kincaid": 3.7,
+        "gunning_fog": 5.8,
+        "consensus": 5.0,
+        "reading_grade": "Grade 5, easy to read",
+        "sentences": 2,
+        "hard_sentences": 0,
+        "very_hard_sentences": 0,
+        "adverbs": 1,
+        "passive": 2,
+        "complex_phrases": 0,
+        "verdict": "pass",
+        "threshold": null
+      },
+      "findings": [
+        {
+          "start": 11,
+          "end": 23,
+          "line": 1,
+          "column": 12,
+          "end_line": 1,
+          "end_column": 24,
+          "category": "passive",
+          "color": "green",
+          "severity": "warn",
+          "message": "Passive voice: 'were written'",
+          "analyzer": "passive",
+          "hint": "Name who does the action and make them the subject."
+        },
+        {
+          "start": 44,
+          "end": 56,
+          "line": 2,
+          "column": 12,
+          "end_line": 2,
+          "end_column": 24,
+          "category": "passive",
+          "color": "green",
+          "severity": "warn",
+          "message": "Passive voice: 'was reviewed'",
+          "analyzer": "passive",
+          "hint": "Name who does the action and make them the subject."
+        },
+        {
+          "start": 57,
+          "end": 66,
+          "line": 2,
+          "column": 25,
+          "end_line": 2,
+          "end_column": 34,
+          "category": "adverb",
+          "color": "blue",
+          "severity": "info",
+          "message": "Adverb: 'carefully'",
+          "analyzer": "adverbs",
+          "hint": "Cut the adverb or use a stronger verb."
+        }
+      ]
+    }
+  ],
+  "skipped": [],
+  "errors": [],
+  "summary": {
+    "files": 3,
+    "analyzed": 3,
+    "passed": 3,
+    "failed": 0,
+    "skipped": 0,
+    "errors": 0,
+    "max_grade": null
+  }
+}
+--- stderr
+

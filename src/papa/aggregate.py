@@ -36,7 +36,7 @@ def merge_findings(findings: list[Finding]) -> list[Finding]:
                 kept[-1] = finding
             continue
         kept.append(finding)
-    return sorted(sentence + kept, key=lambda f: (f.start, f.end))
+    return sorted(sentence + kept, key=lambda f: (f.start, -f.end))
 
 
 def build_score(
@@ -60,6 +60,7 @@ def build_score(
         ari=round(ari, 1),
         flesch_kincaid=round(fk, 1),
         gunning_fog=round(fog, 1),
+        consensus=round(consensus, 1),
         reading_grade=label,
         sentences=sentence_count,
         hard_sentences=_count(findings, HARD),

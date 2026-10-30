@@ -16,7 +16,9 @@ from ..models import (
     VERY_HARD,
     Analysis,
     Finding,
+    Run,
 )
+from .common import plural
 
 _BG = {
     HARD: "#fff3bf",
@@ -52,28 +54,54 @@ aside li { display: flex; align-items: center; gap: 8px; font-size: 14px; paddin
 aside .swatch { width: 14px; height: 14px; border-radius: 3px; flex: 0 0 auto; }
 aside .count { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 600; }
 .hl { border-radius: 3px; padding: 0 1px; }
+nav.index { max-width: 1100px; margin: 0 auto; padding: 24px 24px 0; }
+nav.index h1 { font-size: 20px; margin: 0 0 8px; }
+nav.index ol { margin: 0; padding-left: 20px; }
+nav.index a { color: #1c5fb8; }
+nav.index .fail { color: #c92a2a; font-weight: 600; }
+@media (max-width: 760px) {
+  .wrap { flex-direction: column; padding: 16px; align-items: stretch; }
+  aside { position: static; flex: none; }
+  main { padding: 16px; }
+  main pre { font-size: 14px; }
+}
 """
 
 
-def render(analysis: Analysis, *, color: bool = False) -> str:
-    body = _render_spans(analysis.source, analysis.findings)
+def render(run: Run, *, color: bool = False, width: int = 80, details: bool = True) -> str:
     styles = "".join(f".hl-{cat}{{background:{bg};}}" for cat, bg in _BG.items())
+    sections = "\n".join(
+        f'<section class="wrap" id="file-{i}">\n<aside>{_sidebar(a)}</aside>\n'
+        f"<main><pre>{_render_spans(a.source, a.findings)}</pre></main>\n</section>"
+        for i, a in enumerate(run.analyses, 1)
+    )
+    title = run.analyses[0].path if len(run.analyses) == 1 else plural(len(run.analyses), "file")
     return f"""<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>papa · {_html.escape(analysis.path)}</title>
+<title>papa · {_html.escape(title)}</title>
 <style>{_CSS}{styles}</style>
 </head>
 <body>
-<div class="wrap">
-<aside>{_sidebar(analysis)}</aside>
-<main><pre>{body}</pre></main>
-</div>
+{_index(run.analyses)}
+{sections}
 </body>
 </html>
 """
+
+
+def _index(analyses: list[Analysis]) -> str:
+    if len(analyses) < 2:
+        return ""
+    items = "".join(
+        f'<li><a href="#file-{i}">{_html.escape(a.path)}</a> · {_html.escape(a.score.reading_grade)}'
+        + (' · <span class="fail">FAIL</span>' if a.score.verdict == "fail" else "")
+        + "</li>"
+        for i, a in enumerate(analyses, 1)
+    )
+    return f'<nav class="index"><h1>papa · {plural(len(analyses), "file")}</h1><ol>{items}</ol></nav>'
 
 
 def _sidebar(analysis: Analysis) -> str:
@@ -101,7 +129,7 @@ def _sidebar(analysis: Analysis) -> str:
 <div class="file">{_html.escape(analysis.path)}</div>
 <div class="grade">{_html.escape(score.reading_grade)}</div>
 {verdict_html}
-<div class="formulas">ARI {score.ari} · FK {score.flesch_kincaid} · Fog {score.gunning_fog}<br>{score.sentences} sentences</div>
+<div class="formulas">ARI {score.ari} · FK {score.flesch_kincaid} · Fog {score.gunning_fog}<br>{plural(score.sentences, 'sentence')}</div>
 <ul>{rows}</ul>
 """
 

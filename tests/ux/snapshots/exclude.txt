@@ -1,0 +1,24 @@
+$ project/docs --exclude 'project/docs/generated/**'
+[exit 0]
+--- stdout
+project/docs/faq.txt  ·  Grade 4, easy to read
+
+  1 passive · 1 adverb
+  ARI 1.8 · FK 5.2 · Fog 6.0 · 2 sentences
+
+  1:12  passive    Passive voice: 'was given'
+  1:40  adverb     Adverb: 'usually'
+
+project/docs/guide.md  ·  Grade 1, easy to read
+
+  No issues found.
+  ARI 0.0 · FK 0.0 · Fog 2.4 · 4 sentences
+
+Tips
+  passive    Name who does the action and make them the subject.
+  adverb     Cut the adverb or use a stronger verb.
+
+Checked 2 files.
+Hardest: project/docs/faq.txt (grade 4.3).
+--- stderr
+

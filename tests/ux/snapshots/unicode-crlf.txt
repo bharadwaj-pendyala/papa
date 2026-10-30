@@ -1,0 +1,8 @@
+$ unicode-crlf.txt --report concise
+[exit 0]
+--- stdout
+unicode-crlf.txt:1:12: warning: Passive voice: 'were written' [passive]
+unicode-crlf.txt:2:12: warning: Passive voice: 'was reviewed' [passive]
+unicode-crlf.txt:2:25: note: Adverb: 'carefully' [adverb]
+--- stderr
+

@@ -1,4 +1,4 @@
-"""Colored terminal report: grade + counts + flagged lines (spec §7)."""
+"""Colored terminal report: grade + counts + flagged lines + fix tips (spec §7)."""
 
 from __future__ import annotations
 
@@ -11,7 +11,9 @@ from ..models import (
     VERY_HARD,
     Analysis,
     Finding,
+    Run,
 )
+from .common import line_col, plural
 
 _ANSI = {
     "yellow": "33", "red": "31", "blue": "34", "green": "32",
@@ -21,51 +23,144 @@ _BADGE = {
     HARD: "hard", VERY_HARD: "very hard", PASSIVE: "passive",
     ADVERB: "adverb", COMPLEX: "complex",
 }
+_BADGE_WIDTH = 11
+_TIP_ORDER = [VERY_HARD, HARD, PASSIVE, COMPLEX, ADVERB]
 
 
-def render(analysis: Analysis, *, color: bool = False) -> str:
+def render(run: Run, *, color: bool = False, width: int = 80, details: bool = True) -> str:
+    blocks = [_file_block(a, color, width, details) for a in run.analyses]
+    tail = []
+    if details:
+        tail += _tips(run.analyses, color, width)
+    if len(run.analyses) + len(run.skipped) + len(run.errors) > 1:
+        tail += ([""] if tail else []) + _summary(run, color)
+    return "\n".join(blocks + (["\n".join(tail) + "\n"] if tail else []))
+
+
+def _file_block(analysis: Analysis, color: bool, width: int, details: bool) -> str:
     score = analysis.score
-    lines = [_c(f"{analysis.path}  ·  {score.reading_grade}", "bold", on=color)]
+    header = f"{analysis.path}  ·  {score.reading_grade}"
+    if len(header) > width:
+        header = f"{analysis.path}\n{score.reading_grade}"
+    lines = [_c(header, "bold", on=color)]
 
     if score.threshold is not None:
-        passed = score.verdict == "pass"
-        mark = "✓ passes" if passed else "✗ fails"
-        lines.append(
-            _c(f"  {mark} --max-grade {_fmt(score.threshold['max_grade'])}",
-               "green" if passed else "red", on=color)
-        )
+        max_grade = _fmt(score.threshold["max_grade"])
+        if score.verdict == "pass":
+            lines.append(_c(f"  PASS  grade {_grade(score.consensus)} is within --max-grade {max_grade}",
+                            "green", on=color))
+        else:
+            lines.append(_c(f"  FAIL  grade {_grade(score.consensus)} is above --max-grade {max_grade}",
+                            "red", on=color))
 
     lines.append("")
-    lines.append("  " + " · ".join([
-        _c(f"{score.hard_sentences} hard", "yellow", on=color),
-        _c(f"{score.very_hard_sentences} very hard", "red", on=color),
-        _c(f"{score.passive} passive", "green", on=color),
-        _c(f"{score.adverbs} adverbs", "blue", on=color),
-        _c(f"{score.complex_phrases} complex", "purple", on=color),
-    ]))
-    lines.append(_c(
-        f"  ARI {score.ari} · FK {score.flesch_kincaid} · Fog {score.gunning_fog}"
-        f"  ({score.sentences} sentences)", "grey", on=color,
-    ))
+    counts = [
+        (plural(score.very_hard_sentences, "very hard sentence"), "red"),
+        (plural(score.hard_sentences, "hard sentence"), "yellow"),
+        (f"{score.passive} passive", "green"),
+        (plural(score.complex_phrases, "complex phrase"), "purple"),
+        (plural(score.adverbs, "adverb"), "blue"),
+    ]
+    flagged = [(text, code) for text, code in counts if not text.startswith("0 ")]
+    lines += _wrap_parts(flagged, width, color) if flagged else [_c("  No issues found.", "green", on=color)]
+    formulas = [
+        (f"ARI {_grade(score.ari)}", "grey"), (f"FK {_grade(score.flesch_kincaid)}", "grey"),
+        (f"Fog {_grade(score.gunning_fog)}", "grey"), (plural(score.sentences, "sentence"), "grey"),
+    ]
+    lines += _wrap_parts(formulas, width, color)
 
-    if analysis.findings:
+    if details and analysis.findings:
+        locations = [line_col(analysis.source, f.start) for f in analysis.findings]
+        loc_width = max(len(f"{line}:{col}") for line, col in locations)
         lines.append("")
-        for finding in analysis.findings:
-            lines.append(_flagged_line(analysis.source, finding, color))
+        for finding, (line, col) in zip(analysis.findings, locations):
+            lines.append(_flagged_line(analysis.source, finding, f"{line}:{col}", loc_width, color, width))
 
     return "\n".join(lines) + "\n"
 
 
-def _flagged_line(source: str, finding: Finding, color: bool) -> str:
-    line_no = source.count("\n", 0, finding.start) + 1
-    badge = _c(f"{_BADGE[finding.category]:<10}", COLOR[finding.category], on=color)
+def _flagged_line(source: str, finding: Finding, loc: str, loc_width: int, color: bool, width: int) -> str:
+    prefix_len = 2 + loc_width + 2 + _BADGE_WIDTH
+    badge = _c(f"{_BADGE[finding.category]:<{_BADGE_WIDTH}}", COLOR[finding.category], on=color)
     message = finding.message
     if finding.category in (HARD, VERY_HARD):
-        quote = source[finding.start:finding.end].replace("\n", " ").strip()
-        if len(quote) > 64:
-            quote = quote[:63] + "…"
+        room = max(width - prefix_len - len(message) - 4, 12)
+        quote = " ".join(source[finding.start:finding.end].split())
+        if len(quote) > room:
+            quote = quote[:room - 1] + "…"
         message = f'{message}: "{quote}"'
-    return f"  L{line_no:<4} {badge} {message}"
+    lines = _wrap_text(message, width - prefix_len, first=f"  {loc:<{loc_width}}  {badge}", rest=" " * prefix_len)
+    return "\n".join(lines)
+
+
+def _tips(analyses: list[Analysis], color: bool, width: int) -> list[str]:
+    hints = {}
+    for analysis in analyses:
+        for finding in analysis.findings:
+            hints.setdefault(finding.category, finding.hint)
+    if not hints:
+        return []
+    if COMPLEX in {f.category for a in analyses for f in a.findings}:
+        hints[COMPLEX] = "Use the plainer phrase shown in each finding."
+    indent = 2 + _BADGE_WIDTH
+    lines = [_c("Tips", "bold", on=color)]
+    for category in _TIP_ORDER:
+        if category in hints:
+            badge = _c(f"{_BADGE[category]:<{_BADGE_WIDTH}}", COLOR[category], on=color)
+            lines += _wrap_text(hints[category], width - indent, first=f"  {badge}", rest=" " * indent)
+    return lines
+
+
+def _summary(run: Run, color: bool) -> list[str]:
+    total = len(run.analyses) + len(run.skipped) + len(run.errors)
+    parts = []
+    if run.max_grade is not None:
+        failed = sum(1 for a in run.analyses if a.score.verdict == "fail")
+        parts += [f"{len(run.analyses) - failed} passed", f"{failed} failed"]
+    if run.skipped:
+        parts.append(f"{len(run.skipped)} skipped")
+    if run.errors:
+        parts.append(plural(len(run.errors), "error"))
+    text = f"Checked {plural(total, 'file')}" + (": " + ", ".join(parts) if parts else "")
+    if run.max_grade is not None:
+        text += f" (--max-grade {_fmt(run.max_grade)})"
+    bad = run.errors or any(a.score.verdict == "fail" for a in run.analyses)
+    lines = [_c(text + ".", "red" if bad else "bold", on=color)]
+    if len(run.analyses) > 1:
+        hardest = max(run.analyses, key=lambda a: a.score.consensus)
+        lines.append(f"Hardest: {hardest.path} (grade {_grade(hardest.score.consensus)}).")
+    return lines
+
+
+def _wrap_parts(parts: list[tuple[str, str]], width: int, color: bool) -> list[str]:
+    lines, current, used = [], [], 2
+    for text, code in parts:
+        needed = len(text) + (3 if current else 0)
+        if current and used + needed > width:
+            lines.append("  " + " · ".join(current))
+            current, used = [], 2
+            needed = len(text)
+        current.append(_c(text, code, on=color))
+        used += needed
+    lines.append("  " + " · ".join(current))
+    return lines
+
+
+def _wrap_text(text: str, width: int, *, first: str, rest: str) -> list[str]:
+    lines, current = [], ""
+    for word in text.split():
+        if current and len(current) + 1 + len(word) > max(width, 12):
+            lines.append(current)
+            current = word
+        else:
+            current = f"{current} {word}".strip()
+    lines.append(current)
+    return [(first if i == 0 else rest) + line for i, line in enumerate(lines)]
+
+
+def _grade(value: float) -> float:
+    """Formulas go negative on very simple text; a reader expects grade 0 there."""
+    return max(value, 0.0)
 
 
 def _fmt(value: float) -> str:

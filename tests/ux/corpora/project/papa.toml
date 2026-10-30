@@ -1,0 +1,3 @@
+[papa]
+max-grade = 8
+exclude = ["docs/generated/**"]

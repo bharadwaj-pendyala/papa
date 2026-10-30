@@ -1,0 +1,24 @@
+$ all-findings.md
+[exit 0]
+--- stdout
+all-findings.md  ·  Grade 15, very hard to read
+
+  1 very hard sentence · 2 passive · 2 complex phrases · 3 adverbs
+  ARI 14.4 · FK 13.4 · Fog 16.7 · 6 sentences
+
+  7:15    passive    Passive voice: 'was shipped'
+  7:39    complex    Complex phrase: 'in order to', consider 'to'
+  8:4     adverb     Adverb: 'basically'
+  8:55    adverb     Adverb: 'really'
+  15:1    very hard  Very hard to read (grade 32): "Due to the fact that the m…"
+  15:1    complex    Complex phrase: 'Due to the fact that', consider 'because'
+  15:172  adverb     Adverb: 'consistently'
+  15:279  passive    Passive voice: 'was postponed'
+
+Tips
+  very hard  Split the sentence or cut words. Aim for one idea per sentence.
+  passive    Name who does the action and make them the subject.
+  complex    Use the plainer phrase shown in each finding.
+  adverb     Cut the adverb or use a stronger verb.
+--- stderr
+

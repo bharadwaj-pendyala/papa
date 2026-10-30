@@ -1,0 +1,9 @@
+$ easy.txt ./easy.txt
+[exit 0]
+--- stdout
+easy.txt  ·  Grade 0, easy to read
+
+  No issues found.
+  ARI 0.0 · FK 0.0 · Fog 2.1 · 3 sentences
+--- stderr
+

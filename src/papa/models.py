@@ -40,6 +40,7 @@ class Finding:
     severity: str
     message: str
     analyzer: str
+    hint: str = ""
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -52,6 +53,7 @@ class DocumentScore:
     ari: float
     flesch_kincaid: float
     gunning_fog: float
+    consensus: float
     reading_grade: str
     sentences: int
     hard_sentences: int
@@ -73,3 +75,13 @@ class Analysis:
     clean: str
     score: DocumentScore
     findings: list[Finding]
+
+
+@dataclass
+class Run:
+    """Everything one CLI invocation produced, handed to a reporter as a whole."""
+
+    analyses: list[Analysis]
+    skipped: list[tuple[str, str]]
+    errors: list[tuple[str, str]]
+    max_grade: float | None

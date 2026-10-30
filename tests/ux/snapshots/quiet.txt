@@ -1,0 +1,6 @@
+$ hard.md --max-grade 8 -q
+[exit 1]
+--- stdout
+
+--- stderr
+

@@ -1,0 +1,35 @@
+$ project/docs
+[exit 0]
+--- stdout
+project/docs/faq.txt  ·  Grade 4, easy to read
+
+  1 passive · 1 adverb
+  ARI 1.8 · FK 5.2 · Fog 6.0 · 2 sentences
+
+  1:12  passive    Passive voice: 'was given'
+  1:40  adverb     Adverb: 'usually'
+
+project/docs/generated/api.md  ·  Grade 13, hard to read
+
+  1 hard sentence · 2 passive · 1 adverb
+  ARI 10.8 · FK 11.5 · Fog 16.9 · 1 sentence
+
+  1:1   hard       Hard to read (grade 11): "This file was generated automatic…"
+  1:11  passive    Passive voice: 'was generated'
+  1:25  adverb     Adverb: 'automatically'
+  1:50  passive    Passive voice: 'be excluded'
+
+project/docs/guide.md  ·  Grade 1, easy to read
+
+  No issues found.
+  ARI 0.0 · FK 0.0 · Fog 2.4 · 4 sentences
+
+Tips
+  hard       Split the sentence or cut words. Aim for one idea per sentence.
+  passive    Name who does the action and make them the subject.
+  adverb     Cut the adverb or use a stronger verb.
+
+Checked 3 files.
+Hardest: project/docs/generated/api.md (grade 13.1).
+--- stderr
+

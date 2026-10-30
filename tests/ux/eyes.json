@@ -1,0 +1,66 @@
+{
+  "command": [
+    "{python}",
+    "-m",
+    "papa"
+  ],
+  "cwd": "corpora",
+  "env": {
+    "PYTHONPATH": "{root}/src"
+  },
+  "snapshots": "snapshots",
+  "artifacts": "{root}/artifacts/eyes",
+  "plugins": [
+    "papa_checks.py"
+  ],
+  "sources": {
+    "terminal": "src/papa/reporters/cli.py",
+    "json": "src/papa/reporters/json_report.py",
+    "html": "src/papa/reporters/html.py",
+    "cli": "src/papa/cli.py"
+  },
+  "cases": [
+    {"id": "help", "argv": ["--help"], "exit": 0, "stdout_contains": ["Examples:", "papa docs/ --max-grade 10", "Exit codes:"]},
+    {"id": "no-args-tty", "argv": [], "tty": true, "exit": 0, "stdout_contains": ["Examples:"]},
+    {"id": "no-args-empty-stdin", "argv": [], "stdin": "", "exit": 2, "stderr_contains": ["no prose on stdin"]},
+    {"id": "singular-piped", "argv": ["singular.txt"], "exit": 0, "stdout_contains": ["1 sentence", "1 adverb", "1 passive"]},
+    {"id": "all-findings-tty-80", "argv": ["all-findings.md"], "tty": true, "cols": 80, "exit": 0, "stdout_contains": ["all-findings.md", "Grade"], "expect_ansi": true},
+    {"id": "all-findings-tty-40", "argv": ["all-findings.md"], "tty": true, "cols": 40, "exit": 0, "expect_ansi": true},
+    {"id": "all-findings-piped", "argv": ["all-findings.md"], "exit": 0, "stdout_regex": ["(?m)^\\s+\\d+:\\d+\\s+passive\\s+Passive voice: 'was shipped'"]},
+    {"id": "no-color-env", "argv": ["all-findings.md"], "tty": true, "env": {"NO_COLOR": "1"}, "exit": 0},
+    {"id": "color-always-piped", "argv": ["all-findings.md", "--color", "always"], "exit": 0, "expect_ansi": true},
+    {"id": "hints", "argv": ["all-findings.md"], "exit": 0, "stdout_contains": ["Name who", "consider 'to'"]},
+    {"id": "concise", "argv": ["all-findings.md", "--report", "concise"], "exit": 0, "check_width": false, "stdout_regex": ["(?m)^all-findings\\.md:7:\\d+: warning: Passive voice: 'was shipped' \\[passive\\]$"]},
+    {"id": "stdin-pipe", "argv": [], "stdin_file": "easy.txt", "exit": 0, "stdout_contains": ["<stdin>"]},
+    {"id": "stdin-dash-filename", "argv": ["-", "--stdin-filename", "notes.md"], "stdin_file": "all-findings.md", "exit": 0, "stdout_contains": ["notes.md"]},
+    {"id": "stdin-twice", "argv": ["-", "-"], "stdin": "Hi there.", "exit": 2, "stderr_contains": ["once"]},
+    {"id": "directory", "argv": ["project/docs"], "exit": 0, "stdout_contains": ["guide.md", "faq.txt", "api.md", "Checked 3 files"]},
+    {"id": "quoted-glob", "argv": ["project/**/*.md"], "exit": 0, "stdout_contains": ["meeting notes.md", "guide.md"], "stdout_absent": ["secret.md"]},
+    {"id": "exclude", "argv": ["project/docs", "--exclude", "project/docs/generated/**"], "exit": 0, "stdout_contains": ["Checked 2 files"], "stdout_absent": ["api.md"]},
+    {"id": "dedupe", "argv": ["easy.txt", "./easy.txt"], "exit": 0, "stdout_absent": ["Checked 2 files"]},
+    {"id": "unmatched-glob", "argv": ["nope/**/*.md"], "exit": 2, "stderr_contains": ["no files match 'nope/**/*.md'"]},
+    {"id": "missing-file", "argv": ["missing.md"], "exit": 2, "stderr_contains": ["missing.md", "no such file"]},
+    {"id": "mixed-missing-and-good", "argv": ["easy.txt", "missing.md"], "exit": 2, "stdout_contains": ["easy.txt"], "stderr_contains": ["missing.md"]},
+    {"id": "bad-utf8", "argv": ["bad-utf8.txt"], "exit": 2, "stderr_contains": ["bad-utf8.txt", "UTF-8"]},
+    {"id": "empty-file", "argv": ["empty.md"], "exit": 2, "stderr_contains": ["no prose"]},
+    {"id": "code-only-plus-prose", "argv": ["code-only.md", "easy.txt"], "exit": 0, "stderr_contains": ["code-only.md", "no prose"]},
+    {"id": "unicode-crlf", "argv": ["unicode-crlf.txt", "--report", "concise"], "exit": 0, "check_width": false, "stdout_regex": ["(?m)^unicode-crlf\\.txt:1:12: warning: Passive voice: 'were written'", "(?m)^unicode-crlf\\.txt:2:\\d+: .*'carefully'"]},
+    {"id": "gate-fail", "argv": ["hard.md", "--max-grade", "8"], "exit": 1, "stdout_contains": ["FAIL", "--max-grade 8"]},
+    {"id": "gate-pass", "argv": ["easy.txt", "--max-grade", "8"], "exit": 0, "stdout_contains": ["PASS"]},
+    {"id": "gate-nan", "argv": ["easy.txt", "--max-grade", "nan"], "exit": 2, "stderr_contains": ["--max-grade"]},
+    {"id": "gate-negative", "argv": ["easy.txt", "--max-grade", "-1"], "exit": 2, "stderr_contains": ["--max-grade"]},
+    {"id": "typo-flag", "argv": ["easy.txt", "--max-grde", "10"], "exit": 2, "stderr_contains": ["did you mean '--max-grade'"]},
+    {"id": "multi-gate-summary", "argv": ["easy.txt", "hard.md", "--max-grade", "8"], "exit": 1, "stdout_contains": ["Checked 2 files: 1 passed, 1 failed"]},
+    {"id": "quiet", "argv": ["hard.md", "--max-grade", "8", "-q"], "exit": 1, "stdout_empty": true},
+    {"id": "summary-only", "argv": ["all-findings.md", "--summary"], "exit": 0, "stdout_absent": ["Passive voice:"]},
+    {"id": "config-file", "argv": ["."], "cwd": "project", "exit": 0, "stdout_contains": ["--max-grade 8"], "stdout_absent": ["api.md"]},
+    {"id": "config-override", "argv": [".", "--max-grade", "20"], "cwd": "project", "exit": 0, "stdout_contains": ["--max-grade 20"]},
+    {"id": "no-config", "argv": [".", "--no-config"], "cwd": "project", "exit": 0, "stdout_contains": ["api.md"]},
+    {"id": "json-single", "argv": ["all-findings.md", "--report", "json"], "exit": 0, "json": true},
+    {"id": "json-multi", "argv": ["easy.txt", "all-findings.md", "unicode-crlf.txt", "--report", "json"], "exit": 0, "json": true},
+    {"id": "json-with-error", "argv": ["easy.txt", "missing.md", "--report", "json"], "exit": 2, "json": true},
+    {"id": "html-single", "argv": ["all-findings.md", "--report", "html", "-o", "{out}/report.html"], "exit": 0, "html": "report.html"},
+    {"id": "html-multi", "argv": ["easy.txt", "all-findings.md", "--report", "html", "-o", "{out}/report.html"], "exit": 0, "html": "report.html"},
+    {"id": "html-bait", "argv": ["html-bait.md", "--report", "html", "-o", "{out}/report.html"], "exit": 0, "html": "report.html"}
+  ]
+}

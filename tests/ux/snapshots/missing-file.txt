@@ -1,0 +1,6 @@
+$ missing.md
+[exit 2]
+--- stdout
+
+--- stderr
+papa: cannot read missing.md: no such file or directory

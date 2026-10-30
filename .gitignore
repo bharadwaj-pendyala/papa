@@ -4,3 +4,5 @@ __pycache__/
 *.pyc
 .venv/
 dist/
+.venv/
+artifacts/

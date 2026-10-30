@@ -1,0 +1,7 @@
+$ easy.txt --max-grde 10
+[exit 2]
+--- stdout
+
+--- stderr
+papa: error: unrecognized arguments: --max-grde 10; did you mean '--max-grade'?
+Run 'papa --help' for examples.

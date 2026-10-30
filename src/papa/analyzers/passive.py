@@ -21,6 +21,8 @@ _IRREGULAR = {
     "won", "met", "sold", "dealt",
 }
 
+_HINT = "Name who does the action and make them the subject."
+
 
 def _is_participle(word: str) -> bool:
     return word in _IRREGULAR or (len(word) > 3 and word.endswith("ed"))
@@ -38,7 +40,7 @@ def analyze(ctx: AnalyzerContext) -> list[Finding]:
                 phrase = ctx.clean[start:nend]
                 findings.append(
                     Finding(start, nend, PASSIVE, COLOR[PASSIVE], "warn",
-                            f"Passive voice: '{phrase}'", "passive")
+                            f"Passive voice: '{phrase}'", "passive", _HINT)
                 )
                 break
             if not nxt.endswith("ly"):  # only an adverb may sit between be-verb and participle

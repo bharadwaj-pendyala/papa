@@ -1,0 +1,39 @@
+$ 'project/**/*.md'
+[exit 0]
+--- stdout
+project/README.md  ·  Grade 1, easy to read
+
+  No issues found.
+  ARI 1.2 · FK 0.6 · Fog 1.8 · 2 sentences
+
+project/docs/generated/api.md  ·  Grade 13, hard to read
+
+  1 hard sentence · 2 passive · 1 adverb
+  ARI 10.8 · FK 11.5 · Fog 16.9 · 1 sentence
+
+  1:1   hard       Hard to read (grade 11): "This file was generated automatic…"
+  1:11  passive    Passive voice: 'was generated'
+  1:25  adverb     Adverb: 'automatically'
+  1:50  passive    Passive voice: 'be excluded'
+
+project/docs/guide.md  ·  Grade 1, easy to read
+
+  No issues found.
+  ARI 0.0 · FK 0.0 · Fog 2.4 · 4 sentences
+
+project/notes/meeting notes.md  ·  Grade 0, easy to read
+
+  1 passive
+  ARI 0.0 · FK 0.0 · Fog 2.2 · 2 sentences
+
+  1:28  passive    Passive voice: 'was changed'
+
+Tips
+  hard       Split the sentence or cut words. Aim for one idea per sentence.
+  passive    Name who does the action and make them the subject.
+  adverb     Cut the adverb or use a stronger verb.
+
+Checked 4 files.
+Hardest: project/docs/generated/api.md (grade 13.1).
+--- stderr
+

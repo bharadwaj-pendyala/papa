@@ -9,6 +9,7 @@ from ..scoring import sentence_grade
 from . import AnalyzerContext, register
 
 _WORD = re.compile(r"[A-Za-z]+")
+_HINT = "Split the sentence or cut words. Aim for one idea per sentence."
 MIN_WORDS = 4  # don't grade fragments (headings, nav, markup); README `sentences_under_words`
 
 
@@ -22,11 +23,11 @@ def analyze(ctx: AnalyzerContext) -> list[Finding]:
         if grade >= 14:
             findings.append(
                 Finding(start, end, VERY_HARD, COLOR[VERY_HARD], "error",
-                        f"Very hard to read (grade {round(grade)})", "readability")
+                        f"Very hard to read (grade {round(grade)})", "readability", _HINT)
             )
         elif grade >= 10:
             findings.append(
                 Finding(start, end, HARD, COLOR[HARD], "warn",
-                        f"Hard to read (grade {round(grade)})", "readability")
+                        f"Hard to read (grade {round(grade)})", "readability", _HINT)
             )
     return findings

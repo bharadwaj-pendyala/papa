@@ -1,0 +1,45 @@
+$ easy.txt missing.md --report json
+[exit 2]
+--- stdout
+{
+  "version": "0.2",
+  "files": [
+    {
+      "file": "easy.txt",
+      "score": {
+        "ari": -4.0,
+        "flesch_kincaid": -1.0,
+        "gunning_fog": 2.1,
+        "consensus": -1.0,
+        "reading_grade": "Grade 0, easy to read",
+        "sentences": 3,
+        "hard_sentences": 0,
+        "very_hard_sentences": 0,
+        "adverbs": 0,
+        "passive": 0,
+        "complex_phrases": 0,
+        "verdict": "pass",
+        "threshold": null
+      },
+      "findings": []
+    }
+  ],
+  "skipped": [],
+  "errors": [
+    {
+      "file": "missing.md",
+      "message": "no such file or directory"
+    }
+  ],
+  "summary": {
+    "files": 2,
+    "analyzed": 1,
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "errors": 1,
+    "max_grade": null
+  }
+}
+--- stderr
+papa: cannot read missing.md: no such file or directory

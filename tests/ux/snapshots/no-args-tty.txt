@@ -1,0 +1,52 @@
+$ 
+[exit 0 tty 80 cols]
+--- stdout
+usage: papa [-h] [--report {cli,concise,json,html}] [-o FILE] [--max-grade N]
+            [--exclude GLOB] [--format {md,txt}] [--stdin-filename NAME]
+            [--summary] [-q] [--color {auto,always,never}] [--config FILE]
+            [--no-config] [--version]
+            [PATH ...]
+
+Hemingway-style readability linting for Markdown and plain text.
+
+positional arguments:
+  PATH                  files, folders, or quoted globs; '-' or a pipe reads
+                        stdin
+
+options:
+  -h, --help            show this help message and exit
+  --report {cli,concise,json,html}
+                        output format (default: cli)
+  -o, --output FILE     write the report to FILE
+  --max-grade N         exit 1 if a file's consensus grade is above N
+  --exclude GLOB        skip paths that match GLOB (repeatable)
+  --format {md,txt}     override format detection
+  --stdin-filename NAME
+                        name to show for stdin; its suffix picks the format
+  --summary             show grades and counts only, without each finding
+  -q, --quiet           print nothing to stdout; rely on the exit code
+  --color {auto,always,never}
+                        color terminal output (default: auto)
+  --config FILE         read settings from FILE
+  --no-config           ignore papa.toml and pyproject.toml
+  --version             show program's version number and exit
+
+Examples:
+  papa post.md                         check one file
+  papa docs/ --max-grade 10            check a folder, fail above grade 10
+  papa 'docs/**/*.md' --exclude 'docs/generated/**'
+  cat post.md | papa --stdin-filename post.md
+  papa post.md --report concise        file:line:col lines for editors
+  papa post.md --report json           findings for scripts and LLMs
+  papa post.md --report html -o report.html
+
+Config:
+  papa reads [papa] from the nearest papa.toml, or [tool.papa] from
+  pyproject.toml. Keys: max-grade, exclude. Flags override config.
+
+Exit codes:
+  0  every file was checked and none failed --max-grade
+  1  at least one file is harder than --max-grade
+  2  usage, config, or input error (missing file, bad UTF-8, no prose)
+--- stderr
+

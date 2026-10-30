@@ -1,0 +1,28 @@
+$ all-findings.md --report html -o {out}/report.html
+[exit 0]
+--- stdout
+
+--- stderr
+papa: wrote {out}/report.html
+--- report.html (visible text)
+papa
+all-findings.md
+Grade 15, very hard to read
+ARI 14.4 · FK 13.4 · Fog 16.76 sentences
+Very hard sentence1
+Hard sentence0
+Passive voice2
+Adverb3
+Complex phrase2
+---
+title: Release notes
+---
+# Release notes
+The new build was shipped by the team in order to fix the login bug.
+We basically rewrote the cache layer, and it now runs really fast.
+```python
+# This code block is ignored, even though it was written badly.
+print("hello")
+```
+Due to the fact that the multifaceted implementation demonstrates considerable architectural sophistication notwithstanding the numerous interdependent complications that consistently undermine long-term maintainability across the entire distributed organization, the migration was postponed.
+Use `papa --max-grade 10` in CI. Short sentences help readers.
