@@ -27,6 +27,19 @@ papa README.md
 papa README.md --report json
 ```
 
+## Check the UX with eyes
+
+Papa ships a harness that runs the CLI like a user does and checks the output.
+Run it before you open a PR that changes what users see:
+
+```bash
+python tools/eyes.py run              # terminal, JSON and HTML checks
+python tools/eyes.py run --browser    # also screenshots and layout checks
+```
+
+See [docs/eyes.md](docs/eyes.md) for how to add a case and approve output
+changes.
+
 ## Project layout
 
 ```
@@ -35,8 +48,12 @@ src/papa/
   normalize.py     neutralize numbers/dates/URLs/identifiers before scoring
   analyzers/       pluggable analyzers (readability, passive, adverbs, complex_phrase)
   aggregate.py     merge spans, compute the document score
-  reporters/       cli, json, html
+  inputs.py        files, folders, globs, stdin, and excludes
+  config.py        papa.toml and [tool.papa]
+  reporters/       cli, concise, json, html
 tests/             pytest suite (one file per area)
+tests/ux/          eyes cases, corpora, reviewed snapshots
+tools/eyes.py      the UX harness
 ```
 
 The data flow is `Ingestor -> Analyzers -> Aggregator -> Reporters`. See `spec.md` for the full architecture.
@@ -51,6 +68,7 @@ The data flow is `Ingestor -> Analyzers -> Aggregator -> Reporters`. See `spec.m
 ## Pull request checklist
 
 - [ ] `pytest` passes locally.
+- [ ] `python tools/eyes.py run` passes, and you reviewed any snapshot change.
 - [ ] New behavior has a test.
 - [ ] Public behavior changes are reflected in `README.md` or `spec.md`.
 - [ ] Commit messages explain the why, not just the what.

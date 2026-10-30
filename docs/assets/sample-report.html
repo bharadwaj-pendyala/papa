@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>papa · /tmp/papa-sample.md</title>
+<title>papa · tests/ux/corpora/all-findings.md</title>
 <style>
 * { box-sizing: border-box; }
 body { margin: 0; font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color: #1a1a1a; background: #f6f7f9; }
@@ -23,26 +23,57 @@ aside li { display: flex; align-items: center; gap: 8px; font-size: 14px; paddin
 aside .swatch { width: 14px; height: 14px; border-radius: 3px; flex: 0 0 auto; }
 aside .count { margin-left: auto; font-variant-numeric: tabular-nums; font-weight: 600; }
 .hl { border-radius: 3px; padding: 0 1px; }
+nav.index { max-width: 1100px; margin: 0 auto; padding: 24px 24px 0; }
+nav.index h1 { font-size: 20px; margin: 0 0 8px; }
+nav.index ol { margin: 0; padding-left: 20px; }
+nav.index a { color: #1c5fb8; }
+nav.index .fail { color: #c92a2a; font-weight: 600; }
+.notice { max-width: 1100px; margin: 24px auto 0; padding: 12px 24px; background: #fff4e6; border: 1px solid #ffd8a8; border-radius: 10px; color: #7a3e00; }
+.notice h2 { font-size: 16px; margin: 0 0 6px; }
+.notice ul { margin: 0; padding-left: 20px; }
+.findings { list-style: none; padding: 0; margin: 24px 0 0; border-top: 1px solid #e3e6ea; }
+.findings li { padding: 10px 0; border-bottom: 1px solid #f1f3f5; font-size: 14px; }
+.findings .loc { font: 13px ui-monospace, SFMono-Regular, Menlo, monospace; color: #495057; margin-right: 8px; }
+.findings .tag { display: inline-block; padding: 0 6px; border-radius: 4px; font-size: 12px; font-weight: 600; color: #1a1a1a; margin-right: 6px; }
+.findings .hint { display: block; color: #495057; margin-top: 2px; }
+@media (max-width: 760px) {
+  .wrap { flex-direction: column; padding: 16px; align-items: stretch; }
+  aside { position: static; flex: none; }
+  main { padding: 16px; }
+  main pre { font-size: 14px; }
+}
 .hl-hard-sentence{background:#fff3bf;}.hl-very-hard-sentence{background:#ffc9c9;}.hl-passive{background:#b2f2bb;}.hl-adverb{background:#a5d8ff;}.hl-complex-phrase{background:#eebefa;}</style>
 </head>
 <body>
-<div class="wrap">
+
+
+<section class="wrap" id="file-1">
 <aside>
 <h1>papa</h1>
-<div class="file">/tmp/papa-sample.md</div>
-<div class="grade">Grade 14, very hard to read</div>
+<div class="file">tests/ux/corpora/all-findings.md</div>
+<div class="grade">Grade 15, very hard to read</div>
 
-<div class="formulas">ARI 13.5 · FK 12.6 · Fog 15.3<br>3 sentences</div>
-<ul><li><span class="swatch" style="background:#ffc9c9"></span>Very hard sentence<span class="count">1</span></li><li><span class="swatch" style="background:#fff3bf"></span>Hard sentence<span class="count">1</span></li><li><span class="swatch" style="background:#b2f2bb"></span>Passive voice<span class="count">5</span></li><li><span class="swatch" style="background:#a5d8ff"></span>Adverb<span class="count">3</span></li><li><span class="swatch" style="background:#eebefa"></span>Complex phrase<span class="count">1</span></li></ul>
+<div class="formulas">ARI 14.4 · FK 13.4 · Fog 16.7<br>6 sentences</div>
+<ul><li><span class="swatch" style="background:#ffc9c9"></span>Very hard sentence<span class="count">1</span></li><li><span class="swatch" style="background:#fff3bf"></span>Hard sentence<span class="count">0</span></li><li><span class="swatch" style="background:#b2f2bb"></span>Passive voice<span class="count">2</span></li><li><span class="swatch" style="background:#a5d8ff"></span>Adverb<span class="count">3</span></li><li><span class="swatch" style="background:#eebefa"></span>Complex phrase<span class="count">2</span></li></ul>
 </aside>
-<main><pre># Release notes
+<main><pre>---
+title: Release notes
+---
 
-<span class="hl hl-hard-sentence" title="Hard to read (grade 10)">The migration <span class="hl hl-passive" title="Passive voice: &#x27;was carried&#x27;">was carried</span> out by the team <span class="hl hl-complex-phrase" title="Complex phrase: &#x27;in order to&#x27;, consider &#x27;to&#x27;">in order to</span> ensure that the data
-<span class="hl hl-passive" title="Passive voice: &#x27;was successfully transferred&#x27;">was successfully transferred</span>.</span> <span class="hl hl-very-hard-sentence" title="Very hard to read (grade 15)">It should <span class="hl hl-passive" title="Passive voice: &#x27;be noted&#x27;">be noted</span> that the process <span class="hl hl-passive" title="Passive voice: &#x27;was
-completed&#x27;">was
-completed</span> very <span class="hl hl-adverb" title="Adverb: &#x27;quickly&#x27;">quickly</span> and the results <span class="hl hl-passive" title="Passive voice: &#x27;were subsequently verified&#x27;">were subsequently verified</span> by the
-engineers who were responsible for the system.</span>
-</pre></main>
-</div>
+# Release notes
+
+The new build <span class="hl hl-passive" title="Passive voice: &#x27;was shipped&#x27;">was shipped</span> by the team <span class="hl hl-complex-phrase" title="Complex phrase: &#x27;in order to&#x27;, consider &#x27;to&#x27;">in order to</span> fix the login bug.
+We <span class="hl hl-adverb" title="Adverb: &#x27;basically&#x27;">basically</span> rewrote the cache layer, and it now runs <span class="hl hl-adverb" title="Adverb: &#x27;really&#x27;">really</span> fast.
+
+```python
+# This code block is ignored, even though it was written badly.
+print(&quot;hello&quot;)
+```
+
+<span class="hl hl-very-hard-sentence" title="Very hard to read (grade 18+)"><span class="hl hl-complex-phrase" title="Complex phrase: &#x27;Due to the fact that&#x27;, consider &#x27;because&#x27;">Due to the fact that</span> the multifaceted implementation demonstrates considerable architectural sophistication notwithstanding the numerous interdependent complications that <span class="hl hl-adverb" title="Adverb: &#x27;consistently&#x27;">consistently</span> undermine long-term maintainability across the entire distributed organization, the migration <span class="hl hl-passive" title="Passive voice: &#x27;was postponed&#x27;">was postponed</span>.</span>
+
+Use `papa --max-grade 10` in CI. Short sentences help readers.
+</pre><ol class="findings"><li><span class="loc">7:15</span><span class="tag" style="background:#b2f2bb">Passive voice</span>Passive voice: &#x27;was shipped&#x27;<span class="hint">Name who does the action and make them the subject.</span></li><li><span class="loc">7:39</span><span class="tag" style="background:#eebefa">Complex phrase</span>Complex phrase: &#x27;in order to&#x27;, consider &#x27;to&#x27;<span class="hint">Use &#x27;to&#x27;.</span></li><li><span class="loc">8:4</span><span class="tag" style="background:#a5d8ff">Adverb</span>Adverb: &#x27;basically&#x27;<span class="hint">Cut the adverb or use a stronger verb.</span></li><li><span class="loc">8:55</span><span class="tag" style="background:#a5d8ff">Adverb</span>Adverb: &#x27;really&#x27;<span class="hint">Cut the adverb or use a stronger verb.</span></li><li><span class="loc">15:1</span><span class="tag" style="background:#ffc9c9">Very hard sentence</span>Very hard to read (grade 18+)<span class="hint">Split the sentence or cut words. Aim for one idea per sentence.</span></li><li><span class="loc">15:1</span><span class="tag" style="background:#eebefa">Complex phrase</span>Complex phrase: &#x27;Due to the fact that&#x27;, consider &#x27;because&#x27;<span class="hint">Use &#x27;because&#x27;.</span></li><li><span class="loc">15:172</span><span class="tag" style="background:#a5d8ff">Adverb</span>Adverb: &#x27;consistently&#x27;<span class="hint">Cut the adverb or use a stronger verb.</span></li><li><span class="loc">15:279</span><span class="tag" style="background:#b2f2bb">Passive voice</span>Passive voice: &#x27;was postponed&#x27;<span class="hint">Name who does the action and make them the subject.</span></li></ol></main>
+</section>
 </body>
 </html>

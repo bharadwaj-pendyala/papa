@@ -33,12 +33,13 @@ small:
 
 - CLI command: `papa`
 - Python package: `papa-lint`
-- Input formats: Markdown and plain text
-- Reports: terminal, JSON, and self-contained HTML
+- Input: Markdown and plain text files, folders, quoted globs, and stdin
+- Reports: terminal, concise (`file:line:col`), JSON, and self-contained HTML
+- Config: `papa.toml` or `[tool.papa]` in `pyproject.toml`
 - CI gating: use `--max-grade` and the process exit code
 
-GitHub Action packaging, SARIF/Markdown reporters, config files, optional
-external linters, and built-in LLM rewriting are roadmap items.
+GitHub Action packaging, SARIF/Markdown reporters, optional external linters,
+and built-in LLM rewriting are roadmap items.
 
 ## Why Papa?
 
@@ -61,24 +62,64 @@ Papa focuses on a narrow first job: make prose readability checks scriptable.
 ```bash
 pipx install papa-lint
 
-papa post.md
+papa post.md                          # check one file
+papa docs/ --max-grade 10             # check a folder, fail above grade 10
+cat post.md | papa                    # read stdin
+papa post.md --report concise         # file:line:col lines for editors
 papa post.md --report html -o report.html
-papa post.md --report json > findings.json
-papa post.md --max-grade 10
+papa --help                           # all flags, examples, exit codes
 ```
 
 Example terminal output:
 
 ```text
-post.md  -  Grade 11, hard to read
-  ✗ fails --max-grade 10
+all-findings.md  ·  Grade 15, very hard to read
 
-  18 hard · 4 very hard · 6 passive · 9 adverbs · 12 complex
-  ARI 11.2 · FK 10.8 · Fog 12.1  (142 sentences)
+  1 very hard sentence · 2 passive · 2 complex phrases · 3 adverbs
+  mean of ARI 14.4, FK 13.4, Fog 16.7 · 6 sentences
 
-  L42   very hard  Very hard to read (grade 16): "Because the detour squeezes..."
-  L58   passive    Passive voice: 'is measured'
+  7:15    passive    'was shipped'
+  7:39    complex    'in order to', consider 'to'
+  8:4     adverb     'basically'
+  15:1    very hard  grade 18+ "Due to the fact that the multifaceted impleme…"
+  15:279  passive    'was postponed'
+
+Tips
+  very hard  Split the sentence or cut words. Aim for one idea per sentence.
+  passive    Name who does the action and make them the subject.
+  complex    Use the plainer phrase shown in each finding.
+  adverb     Cut the adverb or use a stronger verb.
 ```
+
+Each finding starts with `line:column`. The grade is the mean of three
+readability formulas, shown as a US school grade.
+
+## ⚙️ Config
+
+Put shared settings in `papa.toml` at the root of your repo:
+
+```toml
+[papa]
+max-grade = 10
+exclude = ["docs/generated/**", "CHANGELOG.md"]
+```
+
+You can also use `[tool.papa]` in `pyproject.toml`. Papa looks for the config
+in the current folder and its parents, and stops at the repo root. Exclude
+globs are relative to the config file. Command-line flags override the config.
+Use `--config FILE` to pick a file, or `--no-config` to ignore it. The terminal
+report names the config file that it used.
+
+## 🚦 Exit codes
+
+| Code | Meaning |
+|---|---|
+| `0` | No file failed `--max-grade`. Findings alone never fail a run. |
+| `1` | At least one file is harder than `--max-grade`. |
+| `2` | Usage, config, or input error, or no input had prose to check. |
+
+Papa skips files that have no prose, such as a file with only code blocks. It
+writes a note on stderr for each skipped file.
 
 ## 🧪 CI usage
 
@@ -97,8 +138,11 @@ jobs:
         with:
           python-version: "3.11"
       - run: python -m pip install papa-lint
-      - run: papa README.md docs/*.md --max-grade 10
+      - run: papa README.md docs/ --max-grade 10 --report concise
 ```
+
+`--report concise` prints one `file:line:col: severity: message` line for each
+finding. A failed gate is the only `error` line.
 
 For local development, run the same command before opening a PR.
 
@@ -111,32 +155,33 @@ an agent or script:
 papa post.md --report json > findings.json
 ```
 
-The JSON includes the file path, document score, and findings with offsets into
-the original source:
+The JSON lists each file with its score and findings. Each finding has source
+offsets, a line and column, and a hint:
 
 ```jsonc
 {
-  "version": "0.1",
-  "file": "post.md",
-  "score": {
-    "ari": 11.2,
-    "flesch_kincaid": 10.8,
-    "gunning_fog": 12.1,
-    "reading_grade": "Grade 11, hard to read",
-    "verdict": "fail"
-  },
-  "findings": [
+  "version": "0.2",
+  "files": [
     {
-      "start": 1423,
-      "end": 1490,
-      "category": "passive",
-      "message": "Passive voice: 'is measured'",
-      "severity": "warn"
+      "file": "post.md",
+      "score": { "consensus": 11.4, "reading_grade": "Grade 11, hard to read", "verdict": "fail" },
+      "findings": [
+        {
+          "start": 1423, "end": 1434, "line": 42, "column": 7,
+          "category": "passive",
+          "message": "Passive voice: 'is measured'",
+          "hint": "Name who does the action and make them the subject."
+        }
+      ]
     }
-  ]
+  ],
+  "skipped": [],
+  "errors": [],
+  "summary": { "files": 1, "analyzed": 1, "passed": 0, "failed": 1 }
 }
 ```
 
+The example above shows only some of the fields.
 See [docs/llm-contract.md](docs/llm-contract.md) for a prompt pattern that uses
 Papa findings to guide a rewrite.
 
@@ -156,7 +201,8 @@ input -> Ingestor -> Analyzers -> Aggregator -> Reporters
    and complex phrases.
 3. **Aggregate**: merge overlapping findings, compute document scores, and apply
    the optional max-grade gate.
-4. **Report**: render terminal, JSON, or HTML output and set the exit code.
+4. **Report**: render terminal, concise, JSON, or HTML output and set the exit
+   code.
 
 ## Python API
 
@@ -170,7 +216,6 @@ print(result.score.verdict)
 
 ## 🗺️ Roadmap
 
-- Config file support, likely `papa.toml`
 - GitHub Action wrapper
 - SARIF and Markdown reporters for PR annotations and summaries
 - Built-in `--suggest` workflow for LLM-assisted rewrites

@@ -27,7 +27,9 @@ import select
 import shutil
 import subprocess
 import sys
+import threading
 import time
+import unicodedata
 from dataclasses import dataclass, field
 from html.parser import HTMLParser
 from pathlib import Path
@@ -35,7 +37,7 @@ from pathlib import Path
 ANSI = re.compile(r"\x1b\[[0-9;?]*[A-Za-z]|\x1b\][^\x07]*\x07")
 DEFAULT_NOUNS = ["sentence", "file", "finding", "adverb", "error", "warning", "phrase", "issue", "line"]
 CONFIG_CANDIDATES = ["eyes.json", "tests/ux/eyes.json", "tests/eyes/eyes.json"]
-TIMEOUT = 30
+CASE_ID = re.compile(r"[A-Za-z0-9][A-Za-z0-9._-]*")
 
 
 @dataclass
@@ -50,6 +52,7 @@ class Result:
     tty: bool
     cols: int
     seconds: float
+    harness_error: str = ""
 
     @property
     def stdout(self) -> str:
@@ -78,6 +81,8 @@ class Project:
         self.sources = self.config.get("sources", {})
         self.nouns = self.config.get("plural_nouns", DEFAULT_NOUNS)
         self.plugins = [_load_plugin(self.base / p) for p in self.config.get("plugins", [])]
+        self.timeout = self.config.get("timeout", 30)
+        _validate_cases(self.config.get("cases", []))
 
     def expand(self, value: str, out_dir: Path | None = None) -> str:
         return (
@@ -94,6 +99,17 @@ class Project:
         if unknown:
             sys.exit(f"eyes: unknown case(s): {', '.join(sorted(unknown))}")
         return [c for c in cases if c["id"] in only]
+
+
+def _validate_cases(cases: list[dict]) -> None:
+    seen = set()
+    for case in cases:
+        case_id = case.get("id", "")
+        if not CASE_ID.fullmatch(case_id):
+            sys.exit(f"eyes: case id {case_id!r} must match {CASE_ID.pattern} (it names a folder)")
+        if case_id in seen:
+            sys.exit(f"eyes: duplicate case id {case_id!r}")
+        seen.add(case_id)
 
 
 def _find_root(start: Path) -> Path:
@@ -126,20 +142,28 @@ def run_case(project: Project, case: dict) -> Result:
     cols = case.get("cols", 80)
 
     started = time.monotonic()
-    if tty:
-        code, stdout, stderr = _run_pty(command + argv, cwd, env, cols)
-    else:
-        proc = subprocess.run(
-            command + argv, cwd=cwd, env=env, input=stdin if stdin is not None else b"",
-            capture_output=True, timeout=TIMEOUT,
-        )
-        code, stdout, stderr = proc.returncode, proc.stdout, proc.stderr
+    harness_error = ""
+    try:
+        if tty:
+            code, stdout, stderr = _run_pty(command + argv, cwd, env, cols, stdin, project.timeout)
+        else:
+            proc = subprocess.run(
+                command + argv, cwd=cwd, env=env, input=stdin if stdin is not None else b"",
+                capture_output=True, timeout=project.timeout,
+            )
+            code, stdout, stderr = proc.returncode, proc.stdout, proc.stderr
+    except subprocess.TimeoutExpired as error:
+        code, stdout, stderr = -1, error.stdout or b"", error.stderr or b""
+        harness_error = f"timed out after {project.timeout}s"
+    except OSError as error:
+        code, stdout, stderr = -1, b"", b""
+        harness_error = f"could not start {command[0]!r}: {error.strerror or error}"
     seconds = time.monotonic() - started
 
     result = Result(
         case=case, argv=argv, cwd=cwd, out_dir=out_dir, exit=code,
         stdout_raw=stdout.decode("utf-8", "replace"), stderr=stderr.decode("utf-8", "replace"),
-        tty=tty, cols=cols, seconds=seconds,
+        tty=tty, cols=cols, seconds=seconds, harness_error=harness_error,
     )
     (out_dir / "stdout.txt").write_text(result.stdout, encoding="utf-8")
     (out_dir / "stdout.ansi").write_text(result.stdout_raw, encoding="utf-8")
@@ -172,7 +196,8 @@ def _stdin(cwd: Path, case: dict) -> bytes | None:
     return None
 
 
-def _run_pty(cmd: list[str], cwd: Path, env: dict, cols: int) -> tuple[int, bytes, bytes]:
+def _run_pty(cmd: list[str], cwd: Path, env: dict, cols: int, stdin: bytes | None,
+             timeout: float) -> tuple[int, bytes, bytes]:
     import fcntl
     import pty
     import struct
@@ -183,10 +208,20 @@ def _run_pty(cmd: list[str], cwd: Path, env: dict, cols: int) -> tuple[int, byte
     proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdin=slave, stdout=slave,
                             stderr=subprocess.PIPE, close_fds=True)
     os.close(slave)
+    stderr_chunks: list[bytes] = []
+    drain = threading.Thread(target=lambda: stderr_chunks.append(proc.stderr.read()), daemon=True)
+    drain.start()
+    if stdin is not None:
+        os.write(master, stdin + b"\x04")  # typed input, then Ctrl-D for end of input
+
     chunks = []
-    deadline = time.monotonic() + TIMEOUT
-    while time.monotonic() < deadline:
-        ready, _, _ = select.select([master], [], [], 0.5)
+    deadline = time.monotonic() + timeout
+    while True:
+        if time.monotonic() >= deadline:
+            proc.kill()
+            os.close(master)
+            raise subprocess.TimeoutExpired(cmd, timeout, b"".join(chunks), b"")
+        ready, _, _ = select.select([master], [], [], 0.2)
         if not ready:
             if proc.poll() is not None:
                 break
@@ -199,9 +234,9 @@ def _run_pty(cmd: list[str], cwd: Path, env: dict, cols: int) -> tuple[int, byte
             break
         chunks.append(data)
     os.close(master)
-    stderr = proc.stderr.read()
-    code = proc.wait(timeout=TIMEOUT)
-    return code, b"".join(chunks).replace(b"\r\n", b"\n"), stderr
+    code = proc.wait(timeout=max(deadline - time.monotonic(), 1))
+    drain.join(timeout=5)
+    return code, b"".join(chunks).replace(b"\r\n", b"\n"), b"".join(stderr_chunks)
 
 
 # ---- checks ------------------------------------------------------------------
@@ -209,6 +244,9 @@ def _run_pty(cmd: list[str], cwd: Path, env: dict, cols: int) -> tuple[int, byte
 def generic_checks(project: Project, result: Result) -> list[Check]:
     case = result.case
     src = project.sources
+    if result.harness_error:
+        return [Check("runs", "fail", result.harness_error, source=src.get("cli"),
+                      actual=_tail(result.stderr) or None)]
     checks = [_check_exit(result, src.get("cli"))]
     checks.append(_check_no_traceback(result, src.get("cli")))
     checks.extend(_check_text_expectations(result, src.get("cli")))
@@ -284,11 +322,11 @@ def _check_width(result: Result, source) -> Check:
     limit = result.cols
     too_wide = []
     for number, line in enumerate((result.stdout + result.stderr).splitlines(), 1):
-        if len(line) <= limit:
+        if cells(line) <= limit:
             continue
         if any(len(token) > limit // 2 for token in line.split()):
             continue  # an unbreakable token, such as a long path, is allowed to overflow
-        too_wide.append((number, len(line), line))
+        too_wide.append((number, cells(line), line))
     if not too_wide:
         return Check("line-width", "pass", source=source)
     number, width, line = too_wide[0]
@@ -296,6 +334,12 @@ def _check_width(result: Result, source) -> Check:
                  f"{len(too_wide)} line(s) wider than {limit} columns; first is line {number}",
                  f"<= {limit} columns", f"{width} columns: {line}", source,
                  {"artifact_line": number})
+
+
+def cells(text: str) -> int:
+    """Terminal columns used by ``text``: wide CJK and emoji take two, combining marks none."""
+    return sum(0 if unicodedata.combining(ch) else 2 if unicodedata.east_asian_width(ch) in "WF" else 1
+               for ch in text)
 
 
 def _check_plurals(result: Result, nouns: list[str], source) -> Check:
@@ -340,8 +384,13 @@ class _HTMLScan(HTMLParser):
     def handle_starttag(self, tag, attrs):
         if tag in self.LOADERS:
             self.problems.append(f"<{tag}> element loads or runs external content")
+        attributes = dict(attrs)
+        if tag == "meta" and (attributes.get("http-equiv") or "").lower() == "refresh":
+            self.problems.append("<meta http-equiv=refresh> navigates away")
         for name, value in attrs:
             value = value or ""
+            if name.startswith("on"):
+                self.problems.append(f"<{tag} {name}> runs script")
             if name in ("src", "srcset") or (name == "href" and not value.startswith("#")):
                 self.problems.append(f"<{tag} {name}={value!r}> references a resource")
             if name == "style" and ("url(" in value or "@import" in value):
@@ -593,6 +642,9 @@ def browser_checks(eyes, why: str, project: Project, result: Result) -> list[Che
         page.write_text(ansi_to_html(result.stdout_raw, result.cols), encoding="utf-8")
         facts = eyes.look(page, result.out_dir / "terminal.png", (result.cols * 9 + 40, 600), None)
         shots += [facts["screenshot"]] if "screenshot" in facts else []
+    expected = 2 * bool(result.case.get("html")) + bool(result.tty)
+    if len(shots) < expected:
+        checks.append(Check("screenshots", "fail", f"{eyes.name} saved {len(shots)} of {expected} screenshots"))
     if shots:
         checks.append(Check("screenshots", "pass", f"open these images to see the output ({eyes.name})",
                             extra={"screenshots": shots}))
@@ -640,12 +692,29 @@ def run(project: Project, only: list[str] | None, browser_wanted: bool) -> int:
         for check in checks:
             row = {"case": case["id"], **{k: v for k, v in vars(check).items() if v not in (None, "", {})}}
             if check.status == "fail":
-                row["reproduce"] = {"cwd": _rel(result.cwd), "argv": [*project.config["command"], *result.argv]}
+                row["reproduce"] = _reproduce(project, result)
                 row["artifacts"] = _rel(result.out_dir)
             rows.append(row)
     if eyes:
         eyes.close()
     return _write_report(project, rows)
+
+
+def _reproduce(project: Project, result: Result) -> dict:
+    case = result.case
+    command = [project.expand(part) for part in project.config["command"]] + result.argv
+    env = {k: project.expand(v, result.out_dir)
+           for source in (project.config.get("env", {}), case.get("env", {})) for k, v in source.items()}
+    stdin = f"< {case['stdin_file']}" if "stdin_file" in case else ("< /dev/null" if "stdin" not in case
+                                                                    else f"<<< {case['stdin']!r}")
+    shell = " ".join([*(f"{k}={_shell_quote(v)}" for k, v in env.items()),
+                      *(_shell_quote(a) for a in command)])
+    return {
+        "cwd": _rel(result.cwd),
+        "shell": f"cd {_shell_quote(_rel(result.cwd))} && {shell} {stdin if not result.tty else ''}".rstrip(),
+        "tty": {"cols": result.cols} if result.tty else None,
+        "timeout": project.timeout,
+    }
 
 
 def _write_report(project: Project, rows: list[dict]) -> int:
@@ -687,12 +756,20 @@ def _write_report(project: Project, rows: list[dict]) -> int:
 
 
 def approve(project: Project, only: list[str] | None) -> int:
+    """Accept the output that `run` captured and you inspected; never rerun."""
     project.snapshots.mkdir(parents=True, exist_ok=True)
+    missing = []
     for case in project.cases(only):
-        result = run_case(project, case)
+        captured = project.artifacts / "cases" / case["id"] / "snapshot.txt"
+        if not captured.exists():
+            missing.append(case["id"])
+            continue
         target = project.snapshots / f"{case['id']}.txt"
-        target.write_text(snapshot_text(project, result), encoding="utf-8")
+        shutil.copyfile(captured, target)
         print(f"approved {_rel(target)}")
+    if missing:
+        print(f"eyes: no captured run for {', '.join(missing)}; run them first", file=sys.stderr)
+        return 1
     return 0
 
 
