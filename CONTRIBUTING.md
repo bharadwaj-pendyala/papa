@@ -20,6 +20,10 @@ pip install -e ".[dev]"
 pytest
 ```
 
+On macOS, if `papa` fails with `No module named 'papa'` after an install, a
+sync tool such as iCloud may have hidden the editable `.pth` file. Python 3.13
+skips hidden `.pth` files. Run `chflags nohidden .venv/lib/python*/site-packages/*.pth`.
+
 Run the CLI against a file to see it work:
 
 ```bash

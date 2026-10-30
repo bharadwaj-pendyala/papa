@@ -85,7 +85,7 @@ Add an object to `cases` in `tests/ux/eyes.json`. Each case runs in
 |---|---|
 | `argv` | Arguments after the command. `{out}` is the case artifact folder. |
 | `exit` | The expected exit code (default 0). |
-| `tty`, `cols` | Run in a real terminal of this width. |
+| `tty`, `cols` | Run in a real terminal of this width. With `stdin`, stdin is a pipe and stdout is the terminal, like `cat file \| papa`. |
 | `stdin`, `stdin_file` | Text or a file for stdin. |
 | `env`, `cwd` | Extra environment variables and a working folder. |
 | `stdout_contains`, `stdout_absent`, `stdout_regex` | Text checks on stdout. The same keys exist for stderr. |

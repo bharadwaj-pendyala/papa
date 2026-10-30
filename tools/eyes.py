@@ -205,15 +205,16 @@ def _run_pty(cmd: list[str], cwd: Path, env: dict, cols: int, stdin: bytes | Non
 
     master, slave = pty.openpty()
     fcntl.ioctl(slave, termios.TIOCSWINSZ, struct.pack("HHHH", 40, cols, 0, 0))
-    proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdin=slave, stdout=slave,
-                            stderr=subprocess.PIPE, close_fds=True)
+    # Given stdin, model `cat file | cmd` in a terminal: a pipe in, a terminal out.
+    # Typing into the tty instead would hit the kernel's line limit (1024 bytes on macOS).
+    proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdin=slave if stdin is None else subprocess.PIPE,
+                            stdout=slave, stderr=subprocess.PIPE, close_fds=True)
     os.close(slave)
     stderr_chunks: list[bytes] = []
     drain = threading.Thread(target=lambda: stderr_chunks.append(proc.stderr.read()), daemon=True)
     drain.start()
     if stdin is not None:
-        # Ctrl-D ends input only at the start of a line; a partial line needs one to flush it first.
-        os.write(master, stdin + (b"" if stdin.endswith(b"\n") or not stdin else b"\x04") + b"\x04")
+        threading.Thread(target=_feed, args=(proc.stdin, stdin), daemon=True).start()
 
     chunks = []
     deadline = time.monotonic() + timeout
@@ -238,6 +239,14 @@ def _run_pty(cmd: list[str], cwd: Path, env: dict, cols: int, stdin: bytes | Non
     code = proc.wait(timeout=max(deadline - time.monotonic(), 1))
     drain.join(timeout=5)
     return code, b"".join(chunks).replace(b"\r\n", b"\n"), b"".join(stderr_chunks)
+
+
+def _feed(pipe, data: bytes) -> None:
+    try:
+        pipe.write(data)
+        pipe.close()
+    except OSError:
+        pass  # the command exited without reading all of its input
 
 
 # ---- checks ------------------------------------------------------------------

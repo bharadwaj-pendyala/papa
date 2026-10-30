@@ -101,14 +101,30 @@ def _glob_regex(pattern: str) -> re.Pattern:
         elif pattern[i] == "?":
             out.append("[^/]")
             i += 1
-        elif pattern[i] == "[" and (close := pattern.find("]", i + 2)) != -1:
-            body = pattern[i + 1:close]
-            out.append("[" + ("^" + body[1:] if body.startswith("!") else body).replace("\\", "\\\\") + "]")
+        elif pattern[i] == "[" and (close := _class_end(pattern, i)) != -1:
+            out.append(_class_regex(pattern[i + 1:close]))
             i = close + 1
         else:
             out.append(re.escape(pattern[i]))
             i += 1
     return re.compile("".join(out))
+
+
+def _class_end(pattern: str, start: int) -> int:
+    # Like fnmatch: a ']' right after '[' or '[!' is a literal member, not the end.
+    j = start + 1
+    if j < len(pattern) and pattern[j] == "!":
+        j += 1
+    if j < len(pattern) and pattern[j] == "]":
+        j += 1
+    return pattern.find("]", j)
+
+
+def _class_regex(body: str) -> str:
+    negate = body.startswith("!")
+    members = body[1:] if negate else body
+    escaped = members.replace("\\", "\\\\").replace("^", "\\^").replace("[", "\\[").replace("]", "\\]")
+    return f"[^/{escaped}]" if negate else f"[{escaped}]"
 
 
 def anchor(pattern: str, base: Path) -> str:

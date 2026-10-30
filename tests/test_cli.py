@@ -107,3 +107,9 @@ def test_unknown_config_key_suggests_the_right_one(tmp_path, monkeypatch, capsys
     monkeypatch.chdir(tmp_path)
     assert main(["easy.md"]) == 2
     assert "did you mean 'max-grade'" in capsys.readouterr().err
+
+
+def test_exclude_accepts_any_valid_glob_class(tmp_path, capsys):
+    path = _write(tmp_path, "easy.md", EASY)
+    assert main([path, "--exclude", "[!]].txt", "--report", "json"]) == 0
+    assert main([path, "--exclude", str(tmp_path / "[!x]asy.md")]) == 2

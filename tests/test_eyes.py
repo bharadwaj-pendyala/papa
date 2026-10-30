@@ -111,3 +111,10 @@ def test_reproduce_keeps_multiline_stdin_intact(tmp_path):
     shell = eyes._reproduce(project, result)["shell"]
     out = subprocess.run(["sh", "-c", shell], capture_output=True, text=True, cwd=tmp_path).stdout
     assert out == "one\ntwo\n"
+
+
+def test_long_stdin_in_a_tty_case_does_not_time_out(tmp_path):
+    project = _project(tmp_path, [{"id": "cat", "argv": ["cat | wc -c"], "tty": True,
+                                   "stdin": "x" * 5000 + "\n"}], timeout=5)
+    checks = _checks(project, "cat")
+    assert "runs" not in checks
