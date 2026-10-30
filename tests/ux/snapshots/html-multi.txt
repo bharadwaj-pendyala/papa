@@ -11,7 +11,8 @@ all-findings.md · Grade 15, very hard to read
 papa
 easy.txt
 Grade 0, easy to read
-ARI -4.0 · FK -1.0 · Fog 2.13 sentences
+ARI 0.0 · FK 0.0 · Fog 2.1
+3 sentences
 Very hard sentence0
 Hard sentence0
 Passive voice0
@@ -21,7 +22,8 @@ The cat sat on the mat. The dog ran in the sun. We had fun today.
 papa
 all-findings.md
 Grade 15, very hard to read
-ARI 14.4 · FK 13.4 · Fog 16.76 sentences
+ARI 14.4 · FK 13.4 · Fog 16.7
+6 sentences
 Very hard sentence1
 Hard sentence0
 Passive voice2

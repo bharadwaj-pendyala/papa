@@ -10,6 +10,7 @@
   },
   "snapshots": "snapshots",
   "artifacts": "{root}/artifacts/eyes",
+  "titled": ".hl",
   "plugins": [
     "papa_checks.py"
   ],

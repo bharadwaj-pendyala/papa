@@ -8,7 +8,8 @@ papa: wrote {out}/report.html
 papa
 all-findings.md
 Grade 15, very hard to read
-ARI 14.4 · FK 13.4 · Fog 16.76 sentences
+ARI 14.4 · FK 13.4 · Fog 16.7
+6 sentences
 Very hard sentence1
 Hard sentence0
 Passive voice2

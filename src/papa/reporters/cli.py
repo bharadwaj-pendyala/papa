@@ -13,7 +13,7 @@ from ..models import (
     Finding,
     Run,
 )
-from .common import line_col, plural
+from .common import display_grade as _grade, line_col, plural
 
 _ANSI = {
     "yellow": "33", "red": "31", "blue": "34", "green": "32",
@@ -156,11 +156,6 @@ def _wrap_text(text: str, width: int, *, first: str, rest: str) -> list[str]:
             current = f"{current} {word}".strip()
     lines.append(current)
     return [(first if i == 0 else rest) + line for i, line in enumerate(lines)]
-
-
-def _grade(value: float) -> float:
-    """Formulas go negative on very simple text; a reader expects grade 0 there."""
-    return max(value, 0.0)
 
 
 def _fmt(value: float) -> str:

@@ -9,5 +9,10 @@ def line_col(source: str, offset: int) -> tuple[int, int]:
     return line, offset - (source.rfind("\n", 0, offset) + 1) + 1
 
 
+def display_grade(value: float) -> float:
+    """Formulas go negative on very simple text; a reader expects grade 0 there."""
+    return max(value, 0.0)
+
+
 def plural(count: int, noun: str) -> str:
     return f"{count} {noun}" if count == 1 else f"{count} {noun}s"

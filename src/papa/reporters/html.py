@@ -18,7 +18,7 @@ from ..models import (
     Finding,
     Run,
 )
-from .common import plural
+from .common import display_grade, plural
 
 _BG = {
     HARD: "#fff3bf",
@@ -129,7 +129,7 @@ def _sidebar(analysis: Analysis) -> str:
 <div class="file">{_html.escape(analysis.path)}</div>
 <div class="grade">{_html.escape(score.reading_grade)}</div>
 {verdict_html}
-<div class="formulas">ARI {score.ari} · FK {score.flesch_kincaid} · Fog {score.gunning_fog}<br>{plural(score.sentences, 'sentence')}</div>
+<div class="formulas">ARI {display_grade(score.ari)} · FK {display_grade(score.flesch_kincaid)} · Fog {display_grade(score.gunning_fog)}<br>{plural(score.sentences, 'sentence')}</div>
 <ul>{rows}</ul>
 """
 

@@ -346,11 +346,13 @@ class _HTMLScan(HTMLParser):
                 self.problems.append(f"<{tag} style> loads a resource")
         if tag in ("style", "head"):
             self._skip += 1
+        if tag == "br":
+            self.text.append("\n")
 
     def handle_endtag(self, tag):
         if tag in ("style", "head"):
             self._skip -= 1
-        if tag in ("div", "p", "li", "h1", "h2", "section", "aside", "main", "tr", "br"):
+        if tag in ("div", "p", "li", "h1", "h2", "section", "aside", "main", "tr"):
             self.text.append("\n")
 
     def handle_data(self, data):
@@ -419,22 +421,120 @@ def _shell_quote(arg: str) -> str:
 
 # ---- browser eyes ------------------------------------------------------------
 
-def find_browser() -> str | None:
+VIEWPORTS = {"desktop": (1280, 900), "mobile": (390, 844)}
+
+# Runs inside the page. Reports horizontal overflow, low-contrast text (WCAG AA)
+# and elements a selector says must carry a hover title.
+_INSPECT_JS = """
+(titled) => {
+  const parse = c => { const m = c.match(/rgba?\\(([^)]+)\\)/); if (!m) return null;
+    const p = m[1].split(',').map(Number); return {r: p[0], g: p[1], b: p[2], a: p.length > 3 ? p[3] : 1}; };
+  const lum = c => { const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); };
+    return 0.2126 * f(c.r) + 0.7152 * f(c.g) + 0.0722 * f(c.b); };
+  const bgOf = el => { for (let e = el; e; e = e.parentElement) {
+    const c = parse(getComputedStyle(e).backgroundColor); if (c && c.a > 0) return c; } return {r: 255, g: 255, b: 255, a: 1}; };
+  const low = [], seen = new Set();
+  const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  while (walker.nextNode() && seen.size < 3000) {
+    const node = walker.currentNode, el = node.parentElement;
+    if (!node.textContent.trim() || seen.has(el)) continue;
+    seen.add(el);
+    const st = getComputedStyle(el);
+    if (st.visibility === 'hidden' || st.display === 'none') continue;
+    const fg = parse(st.color), bg = bgOf(el);
+    if (!fg) continue;
+    const a = lum(fg), b = lum(bg), ratio = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05);
+    const size = parseFloat(st.fontSize), large = size >= 24 || (size >= 18.66 && parseInt(st.fontWeight) >= 700);
+    const need = large ? 3 : 4.5;
+    if (ratio < need) low.push(`'${node.textContent.trim().slice(0, 40)}' ratio ${ratio.toFixed(2)} < ${need}`);
+  }
+  const doc = document.documentElement;
+  const clipped = [...document.body.querySelectorAll('*')]
+    .filter(e => e.getBoundingClientRect().right > doc.clientWidth + 1 && e.getClientRects().length)
+    .map(e => e.tagName.toLowerCase() + (e.className ? '.' + String(e.className).split(' ')[0] : ''));
+  return {
+    overflow: doc.scrollWidth - doc.clientWidth,
+    clipped: [...new Set(clipped)].slice(0, 8),
+    low_contrast: low,
+    untitled: titled ? [...document.querySelectorAll(titled)].filter(e => !e.title).length : 0,
+    text_length: document.body.innerText.trim().length,
+  };
+}
+"""
+
+
+class PlaywrightEyes:
+    """Drives real Chromium: blocks the network, inspects layout, saves screenshots."""
+
+    name = "playwright"
+
+    def __init__(self):
+        from playwright.sync_api import sync_playwright
+
+        self._playwright = sync_playwright().start()
+        self._browser = self._playwright.chromium.launch()
+
+    def look(self, page_path: Path, png: Path, size: tuple[int, int], titled: str | None) -> dict:
+        context = self._browser.new_context(viewport={"width": size[0], "height": size[1]})
+        page = context.new_page()
+        blocked, errors = [], []
+
+        def route(request_route):
+            url = request_route.request.url
+            if url.startswith(("file:", "data:", "about:")):
+                return request_route.continue_()
+            blocked.append(url)
+            return request_route.abort()
+
+        page.route("**/*", route)
+        page.on("console", lambda msg: errors.append(msg.text) if msg.type == "error" else None)
+        page.on("pageerror", lambda error: errors.append(str(error)))
+        page.goto(page_path.as_uri(), wait_until="load")
+        facts = page.evaluate(_INSPECT_JS, titled)
+        page.screenshot(path=str(png), full_page=True)
+        context.close()
+        return {**facts, "blocked": blocked, "errors": errors, "screenshot": str(png)}
+
+    def close(self):
+        self._browser.close()
+        self._playwright.stop()
+
+
+class ChromeEyes:
+    """Fallback without Playwright: screenshots only, no in-page inspection."""
+
+    name = "chrome"
+
+    def __init__(self, binary: str):
+        self.binary = binary
+
+    def look(self, page_path: Path, png: Path, size: tuple[int, int], titled: str | None) -> dict:
+        subprocess.run(
+            [self.binary, "--headless=new", "--disable-gpu", "--hide-scrollbars",
+             "--host-resolver-rules=MAP * ~NOTFOUND", f"--window-size={size[0]},{size[1]}",
+             f"--screenshot={png}", page_path.as_uri()],
+            capture_output=True, timeout=60,
+        )
+        return {"screenshot": str(png)} if png.exists() else {}
+
+    def close(self):
+        pass
+
+
+def open_eyes() -> tuple[object | None, str]:
+    """Return (eyes, why) where ``why`` explains a downgrade, so it is never silent."""
+    try:
+        return PlaywrightEyes(), ""
+    except Exception as error:  # missing package or browser build
+        why = f"playwright unavailable ({str(error).splitlines()[0][:160]}); " \
+              "fix: pip install playwright && python -m playwright install chromium"
     for name in ("google-chrome", "chromium", "chromium-browser", "chrome"):
         if found := shutil.which(name):
-            return found
+            return ChromeEyes(found), why + "; using Chrome screenshots only, no layout checks"
     mac = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
-    return mac if Path(mac).exists() else None
-
-
-def screenshot(browser: str, page: Path, png: Path, size: tuple[int, int]) -> bool:
-    proc = subprocess.run(
-        [browser, "--headless=new", "--disable-gpu", "--hide-scrollbars",
-         "--host-resolver-rules=MAP * ~NOTFOUND", f"--window-size={size[0]},{size[1]}",
-         f"--screenshot={png}", page.as_uri()],
-        capture_output=True, timeout=60,
-    )
-    return proc.returncode == 0 and png.exists()
+    if Path(mac).exists():
+        return ChromeEyes(mac), why + "; using Chrome screenshots only, no layout checks"
+    return None, why + "; no Chrome found either"
 
 
 _ANSI_CSS = {"30": "#555", "31": "#e5534b", "32": "#57ab5a", "33": "#c69026", "34": "#539bf5",
@@ -463,33 +563,60 @@ def ansi_to_html(text: str, cols: int) -> str:
             f"width:{cols}ch'>{''.join(out)}</pre>")
 
 
-def browser_checks(browser: str | None, result: Result) -> list[Check]:
-    if not browser:
-        return [Check("browser-render", "skip", "no Chrome or Chromium found")]
+def browser_checks(eyes, why: str, project: Project, result: Result) -> list[Check]:
+    if not result.case.get("html") and not result.tty:
+        return []
+    checks = [Check("browser-engine", "skip", why)] if why else []
+    if eyes is None:
+        return checks
     shots = []
-    if result.case.get("html"):
-        page = result.out_dir / result.case["html"]
-        if page.exists():
-            for label, size in (("desktop", (1280, 900)), ("mobile", (390, 844))):
-                png = result.out_dir / f"html-{label}.png"
-                if screenshot(browser, page, png, size):
-                    shots.append(str(png))
+    source = project.sources.get("html")
+    page = result.out_dir / result.case["html"] if result.case.get("html") else None
+    if page and page.exists():
+        for label, size in VIEWPORTS.items():
+            facts = eyes.look(page, result.out_dir / f"html-{label}.png", size, project.config.get("titled"))
+            shots += [facts["screenshot"]] if "screenshot" in facts else []
+            checks += _page_checks(facts, label, size, source)
     if result.tty:
         page = result.out_dir / "terminal.html"
         page.write_text(ansi_to_html(result.stdout_raw, result.cols), encoding="utf-8")
-        png = result.out_dir / "terminal.png"
-        if screenshot(browser, page, png, (result.cols * 9 + 40, 900)):
-            shots.append(str(png))
-    if not shots:
+        facts = eyes.look(page, result.out_dir / "terminal.png", (result.cols * 9 + 40, 600), None)
+        shots += [facts["screenshot"]] if "screenshot" in facts else []
+    if shots:
+        checks.append(Check("screenshots", "pass", f"open these images to see the output ({eyes.name})",
+                            extra={"screenshots": shots}))
+    return checks
+
+
+def _page_checks(facts: dict, label: str, size: tuple[int, int], source) -> list[Check]:
+    if "overflow" not in facts:
         return []
-    return [Check("browser-render", "pass", "open these images to see the output",
-                  extra={"screenshots": shots})]
+    shot = {"artifact": facts.get("screenshot")}
+    return [
+        Check(f"browser-{label}-network", "fail" if facts["blocked"] else "pass",
+              "page tried to load: " + ", ".join(facts["blocked"][:5]) if facts["blocked"] else "", source=source),
+        Check(f"browser-{label}-overflow", "fail" if facts["overflow"] > 0 or facts["clipped"] else "pass",
+              f"content is wider than {size[0]}px (scrolls by {facts['overflow']}px); "
+              f"elements past the right edge: {', '.join(facts['clipped']) or 'none'}"
+              if facts["overflow"] > 0 or facts["clipped"] else "",
+              source=source, extra=shot),
+        Check(f"browser-{label}-console", "fail" if facts["errors"] else "pass",
+              "; ".join(facts["errors"][:5]), source=source),
+        Check(f"browser-{label}-contrast", "fail" if facts["low_contrast"] else "pass",
+              f"{len(facts['low_contrast'])} text element(s) below WCAG AA contrast",
+              actual="\n".join(facts["low_contrast"][:8]) or None, source=source),
+        Check(f"browser-{label}-titles", "fail" if facts["untitled"] else "pass",
+              f"{facts['untitled']} highlighted element(s) have no hover title" if facts["untitled"] else "",
+              source=source),
+        Check(f"browser-{label}-visible-text", "pass" if facts["text_length"] > 0 else "fail",
+              "" if facts["text_length"] else "page shows no text", source=source, extra=shot),
+    ]
 
 
 # ---- report ------------------------------------------------------------------
 
 def run(project: Project, only: list[str] | None, browser_wanted: bool) -> int:
-    browser = find_browser() if browser_wanted else None
+    eyes, why = open_eyes() if browser_wanted else (None, "")
     rows = []
     for case in project.cases(only):
         result = run_case(project, case)
@@ -498,13 +625,15 @@ def run(project: Project, only: list[str] | None, browser_wanted: bool) -> int:
             checks.extend(plugin.checks(result, project))
         checks.append(_check_snapshot(project, result, snapshot_text(project, result)))
         if browser_wanted:
-            checks.extend(browser_checks(browser, result))
+            checks.extend(browser_checks(eyes, why, project, result))
         for check in checks:
             row = {"case": case["id"], **{k: v for k, v in vars(check).items() if v not in (None, "", {})}}
             if check.status == "fail":
                 row["reproduce"] = {"cwd": _rel(result.cwd), "argv": [*project.config["command"], *result.argv]}
                 row["artifacts"] = _rel(result.out_dir)
             rows.append(row)
+    if eyes:
+        eyes.close()
     return _write_report(project, rows)
 
 

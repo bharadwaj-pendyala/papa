@@ -8,7 +8,8 @@ papa: wrote {out}/report.html
 papa
 html-bait.md
 Grade 9, easy to read
-ARI 13.0 · FK 5.4 · Fog 9.12 sentences
+ARI 13.0 · FK 5.4 · Fog 9.1
+2 sentences
 Very hard sentence0
 Hard sentence1
 Passive voice1
