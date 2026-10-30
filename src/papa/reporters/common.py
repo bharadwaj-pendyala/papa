@@ -14,5 +14,14 @@ def display_grade(value: float) -> float:
     return max(value, 0.0)
 
 
+def gate_grade(consensus: float, max_grade: float, failed: bool) -> str:
+    """Show the grade with just enough decimals that it agrees with the verdict."""
+    for digits in (1, 2, 3, 4):
+        shown = f"{max(consensus, 0.0):.{digits}f}"
+        if (float(shown) > max_grade) == failed:
+            return shown
+    return f"{consensus:.4f}"
+
+
 def plural(count: int, noun: str) -> str:
     return f"{count} {noun}" if count == 1 else f"{count} {noun}s"

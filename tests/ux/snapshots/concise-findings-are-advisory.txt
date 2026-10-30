@@ -1,0 +1,7 @@
+$ hard.md --report concise
+[exit 0]
+--- stdout
+hard.md:1:1: warning: Very hard to read (grade 18+) [very-hard-sentence]
+hard.md:1:151: note: Adverb: 'consistently' [adverb]
+--- stderr
+

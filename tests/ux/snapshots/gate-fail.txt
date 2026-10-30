@@ -5,10 +5,10 @@ hard.md  ·  Grade 35, very hard to read
   FAIL  grade 34.6 is above --max-grade 8
 
   1 very hard sentence · 1 adverb
-  ARI 35.7 · FK 32.1 · Fog 36.0 · 1 sentence
+  mean of ARI 35.7, FK 32.1, Fog 36.0 · 1 sentence
 
-  1:1    very hard  Very hard to read (grade 34): "The multifaceted implementa…"
-  1:151  adverb     Adverb: 'consistently'
+  1:1    very hard  grade 18+ "The multifaceted implementation demonstrates c…"
+  1:151  adverb     'consistently'
 
 Tips
   very hard  Split the sentence or cut words. Aim for one idea per sentence.

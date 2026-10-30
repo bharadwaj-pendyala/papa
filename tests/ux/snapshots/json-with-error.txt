@@ -10,7 +10,7 @@ $ easy.txt missing.md --report json
         "ari": -4.0,
         "flesch_kincaid": -1.0,
         "gunning_fog": 2.1,
-        "consensus": -1.0,
+        "consensus": -0.9612,
         "reading_grade": "Grade 0, easy to read",
         "sentences": 3,
         "hard_sentences": 0,

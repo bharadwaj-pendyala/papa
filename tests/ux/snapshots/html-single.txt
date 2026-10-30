@@ -27,3 +27,11 @@ print("hello")
 ```
 Due to the fact that the multifaceted implementation demonstrates considerable architectural sophistication notwithstanding the numerous interdependent complications that consistently undermine long-term maintainability across the entire distributed organization, the migration was postponed.
 Use `papa --max-grade 10` in CI. Short sentences help readers.
+7:15Passive voicePassive voice: 'was shipped'Name who does the action and make them the subject.
+7:39Complex phraseComplex phrase: 'in order to', consider 'to'Use 'to'.
+8:4AdverbAdverb: 'basically'Cut the adverb or use a stronger verb.
+8:55AdverbAdverb: 'really'Cut the adverb or use a stronger verb.
+15:1Very hard sentenceVery hard to read (grade 18+)Split the sentence or cut words. Aim for one idea per sentence.
+15:1Complex phraseComplex phrase: 'Due to the fact that', consider 'because'Use 'because'.
+15:172AdverbAdverb: 'consistently'Cut the adverb or use a stronger verb.
+15:279Passive voicePassive voice: 'was postponed'Name who does the action and make them the subject.

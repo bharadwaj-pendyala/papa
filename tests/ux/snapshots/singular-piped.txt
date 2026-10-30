@@ -4,10 +4,10 @@ $ singular.txt
 singular.txt  ·  Grade 3, easy to read
 
   1 passive · 1 adverb
-  ARI 5.6 · FK 2.9 · Fog 2.0 · 1 sentence
+  mean of ARI 5.6, FK 2.9, Fog 2.0 · 1 sentence
 
-  1:10  passive    Passive voice: 'was approved'
-  1:23  adverb     Adverb: 'quickly'
+  1:10  passive    'was approved'
+  1:23  adverb     'quickly'
 
 Tips
   passive    Name who does the action and make them the subject.

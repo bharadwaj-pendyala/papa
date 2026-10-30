@@ -1,0 +1,6 @@
+$ easy.txt --config bad-utf8.txt
+[exit 2]
+--- stdout
+
+--- stderr
+papa: cannot read config bad-utf8.txt: invalid UTF-8 at byte 10

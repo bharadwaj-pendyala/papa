@@ -1,0 +1,21 @@
+$ easy.txt missing.md --report html -o {out}/report.html
+[exit 2]
+--- stdout
+
+--- stderr
+papa: cannot read missing.md: no such file or directory
+papa: wrote {out}/report.html
+--- report.html (visible text)
+This report is incomplete
+Could not read missing.md: no such file or directory
+papa
+easy.txt
+Grade 0, easy to read
+ARI 0.0 · FK 0.0 · Fog 2.1
+3 sentences
+Very hard sentence0
+Hard sentence0
+Passive voice0
+Adverb0
+Complex phrase0
+The cat sat on the mat. The dog ran in the sun. We had fun today.

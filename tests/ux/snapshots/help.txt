@@ -45,8 +45,9 @@ Config:
   pyproject.toml. Keys: max-grade, exclude. Flags override config.
 
 Exit codes:
-  0  every file was checked and none failed --max-grade
+  0  no file failed --max-grade (findings alone never fail a run)
   1  at least one file is harder than --max-grade
-  2  usage, config, or input error (missing file, bad UTF-8, no prose)
+  2  usage, config, or input error, or no input had prose to check
+     (files with no prose are skipped with a note on stderr)
 --- stderr
 

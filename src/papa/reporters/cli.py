@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import re
+
 from ..models import (
     ADVERB,
     COLOR,
@@ -13,7 +15,7 @@ from ..models import (
     Finding,
     Run,
 )
-from .common import display_grade as _grade, line_col, plural
+from .common import display_grade as _grade, gate_grade, line_col, plural
 
 _ANSI = {
     "yellow": "33", "red": "31", "blue": "34", "green": "32",
@@ -34,6 +36,8 @@ def render(run: Run, *, color: bool = False, width: int = 80, details: bool = Tr
         tail += _tips(run.analyses, color, width)
     if len(run.analyses) + len(run.skipped) + len(run.errors) > 1:
         tail += ([""] if tail else []) + _summary(run, color)
+    if run.config:
+        tail.append(_c(f"Config: {run.config}", "grey", on=color))
     return "\n".join(blocks + (["\n".join(tail) + "\n"] if tail else []))
 
 
@@ -46,12 +50,12 @@ def _file_block(analysis: Analysis, color: bool, width: int, details: bool) -> s
 
     if score.threshold is not None:
         max_grade = _fmt(score.threshold["max_grade"])
-        if score.verdict == "pass":
-            lines.append(_c(f"  PASS  grade {_grade(score.consensus)} is within --max-grade {max_grade}",
-                            "green", on=color))
+        failed = score.verdict == "fail"
+        shown = gate_grade(score.consensus, score.threshold["max_grade"], failed)
+        if failed:
+            lines.append(_c(f"  FAIL  grade {shown} is above --max-grade {max_grade}", "red", on=color))
         else:
-            lines.append(_c(f"  FAIL  grade {_grade(score.consensus)} is above --max-grade {max_grade}",
-                            "red", on=color))
+            lines.append(_c(f"  PASS  grade {shown} is within --max-grade {max_grade}", "green", on=color))
 
     lines.append("")
     counts = [
@@ -64,8 +68,9 @@ def _file_block(analysis: Analysis, color: bool, width: int, details: bool) -> s
     flagged = [(text, code) for text, code in counts if not text.startswith("0 ")]
     lines += _wrap_parts(flagged, width, color) if flagged else [_c("  No issues found.", "green", on=color)]
     formulas = [
-        (f"ARI {_grade(score.ari)}", "grey"), (f"FK {_grade(score.flesch_kincaid)}", "grey"),
-        (f"Fog {_grade(score.gunning_fog)}", "grey"), (plural(score.sentences, "sentence"), "grey"),
+        (f"mean of ARI {_grade(score.ari)}, FK {_grade(score.flesch_kincaid)}, "
+         f"Fog {_grade(score.gunning_fog)}", "grey"),
+        (plural(score.sentences, "sentence"), "grey"),
     ]
     lines += _wrap_parts(formulas, width, color)
 
@@ -82,13 +87,15 @@ def _file_block(analysis: Analysis, color: bool, width: int, details: bool) -> s
 def _flagged_line(source: str, finding: Finding, loc: str, loc_width: int, color: bool, width: int) -> str:
     prefix_len = 2 + loc_width + 2 + _BADGE_WIDTH
     badge = _c(f"{_BADGE[finding.category]:<{_BADGE_WIDTH}}", COLOR[finding.category], on=color)
-    message = finding.message
     if finding.category in (HARD, VERY_HARD):
-        room = max(width - prefix_len - len(message) - 4, 12)
+        grade = re.search(r"grade [\d+]+", finding.message).group()
+        room = max(width - prefix_len - len(grade) - 4, 12)
         quote = " ".join(source[finding.start:finding.end].split())
         if len(quote) > room:
             quote = quote[:room - 1] + "…"
-        message = f'{message}: "{quote}"'
+        message = f'{grade}  "{quote}"'
+    else:
+        message = finding.message.split(": ", 1)[-1]  # the badge already names the category
     lines = _wrap_text(message, width - prefix_len, first=f"  {loc:<{loc_width}}  {badge}", rest=" " * prefix_len)
     return "\n".join(lines)
 
@@ -114,6 +121,8 @@ def _tips(analyses: list[Analysis], color: bool, width: int) -> list[str]:
 def _summary(run: Run, color: bool) -> list[str]:
     total = len(run.analyses) + len(run.skipped) + len(run.errors)
     parts = []
+    if run.skipped or run.errors:
+        parts.append(f"{len(run.analyses)} analyzed")
     if run.max_grade is not None:
         failed = sum(1 for a in run.analyses if a.score.verdict == "fail")
         parts += [f"{len(run.analyses) - failed} passed", f"{failed} failed"]
@@ -128,7 +137,7 @@ def _summary(run: Run, color: bool) -> list[str]:
     lines = [_c(text + ".", "red" if bad else "bold", on=color)]
     if len(run.analyses) > 1:
         hardest = max(run.analyses, key=lambda a: a.score.consensus)
-        lines.append(f"Hardest: {hardest.path} (grade {_grade(hardest.score.consensus)}).")
+        lines.append(f"Hardest: {hardest.path} (grade {_grade(round(hardest.score.consensus, 1))}).")
     return lines
 
 

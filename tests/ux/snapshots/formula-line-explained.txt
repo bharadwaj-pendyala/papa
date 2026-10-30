@@ -1,0 +1,9 @@
+$ all-findings.md --summary
+[exit 0]
+--- stdout
+all-findings.md  ·  Grade 15, very hard to read
+
+  1 very hard sentence · 2 passive · 2 complex phrases · 3 adverbs
+  mean of ARI 14.4, FK 13.4, Fog 16.7 · 6 sentences
+--- stderr
+

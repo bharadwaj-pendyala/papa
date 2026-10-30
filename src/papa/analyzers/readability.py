@@ -23,11 +23,16 @@ def analyze(ctx: AnalyzerContext) -> list[Finding]:
         if grade >= 14:
             findings.append(
                 Finding(start, end, VERY_HARD, COLOR[VERY_HARD], "error",
-                        f"Very hard to read (grade {round(grade)})", "readability", _HINT)
+                        f"Very hard to read (grade {_shown(grade)})", "readability", _HINT)
             )
         elif grade >= 10:
             findings.append(
                 Finding(start, end, HARD, COLOR[HARD], "warn",
-                        f"Hard to read (grade {round(grade)})", "readability", _HINT)
+                        f"Hard to read (grade {_shown(grade)})", "readability", _HINT)
             )
     return findings
+
+
+def _shown(grade: float) -> str:
+    # Past college level the number stops meaning anything to a reader.
+    return "18+" if grade >= 18 else str(round(grade))

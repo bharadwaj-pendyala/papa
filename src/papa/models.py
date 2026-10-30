@@ -85,3 +85,4 @@ class Run:
     skipped: list[tuple[str, str]]
     errors: list[tuple[str, str]]
     max_grade: float | None
+    config: str | None = None

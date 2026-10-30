@@ -18,7 +18,7 @@ from ..models import (
     Finding,
     Run,
 )
-from .common import display_grade, plural
+from .common import display_grade, line_col, plural
 
 _BG = {
     HARD: "#fff3bf",
@@ -59,6 +59,14 @@ nav.index h1 { font-size: 20px; margin: 0 0 8px; }
 nav.index ol { margin: 0; padding-left: 20px; }
 nav.index a { color: #1c5fb8; }
 nav.index .fail { color: #c92a2a; font-weight: 600; }
+.notice { max-width: 1100px; margin: 24px auto 0; padding: 12px 24px; background: #fff4e6; border: 1px solid #ffd8a8; border-radius: 10px; color: #7a3e00; }
+.notice h2 { font-size: 16px; margin: 0 0 6px; }
+.notice ul { margin: 0; padding-left: 20px; }
+.findings { list-style: none; padding: 0; margin: 24px 0 0; border-top: 1px solid #e3e6ea; }
+.findings li { padding: 10px 0; border-bottom: 1px solid #f1f3f5; font-size: 14px; }
+.findings .loc { font: 13px ui-monospace, SFMono-Regular, Menlo, monospace; color: #495057; margin-right: 8px; }
+.findings .tag { display: inline-block; padding: 0 6px; border-radius: 4px; font-size: 12px; font-weight: 600; color: #1a1a1a; margin-right: 6px; }
+.findings .hint { display: block; color: #495057; margin-top: 2px; }
 @media (max-width: 760px) {
   .wrap { flex-direction: column; padding: 16px; align-items: stretch; }
   aside { position: static; flex: none; }
@@ -72,7 +80,7 @@ def render(run: Run, *, color: bool = False, width: int = 80, details: bool = Tr
     styles = "".join(f".hl-{cat}{{background:{bg};}}" for cat, bg in _BG.items())
     sections = "\n".join(
         f'<section class="wrap" id="file-{i}">\n<aside>{_sidebar(a)}</aside>\n'
-        f"<main><pre>{_render_spans(a.source, a.findings)}</pre></main>\n</section>"
+        f"<main><pre>{_render_spans(a.source, a.findings)}</pre>{_findings_list(a)}</main>\n</section>"
         for i, a in enumerate(run.analyses, 1)
     )
     title = run.analyses[0].path if len(run.analyses) == 1 else plural(len(run.analyses), "file")
@@ -85,11 +93,36 @@ def render(run: Run, *, color: bool = False, width: int = 80, details: bool = Tr
 <style>{_CSS}{styles}</style>
 </head>
 <body>
+{_notice(run)}
 {_index(run.analyses)}
 {sections}
 </body>
 </html>
 """
+
+
+def _notice(run: Run) -> str:
+    problems = [f"Could not read {_html.escape(p)}: {_html.escape(m)}" for p, m in run.errors]
+    problems += [f"Skipped {_html.escape(p)}: {_html.escape(r)}" for p, r in run.skipped]
+    if not problems:
+        return ""
+    items = "".join(f"<li>{p}</li>" for p in problems)
+    return f'<div class="notice" role="alert"><h2>This report is incomplete</h2><ul>{items}</ul></div>'
+
+
+def _findings_list(analysis: Analysis) -> str:
+    if not analysis.findings:
+        return ""
+    items = []
+    for finding in analysis.findings:
+        line, col = line_col(analysis.source, finding.start)
+        items.append(
+            f'<li><span class="loc">{line}:{col}</span>'
+            f'<span class="tag" style="background:{_BG[finding.category]}">{_LABEL[finding.category]}</span>'
+            f"{_html.escape(finding.message)}"
+            f'<span class="hint">{_html.escape(finding.hint)}</span></li>'
+        )
+    return f'<ol class="findings">{"".join(items)}</ol>'
 
 
 def _index(analyses: list[Analysis]) -> str:

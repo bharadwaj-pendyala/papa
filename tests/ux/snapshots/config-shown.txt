@@ -1,0 +1,41 @@
+$ .
+[exit 0]
+--- stdout
+README.md  ·  Grade 1, easy to read
+  PASS  grade 1.2 is within --max-grade 8
+
+  No issues found.
+  mean of ARI 1.2, FK 0.6, Fog 1.8 · 2 sentences
+
+docs/faq.txt  ·  Grade 4, easy to read
+  PASS  grade 4.3 is within --max-grade 8
+
+  1 passive · 1 adverb
+  mean of ARI 1.8, FK 5.2, Fog 6.0 · 2 sentences
+
+  1:12  passive    'was given'
+  1:40  adverb     'usually'
+
+docs/guide.md  ·  Grade 1, easy to read
+  PASS  grade 0.6 is within --max-grade 8
+
+  No issues found.
+  mean of ARI 0.0, FK 0.0, Fog 2.4 · 4 sentences
+
+notes/meeting notes.md  ·  Grade 0, easy to read
+  PASS  grade 0.2 is within --max-grade 8
+
+  1 passive
+  mean of ARI 0.0, FK 0.0, Fog 2.2 · 2 sentences
+
+  1:28  passive    'was changed'
+
+Tips
+  passive    Name who does the action and make them the subject.
+  adverb     Cut the adverb or use a stronger verb.
+
+Checked 4 files: 4 passed, 0 failed (--max-grade 8).
+Hardest: docs/faq.txt (grade 4.3).
+Config: papa.toml
+--- stderr
+

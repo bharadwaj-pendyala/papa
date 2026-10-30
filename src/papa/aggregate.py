@@ -60,7 +60,7 @@ def build_score(
         ari=round(ari, 1),
         flesch_kincaid=round(fk, 1),
         gunning_fog=round(fog, 1),
-        consensus=round(consensus, 1),
+        consensus=round(consensus, 4),
         reading_grade=label,
         sentences=sentence_count,
         hard_sentences=_count(findings, HARD),

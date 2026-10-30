@@ -10,7 +10,7 @@ $ all-findings.md --report json
         "ari": 14.4,
         "flesch_kincaid": 13.4,
         "gunning_fog": 16.7,
-        "consensus": 14.8,
+        "consensus": 14.8486,
         "reading_grade": "Grade 15, very hard to read",
         "sentences": 6,
         "hard_sentences": 0,
@@ -88,7 +88,7 @@ $ all-findings.md --report json
           "category": "very-hard-sentence",
           "color": "red",
           "severity": "error",
-          "message": "Very hard to read (grade 32)",
+          "message": "Very hard to read (grade 18+)",
           "analyzer": "readability",
           "hint": "Split the sentence or cut words. Aim for one idea per sentence."
         },

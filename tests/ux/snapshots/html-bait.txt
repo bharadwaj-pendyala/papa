@@ -16,3 +16,5 @@ Passive voice1
 Adverb0
 Complex phrase0
 Visit https://example.com for details. The <script>alert(1)</script> tag was escaped by the renderer.
+1:40Hard sentenceHard to read (grade 12)Split the sentence or cut words. Aim for one idea per sentence.
+1:74Passive voicePassive voice: 'was escaped'Name who does the action and make them the subject.

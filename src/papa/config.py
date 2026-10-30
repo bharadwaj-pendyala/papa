@@ -29,7 +29,7 @@ def find(start: Path) -> Path | None:
         if candidate.is_file():
             return candidate
         pyproject = directory / "pyproject.toml"
-        if pyproject.is_file() and "papa" in _read(pyproject).get("tool", {}):
+        if pyproject.is_file() and "papa" in (_read(pyproject).get("tool") or {}):
             return pyproject
         if (directory / ".git").exists():
             return None
@@ -38,7 +38,14 @@ def find(start: Path) -> Path | None:
 
 def load(path: Path) -> Config:
     data = _read(path)
-    table = data.get("tool", {}).get("papa", {}) if path.name == "pyproject.toml" else data.get("papa", {})
+    if path.name == "pyproject.toml":
+        tool = data.get("tool", {})
+        table = tool.get("papa", {}) if isinstance(tool, dict) else {}
+        section = "[tool.papa]"
+    else:
+        table, section = data.get("papa", {}), "[papa]"
+    if not isinstance(table, dict):
+        raise ConfigError(f"{path}: {section} must be a table, like:\n\n  {section}\n  max-grade = 10")
     for key in table:
         if key not in KEYS:
             close = difflib.get_close_matches(key, KEYS, n=1)
@@ -56,13 +63,21 @@ def load(path: Path) -> Config:
 
 
 def check_grade(value, label: str) -> float:
-    if isinstance(value, bool) or not isinstance(value, (int, float)) or not math.isfinite(value) or value < 0:
-        raise ConfigError(f"{label} must be a finite number >= 0, got {value!r}")
-    return float(value)
+    try:
+        grade = float(value) if isinstance(value, (int, float)) and not isinstance(value, bool) else math.nan
+    except OverflowError:
+        grade = math.inf
+    if not math.isfinite(grade) or grade < 0:
+        raise ConfigError(f"{label} must be a finite number >= 0, got {str(value)[:20]!r}")
+    return grade
 
 
 def _read(path: Path) -> dict:
     try:
-        return tomllib.loads(path.read_text(encoding="utf-8"))
+        return tomllib.loads(path.read_bytes().decode("utf-8"))
+    except OSError as error:
+        raise ConfigError(f"cannot read config {path}: {(error.strerror or str(error)).lower()}") from None
+    except UnicodeDecodeError as error:
+        raise ConfigError(f"cannot read config {path}: invalid UTF-8 at byte {error.start}") from None
     except tomllib.TOMLDecodeError as error:
         raise ConfigError(f"{path}: invalid TOML: {error}") from None

@@ -1,0 +1,7 @@
+$ easy.txt --summary --report json
+[exit 2]
+--- stdout
+
+--- stderr
+papa: error: --summary only works with --report cli, not --report json
+Run 'papa --help' for examples.

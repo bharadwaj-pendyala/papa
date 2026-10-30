@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import glob
 import os
-from fnmatch import fnmatch
+import re
 from pathlib import Path
 
 STDIN = "-"
@@ -35,6 +35,8 @@ def expand(args: list[str], excludes: list[str]) -> list[str]:
                 continue
             seen.add(key)
             paths.append(path)
+    if args and not paths:
+        raise InputError("every input was excluded by --exclude or the config exclude list")
     return paths
 
 
@@ -73,7 +75,29 @@ def _excluded(path: str, excludes: list[str]) -> bool:
     if path == STDIN:
         return False
     absolute = Path(os.path.abspath(path)).as_posix()
-    return any(fnmatch(absolute, pattern) for pattern in excludes)
+    return any(_glob_regex(pattern).fullmatch(absolute) for pattern in excludes)
+
+
+def _glob_regex(pattern: str) -> re.Pattern:
+    """Glob with the same meaning discovery uses: ``**/`` spans zero or more folders."""
+    out, i = [], 0
+    while i < len(pattern):
+        if pattern.startswith("**/", i):
+            out.append("(?:.*/)?")
+            i += 3
+        elif pattern.startswith("**", i):
+            out.append(".*")
+            i += 2
+        elif pattern[i] == "*":
+            out.append("[^/]*")
+            i += 1
+        elif pattern[i] == "?":
+            out.append("[^/]")
+            i += 1
+        else:
+            out.append(re.escape(pattern[i]))
+            i += 1
+    return re.compile("".join(out))
 
 
 def anchor(pattern: str, base: Path) -> str:

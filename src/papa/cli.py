@@ -29,9 +29,10 @@ Config:
   pyproject.toml. Keys: max-grade, exclude. Flags override config.
 
 Exit codes:
-  0  every file was checked and none failed --max-grade
+  0  no file failed --max-grade (findings alone never fail a run)
   1  at least one file is harder than --max-grade
-  2  usage, config, or input error (missing file, bad UTF-8, no prose)
+  2  usage, config, or input error, or no input had prose to check
+     (files with no prose are skipped with a note on stderr)
 """
 
 
@@ -95,6 +96,8 @@ def _grade(value: str) -> float:
 def main(argv: list[str] | None = None) -> int:
     parser = build_parser()
     args = parser.parse_args(argv)
+    if args.summary and args.report != "cli":
+        parser.error(f"--summary only works with --report cli, not --report {args.report}")
 
     if not args.files and sys.stdin.isatty():
         parser.print_help()
@@ -106,7 +109,8 @@ def main(argv: list[str] | None = None) -> int:
     except (config.ConfigError, inputs.InputError) as error:
         return _fail(str(error))
 
-    run = Run(analyses=[], skipped=[], errors=[], max_grade=settings.max_grade)
+    run = Run(analyses=[], skipped=[], errors=[], max_grade=settings.max_grade,
+              config=_display_path(settings.path) if settings.path else None)
     for path in paths:
         _check_one(path, args, run)
 
@@ -115,7 +119,7 @@ def main(argv: list[str] | None = None) -> int:
     for path, reason in run.skipped:
         print(f"papa: skipped {path}: {reason}", file=sys.stderr)
 
-    if run.analyses and not args.quiet:
+    if not args.quiet and (run.analyses or args.report in ("json", "html")):
         _emit(args, run)
 
     if run.errors or not run.analyses:
@@ -191,6 +195,13 @@ def _color_enabled(choice: str) -> bool:
     if choice != "auto":
         return choice == "always"
     return sys.stdout.isatty() and os.environ.get("NO_COLOR") is None
+
+
+def _display_path(path: Path) -> str:
+    try:
+        return str(path.resolve().relative_to(Path.cwd()))
+    except ValueError:
+        return str(path)
 
 
 def _fail(message: str) -> int:

@@ -220,6 +220,8 @@ def generic_checks(project: Project, result: Result) -> list[Check]:
         checks.append(_check_json_parses(result, src.get("json")))
     if case.get("html"):
         checks.extend(_check_html(result.out_dir / case["html"], src.get("html")))
+        checks.extend(_check_html_contains(result.out_dir / case["html"], case.get("html_contains", []),
+                                           src.get("html")))
     return checks
 
 
@@ -383,6 +385,15 @@ def _check_html(path: Path, source) -> list[Check]:
         Check("html-offline", "fail" if scan.problems else "pass",
               "; ".join(sorted(set(scan.problems))), source=source),
     ]
+
+
+def _check_html_contains(path: Path, needles: list[str], source) -> list[Check]:
+    if not needles or not path.exists():
+        return []
+    text = html_text(path)
+    return [Check("html-contains", "pass" if n in text else "fail",
+                  "" if n in text else "visible page text is missing expected text", n, None, source)
+            for n in needles]
 
 
 # ---- snapshots ---------------------------------------------------------------
