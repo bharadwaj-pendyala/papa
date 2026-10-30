@@ -24,7 +24,7 @@ options:
   --stdin-filename NAME
                         name to show for stdin; its suffix picks the format
   --summary             show grades and counts only, without each finding
-  -q, --quiet           print nothing to stdout; rely on the exit code
+  -q, --quiet           print nothing to stdout; -o files are still written
   --color {auto,always,never}
                         color terminal output (default: auto)
   --config FILE         read settings from FILE

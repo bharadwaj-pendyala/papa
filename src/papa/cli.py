@@ -74,7 +74,7 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("--summary", action="store_true",
                         help="show grades and counts only, without each finding")
     parser.add_argument("-q", "--quiet", action="store_true",
-                        help="print nothing to stdout; rely on the exit code")
+                        help="print nothing to stdout; -o files are still written")
     parser.add_argument("--color", choices=["auto", "always", "never"], default="auto",
                         help="color terminal output (default: auto)")
     parser.add_argument("--config", metavar="FILE", help="read settings from FILE")
@@ -119,7 +119,7 @@ def main(argv: list[str] | None = None) -> int:
     for path, reason in run.skipped:
         print(f"papa: skipped {path}: {reason}", file=sys.stderr)
 
-    if not args.quiet and (run.analyses or args.report in ("json", "html")):
+    if (not args.quiet or args.output) and (run.analyses or args.report in ("json", "html")):
         try:
             _emit(args, run)
         except OSError as error:
@@ -189,7 +189,8 @@ def _emit(args: argparse.Namespace, run: Run) -> None:
     rendered = REPORTERS[args.report](run, color=color, width=width, details=not args.summary)
     if to_file:
         Path(args.output).write_text(rendered, encoding="utf-8")
-        print(f"papa: wrote {args.output}", file=sys.stderr)
+        if not args.quiet:
+            print(f"papa: wrote {args.output}", file=sys.stderr)
     else:
         sys.stdout.write(rendered)
 

@@ -85,6 +85,7 @@
     {"id": "output-dir-missing", "argv": ["easy.txt", "--report", "json", "-o", "{out}/no/such/dir/r.json"], "exit": 2, "stderr_contains": ["cannot write"]},
     {"id": "pyproject-tool-not-table", "argv": ["ok.md"], "cwd": "badtool", "exit": 0},
     {"id": "gate-fail-no-findings-wording", "argv": ["project/README.md", "--max-grade", "0"], "exit": 1, "stdout_absent": ["No issues found"]},
-    {"id": "narrow-quote-keeps-context", "argv": ["all-findings.md"], "tty": true, "cols": 40, "exit": 0, "expect_ansi": true, "stdout_regex": ["grade 18\\+ \"Due\\s+to\\s+the\\s+fact"]}
+    {"id": "narrow-quote-keeps-context", "argv": ["all-findings.md"], "tty": true, "cols": 40, "exit": 0, "expect_ansi": true, "stdout_regex": ["grade 18\\+ \"Due\\s+to\\s+the\\s+fact"]},
+    {"id": "quiet-still-writes-output", "argv": ["all-findings.md", "-q", "--report", "html", "-o", "{out}/report.html"], "exit": 0, "html": "report.html", "stdout_empty": true}
   ]
 }
