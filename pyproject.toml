@@ -23,7 +23,7 @@ dependencies = ["textstat>=0.7.3"]
 
 [project.optional-dependencies]
 dev = ["pytest>=7"]
-eyes = ["playwright>=1.45"]
+eyes = ["agent-eyes[browser]"]
 
 [project.urls]
 Homepage = "https://github.com/bharadwaj-pendyala/papa"

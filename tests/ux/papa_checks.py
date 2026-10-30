@@ -4,11 +4,9 @@ from __future__ import annotations
 
 import json
 import math
-import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[2] / "tools"))
-from eyes import Check  # noqa: E402
+from agent_eyes import Check
 
 SOURCE = "src/papa/reporters/json_report.py"
 SCORE_NUMBERS = {"ari", "flesch_kincaid", "gunning_fog", "consensus"}

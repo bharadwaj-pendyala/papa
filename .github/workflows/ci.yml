@@ -23,7 +23,9 @@ jobs:
       - name: Test
         run: pytest -q
       - name: UX checks (eyes)
-        run: python tools/eyes.py run
+        run: |
+          pip install "agent-eyes @ git+https://github.com/bharadwaj-pendyala/agent-eyes"
+          eyes run
       - name: Upload eyes report
         if: failure()
         uses: actions/upload-artifact@v4
