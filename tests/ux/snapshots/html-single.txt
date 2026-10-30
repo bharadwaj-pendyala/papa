@@ -1,0 +1,37 @@
+$ all-findings.md --report html -o {out}/report.html
+[exit 0]
+--- stdout
+
+--- stderr
+papa: wrote {out}/report.html
+--- report.html (visible text)
+papa
+all-findings.md
+Grade 15, very hard to read
+ARI 14.9 · FK 13.4 · Fog 16.7
+6 sentences
+Very hard sentence1
+Hard sentence0
+Passive voice2
+Adverb3
+Complex phrase2
+---
+title: Release notes
+---
+# Release notes
+The new build was shipped by the team in order to fix the login bug.
+We basically rewrote the cache layer, and it now runs really fast.
+```python
+# This code block is ignored, even though it was written badly.
+print("hello")
+```
+Due to the fact that the multifaceted implementation demonstrates considerable architectural sophistication notwithstanding the numerous interdependent complications that consistently undermine long-term maintainability across the entire distributed organization, the migration was postponed.
+Use `papa --max-grade 10` in CI. Short sentences help readers.
+7:15Passive voicePassive voice: 'was shipped'Name who does the action and make them the subject.
+7:39Complex phraseComplex phrase: 'in order to', consider 'to'Use 'to'.
+8:4AdverbAdverb: 'basically'Cut the adverb or use a stronger verb.
+8:55AdverbAdverb: 'really'Cut the adverb or use a stronger verb.
+15:1Very hard sentenceVery hard to read (grade 18+)Split the sentence or cut words. Aim for one idea per sentence.
+15:1Complex phraseComplex phrase: 'Due to the fact that', consider 'because'Use 'because'.
+15:172AdverbAdverb: 'consistently'Cut the adverb or use a stronger verb.
+15:279Passive voicePassive voice: 'was postponed'Name who does the action and make them the subject.

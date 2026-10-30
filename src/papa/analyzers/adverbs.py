@@ -27,6 +27,7 @@ def analyze(ctx: AnalyzerContext) -> list[Finding]:
         if len(word) >= 4 and word.endswith("ly") and word not in _NOT_ADVERBS:
             findings.append(
                 Finding(match.start(), match.end(), ADVERB, COLOR[ADVERB], "info",
-                        f"Adverb: '{match.group()}'", "adverbs")
+                        f"Adverb: '{match.group()}'", "adverbs",
+                        "Cut the adverb or use a stronger verb.")
             )
     return findings

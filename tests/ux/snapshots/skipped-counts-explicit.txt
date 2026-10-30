@@ -1,0 +1,11 @@
+$ code-only.md easy.txt
+[exit 0]
+--- stdout
+easy.txt  ·  Grade 0, easy to read
+
+  No flagged sentences or words.
+  mean of ARI 0.0, FK 0.0, Fog 2.1 · 3 sentences
+
+Checked 2 files: 1 analyzed, 1 skipped.
+--- stderr
+papa: skipped code-only.md: no prose found (only code or markup)

@@ -20,12 +20,31 @@ pip install -e ".[dev]"
 pytest
 ```
 
+On macOS, if `papa` fails with `No module named 'papa'` after an install, a
+sync tool such as iCloud may have hidden the editable `.pth` file. Python 3.13
+skips hidden `.pth` files. Run `chflags nohidden .venv/lib/python*/site-packages/*.pth`.
+
 Run the CLI against a file to see it work:
 
 ```bash
 papa README.md
 papa README.md --report json
 ```
+
+## Check the UX with eyes
+
+Papa's UX checks run the CLI like a user does and check the output. They use
+[userlens](https://github.com/bharadwaj-pendyala/userlens). Run them before
+you open a PR that changes what users see:
+
+```bash
+pip install -e ".[dev,eyes]"
+eyes run              # terminal, JSON and HTML checks
+eyes run --browser    # also screenshots and layout checks
+```
+
+See [docs/eyes.md](docs/eyes.md) for how to add a case and approve output
+changes.
 
 ## Project layout
 
@@ -35,8 +54,11 @@ src/papa/
   normalize.py     neutralize numbers/dates/URLs/identifiers before scoring
   analyzers/       pluggable analyzers (readability, passive, adverbs, complex_phrase)
   aggregate.py     merge spans, compute the document score
-  reporters/       cli, json, html
+  inputs.py        files, folders, globs, stdin, and excludes
+  config.py        papa.toml and [tool.papa]
+  reporters/       cli, concise, json, html
 tests/             pytest suite (one file per area)
+tests/ux/          eyes cases, corpora, reviewed snapshots
 ```
 
 The data flow is `Ingestor -> Analyzers -> Aggregator -> Reporters`. See `spec.md` for the full architecture.
@@ -51,6 +73,7 @@ The data flow is `Ingestor -> Analyzers -> Aggregator -> Reporters`. See `spec.m
 ## Pull request checklist
 
 - [ ] `pytest` passes locally.
+- [ ] `eyes run` passes, and you reviewed any snapshot change.
 - [ ] New behavior has a test.
 - [ ] Public behavior changes are reflected in `README.md` or `spec.md`.
 - [ ] Commit messages explain the why, not just the what.

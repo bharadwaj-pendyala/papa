@@ -1,0 +1,6 @@
+$ easy.txt --config typo.toml
+[exit 2]
+--- stdout
+
+--- stderr
+papa: typo.toml: unknown key 'max-grde'; did you mean 'max-grade'?

@@ -1,0 +1,6 @@
+$ easy.txt --report json -o {out}/no/such/dir/r.json
+[exit 2]
+--- stdout
+
+--- stderr
+papa: cannot write {out}/no/such/dir/r.json: no such file or directory

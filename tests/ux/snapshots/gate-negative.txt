@@ -1,0 +1,7 @@
+$ easy.txt --max-grade -1
+[exit 2]
+--- stdout
+
+--- stderr
+papa: error: argument --max-grade: must be a finite number >= 0, got '-1'
+Run 'papa --help' for examples.

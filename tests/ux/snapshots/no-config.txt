@@ -1,0 +1,47 @@
+$ . --no-config
+[exit 0]
+--- stdout
+README.md  ·  Grade 1, easy to read
+
+  No flagged sentences or words.
+  mean of ARI 1.2, FK 0.6, Fog 1.8 · 2 sentences
+
+docs/faq.txt  ·  Grade 4, easy to read
+
+  1 passive · 1 adverb
+  mean of ARI 1.8, FK 5.2, Fog 6.0 · 2 sentences
+
+  1:12  passive    'was given'
+  1:40  adverb     'usually'
+
+docs/generated/api.md  ·  Grade 13, hard to read
+
+  1 hard sentence · 2 passive · 1 adverb
+  mean of ARI 10.8, FK 11.5, Fog 16.9 · 1 sentence
+
+  1:1   hard       grade 11 "This file was generated automatically and should…"
+  1:11  passive    'was generated'
+  1:25  adverb     'automatically'
+  1:50  passive    'be excluded'
+
+docs/guide.md  ·  Grade 1, easy to read
+
+  No flagged sentences or words.
+  mean of ARI 0.7, FK 0.0, Fog 2.4 · 4 sentences
+
+notes/meeting notes.md  ·  Grade 0, easy to read
+
+  1 passive
+  mean of ARI 0.0, FK 0.0, Fog 2.2 · 2 sentences
+
+  1:28  passive    'was changed'
+
+Tips
+  hard       Split the sentence or cut words. Aim for one idea per sentence.
+  passive    Name who does the action and make them the subject.
+  adverb     Cut the adverb or use a stronger verb.
+
+Checked 5 files.
+Hardest: docs/generated/api.md (grade 13.1).
+--- stderr
+

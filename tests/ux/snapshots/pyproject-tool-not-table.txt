@@ -1,0 +1,9 @@
+$ ok.md
+[exit 0]
+--- stdout
+ok.md  ·  Grade 0, easy to read
+
+  No flagged sentences or words.
+  mean of ARI 0.0, FK 0.0, Fog 2.0 · 2 sentences
+--- stderr
+

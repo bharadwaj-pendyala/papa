@@ -36,7 +36,7 @@ def merge_findings(findings: list[Finding]) -> list[Finding]:
                 kept[-1] = finding
             continue
         kept.append(finding)
-    return sorted(sentence + kept, key=lambda f: (f.start, f.end))
+    return sorted(sentence + kept, key=lambda f: (f.start, -f.end))
 
 
 def build_score(
@@ -50,9 +50,10 @@ def build_score(
     if max_grade is None:
         verdict, threshold = "pass", None
     else:
-        # gate on the raw consensus, not the rounded display grade: 10.4 is
-        # harder than 10 and must fail even though it displays as "Grade 10".
-        verdict = "fail" if consensus > max_grade else "pass"
+        # Gate on the consensus as JSON reports it (4 decimals), not the rounded
+        # display grade: 10.4 is harder than 10 and must fail even though it
+        # displays as "Grade 10".
+        verdict = "fail" if round(consensus, 4) > max_grade else "pass"
         clean_max = int(max_grade) if float(max_grade).is_integer() else max_grade
         threshold = {"max_grade": clean_max}
 
@@ -60,6 +61,7 @@ def build_score(
         ari=round(ari, 1),
         flesch_kincaid=round(fk, 1),
         gunning_fog=round(fog, 1),
+        consensus=round(consensus, 4),
         reading_grade=label,
         sentences=sentence_count,
         hard_sentences=_count(findings, HARD),

@@ -1,0 +1,7 @@
+$ easy.txt --max-grade nan
+[exit 2]
+--- stdout
+
+--- stderr
+papa: error: argument --max-grade: must be a finite number >= 0, got 'nan'
+Run 'papa --help' for examples.

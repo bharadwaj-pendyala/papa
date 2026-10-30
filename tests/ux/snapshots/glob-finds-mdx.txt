@@ -1,0 +1,9 @@
+$ 'mdx-site/**/*.mdx'
+[exit 0]
+--- stdout
+mdx-site/page.mdx  ·  Grade 3, easy to read
+
+  No flagged sentences or words.
+  mean of ARI 3.7, FK 2.4, Fog 3.8 · 6 sentences
+--- stderr
+

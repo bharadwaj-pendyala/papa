@@ -1,0 +1,6 @@
+$ bad-utf8.txt
+[exit 2]
+--- stdout
+
+--- stderr
+papa: bad-utf8.txt: invalid UTF-8 at byte 10; re-save it as UTF-8

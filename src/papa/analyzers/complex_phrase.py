@@ -56,6 +56,7 @@ def analyze(ctx: AnalyzerContext) -> list[Finding]:
             message += f", consider '{suggestion}'"
         findings.append(
             Finding(match.start(), match.end(), COMPLEX, COLOR[COMPLEX], "warn",
-                    message, "complex-phrase")
+                    message, "complex-phrase",
+                    f"Use '{suggestion}'." if suggestion else "Use a shorter, plainer phrase.")
         )
     return findings

@@ -1,0 +1,25 @@
+$ missing.md --report json
+[exit 2]
+--- stdout
+{
+  "version": "0.2",
+  "files": [],
+  "skipped": [],
+  "errors": [
+    {
+      "file": "missing.md",
+      "message": "no such file or directory"
+    }
+  ],
+  "summary": {
+    "files": 1,
+    "analyzed": 0,
+    "passed": 0,
+    "failed": 0,
+    "skipped": 0,
+    "errors": 1,
+    "max_grade": null
+  }
+}
+--- stderr
+papa: missing.md: no such file or directory

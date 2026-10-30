@@ -1,0 +1,11 @@
+$ easy.txt missing.md
+[exit 2]
+--- stdout
+easy.txt  ·  Grade 0, easy to read
+
+  No flagged sentences or words.
+  mean of ARI 0.0, FK 0.0, Fog 2.1 · 3 sentences
+
+Checked 2 files: 1 analyzed, 1 error.
+--- stderr
+papa: missing.md: no such file or directory

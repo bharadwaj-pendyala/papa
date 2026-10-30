@@ -10,13 +10,18 @@ import re
 _BOUNDARY = re.compile(r"[.!?]+(?=\s|$)|\n[ \t]*\n")
 
 
-def split_sentences(text: str) -> list[tuple[int, int, str]]:
-    """Yield (start, end, text) for each sentence, offsets into ``text``."""
+def split_sentences(text: str, breaks: set[int] | frozenset[int] = frozenset()) -> list[tuple[int, int, str]]:
+    """Yield (start, end, text) for each sentence, offsets into ``text``.
+
+    ``breaks`` are extra positions where a block (list item, table cell,
+    heading) starts, so a sentence never runs across them.
+    """
+    cuts = sorted({m.end() for m in _BOUNDARY.finditer(text)} | {b for b in breaks if 0 < b < len(text)})
     sentences: list[tuple[int, int, str]] = []
     start = 0
-    for match in _BOUNDARY.finditer(text):
-        _append(sentences, text, start, match.end())
-        start = match.end()
+    for cut in cuts:
+        _append(sentences, text, start, cut)
+        start = cut
     _append(sentences, text, start, len(text))
     return sentences
 

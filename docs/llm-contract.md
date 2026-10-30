@@ -7,49 +7,82 @@ and a prompt an agent can use to rewrite flagged spans.
 ## 1. Get the findings
 
 ```bash
-papa post.md --report json > findings.json
+papa post.md --max-grade 10 --report json > findings.json
 ```
 
 ## 2. The JSON shape
 
+Schema `0.2` has one shape for every run: one file, many files, or none.
+
 ```jsonc
 {
-  "version": "0.1",
-  "file": "post.md",
-  "score": {
-    "ari": 11.2,
-    "flesch_kincaid": 10.8,
-    "gunning_fog": 12.1,
-    "reading_grade": "Grade 11, hard to read",
-    "sentences": 142,
-    "hard_sentences": 18,
-    "very_hard_sentences": 4,
-    "adverbs": 9,
-    "passive": 6,
-    "complex_phrases": 12,
-    "verdict": "fail",
-    "threshold": { "max_grade": 10 }
-  },
-  "findings": [
+  "version": "0.2",
+  "files": [
     {
-      "start": 1423,
-      "end": 1490,
-      "category": "passive",
-      "color": "green",
-      "severity": "warn",
-      "message": "Passive voice: 'is measured'",
-      "analyzer": "passive"
+      "file": "post.md",
+      "score": {
+        "ari": 11.2,
+        "flesch_kincaid": 10.8,
+        "gunning_fog": 12.1,
+        "consensus": 11.3667,
+        "reading_grade": "Grade 11, hard to read",
+        "sentences": 142,
+        "hard_sentences": 18,
+        "very_hard_sentences": 4,
+        "adverbs": 9,
+        "passive": 6,
+        "complex_phrases": 12,
+        "verdict": "fail",
+        "threshold": { "max_grade": 10 }
+      },
+      "findings": [
+        {
+          "start": 1423,
+          "end": 1434,
+          "line": 42,
+          "column": 7,
+          "end_line": 42,
+          "end_column": 18,
+          "category": "passive",
+          "color": "green",
+          "severity": "warn",
+          "message": "Passive voice: 'is measured'",
+          "analyzer": "passive",
+          "hint": "Name who does the action and make them the subject.",
+          "excerpt": "is measured"
+        }
+      ]
     }
-  ]
+  ],
+  "skipped": [{ "file": "snippets.md", "reason": "no prose found (only code or markup)" }],
+  "errors": [{ "file": "missing.md", "message": "no such file or directory" }],
+  "summary": {
+    "files": 3, "analyzed": 1, "passed": 0, "failed": 1,
+    "skipped": 1, "errors": 1, "max_grade": 10
+  }
 }
 ```
 
-- `start` and `end` are offsets into the **original** source file, so a span maps
-  back to the exact text the writer sees.
-- `reading_grade` is the human-facing label. The CLI compares its internal raw
-  consensus grade against `--max-grade`, but that raw value is not currently
-  exposed in the JSON payload.
-- `verdict` is `pass` or `fail`. `threshold` records the gate that produced it.
+- `start` and `end` are code-point offsets into the **original** source file.
+  `source[start:end]` is the exact flagged text.
+- `line` and `column` are 1-based and count code points. They point at the
+  same place as `start`, so an editor can jump there.
+- `hint` tells the writer how to fix the finding.
+- `excerpt` is the flagged text as prose: link text without URLs, no
+  emphasis marks, whitespace collapsed. Use `start` and `end` to edit.
+- `consensus` is the mean of ARI, Flesch-Kincaid and Gunning fog. The
+  `--max-grade` gate compares this value. `reading_grade` is the rounded label.
+- `verdict` is `fail` only when a gate is set and `consensus` is above it.
+  `threshold` is `null` when no gate is set.
+- Papa always writes this JSON with `--report json`, also when every input
+  fails. Read `errors` and `skipped` before you trust `files`.
+
+### Changes from 0.1
+
+- The top level is an object with `files`, not a single file or a list.
+- `score.consensus`, and `line`, `column`, `end_line`, `end_column`, `hint`
+  and `excerpt` on findings, are new.
+- `skipped`, `errors` and `summary` are new.
 
 ## 3. The rewrite prompt
 
@@ -81,8 +114,8 @@ FINDINGS:
 ## 4. Close the loop
 
 ```bash
-papa post.revised.md --report json > findings.next.json
+papa post.revised.md --max-grade 10 --report json > findings.next.json
 ```
 
-Re run Papa on the revision and compare `reading_grade`, finding counts, and
+Re run Papa on the revision and compare `consensus`, finding counts, and
 `verdict`. Repeat until `verdict` is `pass` or the grade stops improving.

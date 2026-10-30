@@ -1,0 +1,19 @@
+$ html-bait.md --report html -o {out}/report.html
+[exit 0]
+--- stdout
+
+--- stderr
+papa: wrote {out}/report.html
+--- report.html (visible text)
+papa
+html-bait.md
+Grade 6, easy to read
+ARI 6.2 · FK 4.8 · Fog 5.8
+2 sentences
+Very hard sentence0
+Hard sentence0
+Passive voice1
+Adverb0
+Complex phrase0
+Visit https://example.com for details. The <script>alert(1)</script> tag was escaped by the renderer.
+1:74Passive voicePassive voice: 'was escaped'Name who does the action and make them the subject.

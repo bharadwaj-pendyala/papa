@@ -1,0 +1,6 @@
+$ 'nope/**/*.md'
+[exit 2]
+--- stdout
+
+--- stderr
+papa: nope/**/*.md: no files match; check the pattern or the working directory

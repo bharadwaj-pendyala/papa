@@ -1,0 +1,6 @@
+$ empty.md
+[exit 2]
+--- stdout
+
+--- stderr
+papa: skipped empty.md: no prose found

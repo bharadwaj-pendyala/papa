@@ -1,0 +1,25 @@
+$ empty.md --report json
+[exit 2]
+--- stdout
+{
+  "version": "0.2",
+  "files": [],
+  "skipped": [
+    {
+      "file": "empty.md",
+      "reason": "no prose found"
+    }
+  ],
+  "errors": [],
+  "summary": {
+    "files": 1,
+    "analyzed": 0,
+    "passed": 0,
+    "failed": 0,
+    "skipped": 1,
+    "errors": 0,
+    "max_grade": null
+  }
+}
+--- stderr
+papa: skipped empty.md: no prose found

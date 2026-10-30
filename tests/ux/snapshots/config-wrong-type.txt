@@ -1,0 +1,9 @@
+$ easy.txt --config wrong-type.toml
+[exit 2]
+--- stdout
+
+--- stderr
+papa: wrong-type.toml: [papa] must be a table, like:
+
+  [papa]
+  max-grade = 10

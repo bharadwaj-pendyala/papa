@@ -1,0 +1,161 @@
+$ all-findings.md --report json
+[exit 0]
+--- stdout
+{
+  "version": "0.2",
+  "files": [
+    {
+      "file": "all-findings.md",
+      "score": {
+        "ari": 14.9,
+        "flesch_kincaid": 13.4,
+        "gunning_fog": 16.7,
+        "consensus": 14.9937,
+        "reading_grade": "Grade 15, very hard to read",
+        "sentences": 6,
+        "hard_sentences": 0,
+        "very_hard_sentences": 1,
+        "adverbs": 3,
+        "passive": 2,
+        "complex_phrases": 2,
+        "verdict": "pass",
+        "threshold": null
+      },
+      "findings": [
+        {
+          "start": 61,
+          "end": 72,
+          "line": 7,
+          "column": 15,
+          "end_line": 7,
+          "end_column": 26,
+          "category": "passive",
+          "color": "green",
+          "severity": "warn",
+          "message": "Passive voice: 'was shipped'",
+          "analyzer": "passive",
+          "hint": "Name who does the action and make them the subject.",
+          "excerpt": "was shipped"
+        },
+        {
+          "start": 85,
+          "end": 96,
+          "line": 7,
+          "column": 39,
+          "end_line": 7,
+          "end_column": 50,
+          "category": "complex-phrase",
+          "color": "purple",
+          "severity": "warn",
+          "message": "Complex phrase: 'in order to', consider 'to'",
+          "analyzer": "complex-phrase",
+          "hint": "Use 'to'.",
+          "excerpt": "in order to"
+        },
+        {
+          "start": 119,
+          "end": 128,
+          "line": 8,
+          "column": 4,
+          "end_line": 8,
+          "end_column": 13,
+          "category": "adverb",
+          "color": "blue",
+          "severity": "info",
+          "message": "Adverb: 'basically'",
+          "analyzer": "adverbs",
+          "hint": "Cut the adverb or use a stronger verb.",
+          "excerpt": "basically"
+        },
+        {
+          "start": 170,
+          "end": 176,
+          "line": 8,
+          "column": 55,
+          "end_line": 8,
+          "end_column": 61,
+          "category": "adverb",
+          "color": "blue",
+          "severity": "info",
+          "message": "Adverb: 'really'",
+          "analyzer": "adverbs",
+          "hint": "Cut the adverb or use a stronger verb.",
+          "excerpt": "really"
+        },
+        {
+          "start": 278,
+          "end": 570,
+          "line": 15,
+          "column": 1,
+          "end_line": 15,
+          "end_column": 293,
+          "category": "very-hard-sentence",
+          "color": "red",
+          "severity": "error",
+          "message": "Very hard to read (grade 18+)",
+          "analyzer": "readability",
+          "hint": "Split the sentence or cut words. Aim for one idea per sentence.",
+          "excerpt": "Due to the fact that the multifaceted implementation demonstrates considerable architectural sophistication notwithstanding the numerous interdependent complications that consistently undermine long-term maintainability across the entire distributed organization, the migration was postponed."
+        },
+        {
+          "start": 278,
+          "end": 298,
+          "line": 15,
+          "column": 1,
+          "end_line": 15,
+          "end_column": 21,
+          "category": "complex-phrase",
+          "color": "purple",
+          "severity": "warn",
+          "message": "Complex phrase: 'Due to the fact that', consider 'because'",
+          "analyzer": "complex-phrase",
+          "hint": "Use 'because'.",
+          "excerpt": "Due to the fact that"
+        },
+        {
+          "start": 449,
+          "end": 461,
+          "line": 15,
+          "column": 172,
+          "end_line": 15,
+          "end_column": 184,
+          "category": "adverb",
+          "color": "blue",
+          "severity": "info",
+          "message": "Adverb: 'consistently'",
+          "analyzer": "adverbs",
+          "hint": "Cut the adverb or use a stronger verb.",
+          "excerpt": "consistently"
+        },
+        {
+          "start": 556,
+          "end": 569,
+          "line": 15,
+          "column": 279,
+          "end_line": 15,
+          "end_column": 292,
+          "category": "passive",
+          "color": "green",
+          "severity": "warn",
+          "message": "Passive voice: 'was postponed'",
+          "analyzer": "passive",
+          "hint": "Name who does the action and make them the subject.",
+          "excerpt": "was postponed"
+        }
+      ]
+    }
+  ],
+  "skipped": [],
+  "errors": [],
+  "summary": {
+    "files": 1,
+    "analyzed": 1,
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "errors": 0,
+    "max_grade": null
+  }
+}
+--- stderr
+

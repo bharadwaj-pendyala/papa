@@ -1,0 +1,6 @@
+$ project/README.md --max-grade 0 --report concise
+[exit 1]
+--- stdout
+project/README.md:1:1: error: grade 1.2 is above --max-grade 0 [max-grade]
+--- stderr
+

@@ -1,0 +1,16 @@
+$ singular.txt
+[exit 0]
+--- stdout
+singular.txt  ·  Grade 3, easy to read
+
+  1 passive · 1 adverb
+  mean of ARI 5.6, FK 2.9, Fog 2.0 · 1 sentence
+
+  1:10  passive    'was approved'
+  1:23  adverb     'quickly'
+
+Tips
+  passive    Name who does the action and make them the subject.
+  adverb     Cut the adverb or use a stronger verb.
+--- stderr
+

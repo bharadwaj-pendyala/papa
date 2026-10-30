@@ -22,3 +22,13 @@ jobs:
         run: pip install -e ".[dev]"
       - name: Test
         run: pytest -q
+      - name: UX checks (eyes)
+        run: |
+          pip install "userlens @ git+https://github.com/bharadwaj-pendyala/userlens"
+          eyes run
+      - name: Upload eyes report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eyes-${{ matrix.python-version }}
+          path: artifacts/eyes
