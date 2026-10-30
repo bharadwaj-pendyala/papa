@@ -34,7 +34,8 @@ $ readme-style.md --report json
           "severity": "warn",
           "message": "Passive voice: 'are labeled'",
           "analyzer": "passive",
-          "hint": "Name who does the action and make them the subject."
+          "hint": "Name who does the action and make them the subject.",
+          "excerpt": "are labeled"
         }
       ]
     }

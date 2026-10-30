@@ -36,7 +36,7 @@ def analyze(
     ctx = AnalyzerContext(clean=clean, sentences=sentences)
 
     raw = [finding for analyzer in ANALYZERS.values() for finding in analyzer(ctx)]
-    raw = [_remap(finding, offset_map) for finding in raw]
+    raw = [_remap(finding, clean, offset_map) for finding in raw]
 
     grades = document_grades(_as_sentences(sentences))
     score = build_score(raw, len(sentences), grades, max_grade)
@@ -50,9 +50,10 @@ def _as_sentences(sentences: list[tuple[int, int, str]]) -> str:
     return " ".join(text if text[-1] in ".!?" else text + "." for _, _, text in sentences)
 
 
-def _remap(finding: Finding, offset_map: OffsetMap) -> Finding:
+def _remap(finding: Finding, clean: str, offset_map: OffsetMap) -> Finding:
     return replace(
         finding,
+        excerpt=" ".join(clean[finding.start:finding.end].split()),
         start=offset_map.to_original(finding.start),
         end=offset_map.to_original_end(finding.end),
     )

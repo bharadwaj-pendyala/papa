@@ -16,7 +16,7 @@ from ..models import (
     Finding,
     Run,
 )
-from .common import as_prose, display_grade as _grade, gate_grade, line_col, plural
+from .common import display_grade as _grade, gate_grade, line_col, plural
 
 _ANSI = {
     "yellow": "33", "red": "31", "blue": "34", "green": "32",
@@ -142,7 +142,7 @@ def _flagged_line(source: str, finding: Finding, loc: str, loc_width: int, color
     if finding.category in (HARD, VERY_HARD):
         grade = re.search(r"grade [\d+]+", finding.message).group()
         room = max(width - prefix_len - len(grade) - 4, 30)
-        quote = as_prose(source[finding.start:finding.end])
+        quote = finding.excerpt
         if len(quote) > room:
             quote = quote[:room - 1] + "…"
         message = f'{grade}  "{quote}"'

@@ -74,3 +74,10 @@ def test_headings_and_table_cells_are_not_graded_as_sentences():
     from papa import analyze
     md = "## Markdown code-block awareness\n\n| Sophisticated multifaceted capability |\n|---|\n"
     assert not [f for f in analyze(md).findings if f.category in ("hard-sentence", "very-hard-sentence")]
+
+
+def test_short_clear_sentences_are_not_flagged_as_hard():
+    from papa import analyze
+    for text in ("They're different numbers.", "Interrogate before you generate.",
+                 "Command-line flags override the config."):
+        assert not [f for f in analyze(text).findings if "sentence" in f.category], text

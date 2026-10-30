@@ -37,6 +37,7 @@ _HEADING = re.compile(r"^[ \t]{0,3}#{1,6}[ \t]+", re.MULTILINE)
 _SETEXT = re.compile(r"^[ \t]{0,3}(?:=+|-+)[ \t]*$", re.MULTILINE)
 _LIST_ITEM = re.compile(r"^[ \t]*(?:[-*+]|\d{1,9}[.)])[ \t]+(?:\[[ xX]\][ \t]+)?", re.MULTILINE)
 _QUOTE = re.compile(r"^[ \t]{0,3}(?:>[ \t]?)+", re.MULTILINE)
+_CALLOUT = re.compile(r"^[ \t]*:::[\w-]*", re.MULTILINE)  # Docusaurus-style :::info ... :::
 _RULE = re.compile(r"^[ \t]{0,3}(?:[-*_][ \t]*){3,}$", re.MULTILINE)
 _TABLE_ROW = re.compile(r"^[ \t]*\|.*$", re.MULTILINE)
 _TABLE_DIVIDER = re.compile(r"^[ \t]*\|?[ \t]*:?-+:?[ \t]*(?:\|[ \t]*:?-+:?[ \t]*)+\|?[ \t]*$", re.MULTILINE)
@@ -103,7 +104,7 @@ def block_breaks(text: str, fmt: str, offset_map: OffsetMap) -> set[int]:
     a table cell, or a tag on its own line. Sentences never span these."""
     if fmt == "txt":
         return set()
-    starts = [m.start() for m in _LIST_ITEM.finditer(text)]
+    starts = [m.start() for pattern in (_LIST_ITEM, _CALLOUT) for m in pattern.finditer(text)]
     for heading in _HEADING.finditer(text):
         line_end = text.find("\n", heading.end())
         starts += [heading.start(), line_end if line_end != -1 else len(text)]
@@ -128,7 +129,7 @@ def _strip_spans(text: str, fmt: str) -> list[tuple[int, int]]:
 
     markup: list[tuple[int, int]] = []
     whole = [_COMMENT, _TAG, _LINKED_IMAGE, _IMAGE, _LINK_DEFINITION, _URL, _EMPHASIS,
-             _HEADING, _SETEXT, _LIST_ITEM, _QUOTE, _RULE, _TABLE_DIVIDER]
+             _HEADING, _SETEXT, _LIST_ITEM, _QUOTE, _CALLOUT, _RULE, _TABLE_DIVIDER]
     if fmt == "mdx":
         whole = [_MDX_IMPORT, _MDX_EXPRESSION, *whole]
     for pattern in whole:

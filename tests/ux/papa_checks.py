@@ -14,7 +14,7 @@ SOURCE = "src/papa/reporters/json_report.py"
 SCORE_NUMBERS = {"ari", "flesch_kincaid", "gunning_fog", "consensus"}
 SCORE_INTS = {"sentences", "hard_sentences", "very_hard_sentences", "adverbs", "passive", "complex_phrases"}
 FINDING_INTS = {"start", "end", "line", "column", "end_line", "end_column"}
-FINDING_STRS = {"category", "color", "severity", "message", "hint", "analyzer"}
+FINDING_STRS = {"category", "color", "severity", "message", "hint", "excerpt", "analyzer"}
 CATEGORIES = {"hard-sentence", "very-hard-sentence", "passive", "adverb", "complex-phrase"}
 SUMMARY_KEYS = {"files", "analyzed", "passed", "failed", "skipped", "errors", "max_grade"}
 

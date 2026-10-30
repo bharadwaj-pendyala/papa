@@ -48,7 +48,8 @@ Schema `0.2` has one shape for every run: one file, many files, or none.
           "severity": "warn",
           "message": "Passive voice: 'is measured'",
           "analyzer": "passive",
-          "hint": "Name who does the action and make them the subject."
+          "hint": "Name who does the action and make them the subject.",
+          "excerpt": "is measured"
         }
       ]
     }
@@ -67,6 +68,8 @@ Schema `0.2` has one shape for every run: one file, many files, or none.
 - `line` and `column` are 1-based and count code points. They point at the
   same place as `start`, so an editor can jump there.
 - `hint` tells the writer how to fix the finding.
+- `excerpt` is the flagged text as prose: link text without URLs, no
+  emphasis marks, whitespace collapsed. Use `start` and `end` to edit.
 - `consensus` is the mean of ARI, Flesch-Kincaid and Gunning fog. The
   `--max-grade` gate compares this value. `reading_grade` is the rounded label.
 - `verdict` is `fail` only when a gate is set and `consensus` is above it.
@@ -77,8 +80,8 @@ Schema `0.2` has one shape for every run: one file, many files, or none.
 ### Changes from 0.1
 
 - The top level is an object with `files`, not a single file or a list.
-- `score.consensus`, and `line`, `column`, `end_line`, `end_column` and `hint`
-  on findings, are new.
+- `score.consensus`, and `line`, `column`, `end_line`, `end_column`, `hint`
+  and `excerpt` on findings, are new.
 - `skipped`, `errors` and `summary` are new.
 
 ## 3. The rewrite prompt

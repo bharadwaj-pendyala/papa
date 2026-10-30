@@ -41,6 +41,7 @@ class Finding:
     message: str
     analyzer: str
     hint: str = ""
+    excerpt: str = ""
 
     def to_dict(self) -> dict:
         return asdict(self)

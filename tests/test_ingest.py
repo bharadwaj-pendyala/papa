@@ -144,3 +144,15 @@ def test_jsx_attribute_with_two_levels_of_braces_is_not_prose():
     mdx = '<Card\n  icon={\n    <img src="/x.svg" width={20} />\n  }\n  title="LangChain"\n/>\nTrace your chains.\n'
     clean, _ = ingest(mdx, "mdx")
     assert " ".join(clean.split()) == "Trace your chains."
+
+
+def test_callout_markers_are_not_prose():
+    md = ":::info\nThis guide shows how to run checks in CI.\n:::\n"
+    clean, _ = ingest(md, "mdx")
+    assert " ".join(clean.split()) == "This guide shows how to run checks in CI."
+
+
+def test_findings_carry_a_prose_excerpt_even_inside_a_link():
+    md = "Read [part one](/blog/one) of the multifaceted interdependent architectural sophistication series today.\n"
+    hard = [f for f in analyze(md).findings if "sentence" in f.category]
+    assert hard and hard[0].excerpt.startswith("Read part one of the")

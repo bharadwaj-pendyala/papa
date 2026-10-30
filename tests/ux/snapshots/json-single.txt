@@ -34,7 +34,8 @@ $ all-findings.md --report json
           "severity": "warn",
           "message": "Passive voice: 'was shipped'",
           "analyzer": "passive",
-          "hint": "Name who does the action and make them the subject."
+          "hint": "Name who does the action and make them the subject.",
+          "excerpt": "was shipped"
         },
         {
           "start": 85,
@@ -48,7 +49,8 @@ $ all-findings.md --report json
           "severity": "warn",
           "message": "Complex phrase: 'in order to', consider 'to'",
           "analyzer": "complex-phrase",
-          "hint": "Use 'to'."
+          "hint": "Use 'to'.",
+          "excerpt": "in order to"
         },
         {
           "start": 119,
@@ -62,7 +64,8 @@ $ all-findings.md --report json
           "severity": "info",
           "message": "Adverb: 'basically'",
           "analyzer": "adverbs",
-          "hint": "Cut the adverb or use a stronger verb."
+          "hint": "Cut the adverb or use a stronger verb.",
+          "excerpt": "basically"
         },
         {
           "start": 170,
@@ -76,7 +79,8 @@ $ all-findings.md --report json
           "severity": "info",
           "message": "Adverb: 'really'",
           "analyzer": "adverbs",
-          "hint": "Cut the adverb or use a stronger verb."
+          "hint": "Cut the adverb or use a stronger verb.",
+          "excerpt": "really"
         },
         {
           "start": 278,
@@ -90,7 +94,8 @@ $ all-findings.md --report json
           "severity": "error",
           "message": "Very hard to read (grade 18+)",
           "analyzer": "readability",
-          "hint": "Split the sentence or cut words. Aim for one idea per sentence."
+          "hint": "Split the sentence or cut words. Aim for one idea per sentence.",
+          "excerpt": "Due to the fact that the multifaceted implementation demonstrates considerable architectural sophistication notwithstanding the numerous interdependent complications that consistently undermine long-term maintainability across the entire distributed organization, the migration was postponed."
         },
         {
           "start": 278,
@@ -104,7 +109,8 @@ $ all-findings.md --report json
           "severity": "warn",
           "message": "Complex phrase: 'Due to the fact that', consider 'because'",
           "analyzer": "complex-phrase",
-          "hint": "Use 'because'."
+          "hint": "Use 'because'.",
+          "excerpt": "Due to the fact that"
         },
         {
           "start": 449,
@@ -118,7 +124,8 @@ $ all-findings.md --report json
           "severity": "info",
           "message": "Adverb: 'consistently'",
           "analyzer": "adverbs",
-          "hint": "Cut the adverb or use a stronger verb."
+          "hint": "Cut the adverb or use a stronger verb.",
+          "excerpt": "consistently"
         },
         {
           "start": 556,
@@ -132,7 +139,8 @@ $ all-findings.md --report json
           "severity": "warn",
           "message": "Passive voice: 'was postponed'",
           "analyzer": "passive",
-          "hint": "Name who does the action and make them the subject."
+          "hint": "Name who does the action and make them the subject.",
+          "excerpt": "was postponed"
         }
       ]
     }

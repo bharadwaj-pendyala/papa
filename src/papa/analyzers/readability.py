@@ -10,18 +10,17 @@ from . import AnalyzerContext, register
 
 _WORD = re.compile(r"[A-Za-z]+")
 _HINT = "Split the sentence or cut words. Aim for one idea per sentence."
-MIN_WORDS = 4  # don't grade fragments (headings, nav, markup); README `sentences_under_words`
-# A heading, table cell or label has no closing punctuation. Grade it only when
-# it is long enough to read like a sentence.
-MIN_UNPUNCTUATED_WORDS = 8
+# Grade formulas swing wildly on short sentences: "Interrogate before you
+# generate." scores 15. Below this length a sentence is never "hard" to read,
+# and headings, labels and table cells drop out too.
+MIN_WORDS = 8
 
 
 @register("readability")
 def analyze(ctx: AnalyzerContext) -> list[Finding]:
     findings = []
     for start, end, text in ctx.sentences:
-        words = len(_WORD.findall(text))
-        if words < MIN_WORDS or (text[-1] not in ".!?" and words < MIN_UNPUNCTUATED_WORDS):
+        if len(_WORD.findall(text)) < MIN_WORDS:
             continue
         grade = sentence_grade(text)
         if grade >= 14:
