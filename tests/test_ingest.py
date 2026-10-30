@@ -67,3 +67,80 @@ def test_inline_backticks_inside_fence_are_not_double_counted():
     clean, _ = ingest(text, "md")
     assert "not inline" not in clean
     assert "More text." in clean
+
+
+from pathlib import Path
+
+from papa import analyze
+from papa.ingest import block_breaks
+from papa.sentences import split_sentences
+
+CORPORA = Path(__file__).parent / "ux" / "corpora"
+README = (CORPORA / "readme-style.md").read_text(encoding="utf-8")
+MDX = (CORPORA / "mdx-site" / "page.mdx").read_text(encoding="utf-8")
+
+
+def _sentences(source, fmt):
+    clean, omap = ingest(source, fmt)
+    return [" ".join(text.split()) for _, _, text in split_sentences(clean, breaks=block_breaks(source, fmt, omap))]
+
+
+def test_markdown_markup_is_not_prose():
+    clean = analyze(README, fmt="md").clean
+    for markup in ("img.shields", "](", "**", "<div", "|", "https://", "#"):
+        assert markup not in clean, markup
+
+
+def test_markdown_keeps_link_and_cell_text():
+    clean = analyze(README, fmt="md").clean
+    for text in ("Quickstart", "labeled", "Skip the slow checks.", "Fast widgets for your build."):
+        assert text in clean, text
+
+
+def test_list_items_headings_and_cells_are_separate_sentences():
+    sentences = _sentences(README, "md")
+    assert "CLI command:" in sentences
+    assert "Python package:" in sentences
+    assert "Status" in sentences
+    assert "Skip the slow checks." in sentences
+
+
+def test_wrapped_paragraph_lines_stay_one_sentence():
+    sentences = _sentences(README, "md")
+    assert "Good first issues are labeled for new people." in sentences
+
+
+def test_mdx_imports_exports_and_tags_are_not_prose():
+    clean = analyze(MDX, fmt="mdx").clean
+    for markup in ("import", "export", "<Tab", "items=", "<Image", "screenshot.png"):
+        assert markup not in clean, markup
+    assert "Call the function from your code." in clean
+
+
+def test_findings_in_markdown_still_point_at_the_source():
+    result = analyze(README, fmt="md")
+    passive = [f for f in result.findings if f.category == "passive"]
+    assert any(README[f.start:f.end].startswith("are") for f in passive)
+    assert all(0 <= f.start < f.end <= len(README) for f in result.findings)
+
+
+def test_passive_message_reads_as_prose_across_a_link():
+    result = analyze(README, fmt="md")
+    assert any(f.message == "Passive voice: 'are labeled'" for f in result.findings)
+
+
+def test_split_sentences_honours_block_breaks():
+    text = "one two three four five six seven"
+    assert [s for _, _, s in split_sentences(text, breaks={8})] == ["one two", "three four five six seven"]
+
+
+def test_jsx_tag_with_an_element_inside_an_attribute_is_not_prose():
+    mdx = '<Button\n  href={HOSTS.WWW}\n  endIcon={<Compass aria-hidden />}\n>\n  Explore the docs.\n</Button>\n'
+    clean, _ = ingest(mdx, "mdx")
+    assert " ".join(clean.split()) == "Explore the docs."
+
+
+def test_jsx_attribute_with_two_levels_of_braces_is_not_prose():
+    mdx = '<Card\n  icon={\n    <img src="/x.svg" width={20} />\n  }\n  title="LangChain"\n/>\nTrace your chains.\n'
+    clean, _ = ingest(mdx, "mdx")
+    assert " ".join(clean.split()) == "Trace your chains."

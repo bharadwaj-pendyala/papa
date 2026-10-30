@@ -10,12 +10,13 @@ from ..models import (
     COMPLEX,
     HARD,
     PASSIVE,
+    PRIORITY,
     VERY_HARD,
     Analysis,
     Finding,
     Run,
 )
-from .common import display_grade as _grade, gate_grade, line_col, plural
+from .common import as_prose, display_grade as _grade, gate_grade, line_col, plural
 
 _ANSI = {
     "yellow": "33", "red": "31", "blue": "34", "green": "32",
@@ -25,15 +26,34 @@ _BADGE = {
     HARD: "hard", VERY_HARD: "very hard", PASSIVE: "passive",
     ADVERB: "adverb", COMPLEX: "complex",
 }
+_NOUN = {
+    HARD: "hard sentence", VERY_HARD: "very hard sentence",
+    ADVERB: "adverb", COMPLEX: "complex phrase",
+}
 _BADGE_WIDTH = 11
 _TIP_ORDER = [VERY_HARD, HARD, PASSIVE, COMPLEX, ADVERB]
 
 
-def render(run: Run, *, color: bool = False, width: int = 80, details: bool = True) -> str:
-    blocks = [_file_block(a, color, width, details) for a in run.analyses]
+# Enough to act on without scrolling; --all lifts the cap.
+SINGLE_FILE_LIMIT = 25
+PER_FILE_LIMIT = 10
+COMPACT_ABOVE_FILES = 10
+
+
+def render(run: Run, *, color: bool = False, width: int = 80, details: bool = True,
+           show_all: bool = False) -> str:
+    compact = not show_all and len(run.analyses) > COMPACT_ABOVE_FILES
+    if compact:
+        blocks = ["\n".join(_compact_line(a, color) for a in run.analyses) + "\n"]
+        details = False
+    else:
+        limit = None if show_all else SINGLE_FILE_LIMIT if len(run.analyses) == 1 else PER_FILE_LIMIT
+        blocks = [_file_block(a, color, width, details, limit) for a in run.analyses]
     tail = []
     if details:
         tail += _tips(run.analyses, color, width)
+    if compact:
+        tail.append("Run papa on one file to see its findings, or add --all to see every finding.")
     if len(run.analyses) + len(run.skipped) + len(run.errors) > 1:
         tail += ([""] if tail else []) + _summary(run, color)
     if run.config:
@@ -41,7 +61,36 @@ def render(run: Run, *, color: bool = False, width: int = 80, details: bool = Tr
     return "\n".join(blocks + (["\n".join(tail) + "\n"] if tail else []))
 
 
-def _file_block(analysis: Analysis, color: bool, width: int, details: bool) -> str:
+def _compact_line(analysis: Analysis, color: bool) -> str:
+    score = analysis.score
+    mark = {"fail": _c("FAIL ", "red", on=color), "pass": _c("PASS ", "green", on=color)}[score.verdict]
+    gate = mark if score.threshold is not None else ""
+    count = plural(len(analysis.findings), "finding")
+    return f"  {gate}{analysis.path}  ·  {score.reading_grade}  ·  {count}"
+
+
+def _shown_findings(findings: list[Finding], limit: int | None) -> list[Finding]:
+    if limit is None or len(findings) <= limit:
+        return findings
+    by_severity = sorted(findings, key=lambda f: (-PRIORITY[f.category], f.start))[:limit]
+    return sorted(by_severity, key=lambda f: (f.start, -f.end))
+
+
+def _omitted_line(findings: list[Finding], shown: list[Finding]) -> str:
+    kept = {id(f) for f in shown}
+    counts: dict[str, int] = {}
+    for finding in findings:
+        if id(finding) not in kept:
+            counts[finding.category] = counts.get(finding.category, 0) + 1
+    detail = ", ".join(_count(category, n) for category, n in counts.items())
+    return f"  … {len(findings) - len(shown)} more ({detail}). Add --all to see every finding."
+
+
+def _count(category: str, n: int) -> str:
+    return f"{n} passive" if category == PASSIVE else plural(n, _NOUN[category])
+
+
+def _file_block(analysis: Analysis, color: bool, width: int, details: bool, limit: int | None) -> str:
     score = analysis.score
     header = f"{analysis.path}  ·  {score.reading_grade}"
     if len(header) > width:
@@ -75,11 +124,14 @@ def _file_block(analysis: Analysis, color: bool, width: int, details: bool) -> s
     lines += _wrap_parts(formulas, width, color)
 
     if details and analysis.findings:
-        locations = [line_col(analysis.source, f.start) for f in analysis.findings]
+        shown = _shown_findings(analysis.findings, limit)
+        locations = [line_col(analysis.source, f.start) for f in shown]
         loc_width = max(len(f"{line}:{col}") for line, col in locations)
         lines.append("")
-        for finding, (line, col) in zip(analysis.findings, locations):
+        for finding, (line, col) in zip(shown, locations):
             lines.append(_flagged_line(analysis.source, finding, f"{line}:{col}", loc_width, color, width))
+        if len(shown) < len(analysis.findings):
+            lines.append(_c(_omitted_line(analysis.findings, shown), "grey", on=color))
 
     return "\n".join(lines) + "\n"
 
@@ -90,7 +142,7 @@ def _flagged_line(source: str, finding: Finding, loc: str, loc_width: int, color
     if finding.category in (HARD, VERY_HARD):
         grade = re.search(r"grade [\d+]+", finding.message).group()
         room = max(width - prefix_len - len(grade) - 4, 30)
-        quote = " ".join(source[finding.start:finding.end].split())
+        quote = as_prose(source[finding.start:finding.end])
         if len(quote) > room:
             quote = quote[:room - 1] + "…"
         message = f'{grade}  "{quote}"'
@@ -111,8 +163,10 @@ def _tips(analyses: list[Analysis], color: bool, width: int) -> list[str]:
         hints[COMPLEX] = "Use the plainer phrase shown in each finding."
     indent = 2 + _BADGE_WIDTH
     lines = [_c("Tips", "bold", on=color)]
+    printed = set()
     for category in _TIP_ORDER:
-        if category in hints:
+        if category in hints and hints[category] not in printed:
+            printed.add(hints[category])
             badge = _c(f"{_BADGE[category]:<{_BADGE_WIDTH}}", COLOR[category], on=color)
             lines += _wrap_text(hints[category], width - indent, first=f"  {badge}", rest=" " * indent)
     return lines

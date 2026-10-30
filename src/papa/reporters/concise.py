@@ -9,7 +9,8 @@ from .common import gate_grade, line_col
 _SEVERITY = {"error": "warning", "warn": "warning", "info": "note"}
 
 
-def render(run: Run, *, color: bool = False, width: int = 80, details: bool = True) -> str:
+def render(run: Run, *, color: bool = False, width: int = 80, details: bool = True,
+           show_all: bool = False) -> str:
     lines = []
     for analysis in run.analyses:
         score = analysis.score

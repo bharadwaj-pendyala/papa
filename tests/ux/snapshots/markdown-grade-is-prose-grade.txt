@@ -1,0 +1,15 @@
+$ readme-style.md --max-grade 8
+[exit 0]
+--- stdout
+readme-style.md  ·  Grade 5, easy to read
+  PASS  grade 4.6 is within --max-grade 8
+
+  1 passive
+  mean of ARI 6.1, FK 4.0, Fog 3.8 · 16 sentences
+
+  27:39  passive    'are labeled'
+
+Tips
+  passive    Name who does the action and make them the subject.
+--- stderr
+

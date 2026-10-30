@@ -1,0 +1,42 @@
+$ long.md
+[exit 0]
+--- stdout
+long.md  ·  Grade 15, very hard to read
+
+  4 very hard sentences · 8 passive · 8 complex phrases · 12 adverbs
+  mean of ARI 14.6, FK 13.4, Fog 16.9 · 20 sentences
+
+  2:15    passive    'was shipped'
+  2:39    complex    'in order to', consider 'to'
+  3:4     adverb     'basically'
+  3:55    adverb     'really'
+  10:1    very hard  grade 18+ "Due to the fact that the multifaceted impleme…"
+  10:1    complex    'Due to the fact that', consider 'because'
+  10:172  adverb     'consistently'
+  10:279  passive    'was postponed'
+  14:15   passive    'was shipped'
+  14:39   complex    'in order to', consider 'to'
+  15:4    adverb     'basically'
+  15:55   adverb     'really'
+  22:1    very hard  grade 18+ "Due to the fact that the multifaceted impleme…"
+  22:1    complex    'Due to the fact that', consider 'because'
+  22:279  passive    'was postponed'
+  26:15   passive    'was shipped'
+  26:39   complex    'in order to', consider 'to'
+  34:1    very hard  grade 18+ "Due to the fact that the multifaceted impleme…"
+  34:1    complex    'Due to the fact that', consider 'because'
+  34:279  passive    'was postponed'
+  38:15   passive    'was shipped'
+  38:39   complex    'in order to', consider 'to'
+  46:1    very hard  grade 18+ "Due to the fact that the multifaceted impleme…"
+  46:1    complex    'Due to the fact that', consider 'because'
+  46:279  passive    'was postponed'
+  … 7 more (7 adverbs). Add --all to see every finding.
+
+Tips
+  very hard  Split the sentence or cut words. Aim for one idea per sentence.
+  passive    Name who does the action and make them the subject.
+  complex    Use the plainer phrase shown in each finding.
+  adverb     Cut the adverb or use a stronger verb.
+--- stderr
+

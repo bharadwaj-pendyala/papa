@@ -1,0 +1,209 @@
+$ big --all
+[exit 0]
+--- stdout
+big/page-01.md  ·  Grade 15, very hard to read
+
+  1 very hard sentence · 2 passive · 2 complex phrases · 3 adverbs
+  mean of ARI 14.9, FK 13.4, Fog 16.7 · 6 sentences
+
+  7:15    passive    'was shipped'
+  7:39    complex    'in order to', consider 'to'
+  8:4     adverb     'basically'
+  8:55    adverb     'really'
+  15:1    very hard  grade 18+ "Due to the fact that the multifaceted impleme…"
+  15:1    complex    'Due to the fact that', consider 'because'
+  15:172  adverb     'consistently'
+  15:279  passive    'was postponed'
+
+big/page-02.md  ·  Grade 15, very hard to read
+
+  1 very hard sentence · 2 passive · 2 complex phrases · 3 adverbs
+  mean of ARI 14.9, FK 13.4, Fog 16.7 · 6 sentences
+
+  7:15    passive    'was shipped'
+  7:39    complex    'in order to', consider 'to'
+  8:4     adverb     'basically'
+  8:55    adverb     'really'
+  15:1    very hard  grade 18+ "Due to the fact that the multifaceted impleme…"
+  15:1    complex    'Due to the fact that', consider 'because'
+  15:172  adverb     'consistently'
+  15:279  passive    'was postponed'
+
+big/page-03.md  ·  Grade 15, very hard to read
+
+  1 very hard sentence · 2 passive · 2 complex phrases · 3 adverbs
+  mean of ARI 14.9, FK 13.4, Fog 16.7 · 6 sentences
+
+  7:15    passive    'was shipped'
+  7:39    complex    'in order to', consider 'to'
+  8:4     adverb     'basically'
+  8:55    adverb     'really'
+  15:1    very hard  grade 18+ "Due to the fact that the multifaceted impleme…"
+  15:1    complex    'Due to the fact that', consider 'because'
+  15:172  adverb     'consistently'
+  15:279  passive    'was postponed'
+
+big/page-04.md  ·  Grade 15, very hard to read
+
+  1 very hard sentence · 2 passive · 2 complex phrases · 3 adverbs
+  mean of ARI 14.9, FK 13.4, Fog 16.7 · 6 sentences
+
+  7:15    passive    'was shipped'
+  7:39    complex    'in order to', consider 'to'
+  8:4     adverb     'basically'
+  8:55    adverb     'really'
+  15:1    very hard  grade 18+ "Due to the fact that the multifaceted impleme…"
+  15:1    complex    'Due to the fact that', consider 'because'
+  15:172  adverb     'consistently'
+  15:279  passive    'was postponed'
+
+big/page-05.md  ·  Grade 15, very hard to read
+
+  1 very hard sentence · 2 passive · 2 complex phrases · 3 adverbs
+  mean of ARI 14.9, FK 13.4, Fog 16.7 · 6 sentences
+
+  7:15    passive    'was shipped'
+  7:39    complex    'in order to', consider 'to'
+  8:4     adverb     'basically'
+  8:55    adverb     'really'
+  15:1    very hard  grade 18+ "Due to the fact that the multifaceted impleme…"
+  15:1    complex    'Due to the fact that', consider 'because'
+  15:172  adverb     'consistently'
+  15:279  passive    'was postponed'
+
+big/page-06.md  ·  Grade 15, very hard to read
+
+  1 very hard sentence · 2 passive · 2 complex phrases · 3 adverbs
+  mean of ARI 14.9, FK 13.4, Fog 16.7 · 6 sentences
+
+  7:15    passive    'was shipped'
+  7:39    complex    'in order to', consider 'to'
+  8:4     adverb     'basically'
+  8:55    adverb     'really'
+  15:1    very hard  grade 18+ "Due to the fact that the multifaceted impleme…"
+  15:1    complex    'Due to the fact that', consider 'because'
+  15:172  adverb     'consistently'
+  15:279  passive    'was postponed'
+
+big/page-07.md  ·  Grade 15, very hard to read
+
+  1 very hard sentence · 2 passive · 2 complex phrases · 3 adverbs
+  mean of ARI 14.9, FK 13.4, Fog 16.7 · 6 sentences
+
+  7:15    passive    'was shipped'
+  7:39    complex    'in order to', consider 'to'
+  8:4     adverb     'basically'
+  8:55    adverb     'really'
+  15:1    very hard  grade 18+ "Due to the fact that the multifaceted impleme…"
+  15:1    complex    'Due to the fact that', consider 'because'
+  15:172  adverb     'consistently'
+  15:279  passive    'was postponed'
+
+big/page-08.md  ·  Grade 15, very hard to read
+
+  1 very hard sentence · 2 passive · 2 complex phrases · 3 adverbs
+  mean of ARI 14.9, FK 13.4, Fog 16.7 · 6 sentences
+
+  7:15    passive    'was shipped'
+  7:39    complex    'in order to', consider 'to'
+  8:4     adverb     'basically'
+  8:55    adverb     'really'
+  15:1    very hard  grade 18+ "Due to the fact that the multifaceted impleme…"
+  15:1    complex    'Due to the fact that', consider 'because'
+  15:172  adverb     'consistently'
+  15:279  passive    'was postponed'
+
+big/page-09.md  ·  Grade 15, very hard to read
+
+  1 very hard sentence · 2 passive · 2 complex phrases · 3 adverbs
+  mean of ARI 14.9, FK 13.4, Fog 16.7 · 6 sentences
+
+  7:15    passive    'was shipped'
+  7:39    complex    'in order to', consider 'to'
+  8:4     adverb     'basically'
+  8:55    adverb     'really'
+  15:1    very hard  grade 18+ "Due to the fact that the multifaceted impleme…"
+  15:1    complex    'Due to the fact that', consider 'because'
+  15:172  adverb     'consistently'
+  15:279  passive    'was postponed'
+
+big/page-10.md  ·  Grade 15, very hard to read
+
+  1 very hard sentence · 2 passive · 2 complex phrases · 3 adverbs
+  mean of ARI 14.9, FK 13.4, Fog 16.7 · 6 sentences
+
+  7:15    passive    'was shipped'
+  7:39    complex    'in order to', consider 'to'
+  8:4     adverb     'basically'
+  8:55    adverb     'really'
+  15:1    very hard  grade 18+ "Due to the fact that the multifaceted impleme…"
+  15:1    complex    'Due to the fact that', consider 'because'
+  15:172  adverb     'consistently'
+  15:279  passive    'was postponed'
+
+big/page-11.md  ·  Grade 15, very hard to read
+
+  1 very hard sentence · 2 passive · 2 complex phrases · 3 adverbs
+  mean of ARI 14.9, FK 13.4, Fog 16.7 · 6 sentences
+
+  7:15    passive    'was shipped'
+  7:39    complex    'in order to', consider 'to'
+  8:4     adverb     'basically'
+  8:55    adverb     'really'
+  15:1    very hard  grade 18+ "Due to the fact that the multifaceted impleme…"
+  15:1    complex    'Due to the fact that', consider 'because'
+  15:172  adverb     'consistently'
+  15:279  passive    'was postponed'
+
+big/page-12.md  ·  Grade 15, very hard to read
+
+  1 very hard sentence · 2 passive · 2 complex phrases · 3 adverbs
+  mean of ARI 14.9, FK 13.4, Fog 16.7 · 6 sentences
+
+  7:15    passive    'was shipped'
+  7:39    complex    'in order to', consider 'to'
+  8:4     adverb     'basically'
+  8:55    adverb     'really'
+  15:1    very hard  grade 18+ "Due to the fact that the multifaceted impleme…"
+  15:1    complex    'Due to the fact that', consider 'because'
+  15:172  adverb     'consistently'
+  15:279  passive    'was postponed'
+
+big/page-13.md  ·  Grade 15, very hard to read
+
+  1 very hard sentence · 2 passive · 2 complex phrases · 3 adverbs
+  mean of ARI 14.9, FK 13.4, Fog 16.7 · 6 sentences
+
+  7:15    passive    'was shipped'
+  7:39    complex    'in order to', consider 'to'
+  8:4     adverb     'basically'
+  8:55    adverb     'really'
+  15:1    very hard  grade 18+ "Due to the fact that the multifaceted impleme…"
+  15:1    complex    'Due to the fact that', consider 'because'
+  15:172  adverb     'consistently'
+  15:279  passive    'was postponed'
+
+big/page-14.md  ·  Grade 15, very hard to read
+
+  1 very hard sentence · 2 passive · 2 complex phrases · 3 adverbs
+  mean of ARI 14.9, FK 13.4, Fog 16.7 · 6 sentences
+
+  7:15    passive    'was shipped'
+  7:39    complex    'in order to', consider 'to'
+  8:4     adverb     'basically'
+  8:55    adverb     'really'
+  15:1    very hard  grade 18+ "Due to the fact that the multifaceted impleme…"
+  15:1    complex    'Due to the fact that', consider 'because'
+  15:172  adverb     'consistently'
+  15:279  passive    'was postponed'
+
+Tips
+  very hard  Split the sentence or cut words. Aim for one idea per sentence.
+  passive    Name who does the action and make them the subject.
+  complex    Use the plainer phrase shown in each finding.
+  adverb     Cut the adverb or use a stronger verb.
+
+Checked 14 files.
+Hardest: big/page-01.md (grade 15.0).
+--- stderr
+

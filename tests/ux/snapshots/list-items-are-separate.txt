@@ -1,0 +1,55 @@
+$ readme-style.md --report json
+[exit 0]
+--- stdout
+{
+  "version": "0.2",
+  "files": [
+    {
+      "file": "readme-style.md",
+      "score": {
+        "ari": 6.1,
+        "flesch_kincaid": 4.0,
+        "gunning_fog": 3.8,
+        "consensus": 4.639,
+        "reading_grade": "Grade 5, easy to read",
+        "sentences": 16,
+        "hard_sentences": 0,
+        "very_hard_sentences": 0,
+        "adverbs": 0,
+        "passive": 1,
+        "complex_phrases": 0,
+        "verdict": "pass",
+        "threshold": null
+      },
+      "findings": [
+        {
+          "start": 647,
+          "end": 659,
+          "line": 27,
+          "column": 39,
+          "end_line": 28,
+          "end_column": 9,
+          "category": "passive",
+          "color": "green",
+          "severity": "warn",
+          "message": "Passive voice: 'are labeled'",
+          "analyzer": "passive",
+          "hint": "Name who does the action and make them the subject."
+        }
+      ]
+    }
+  ],
+  "skipped": [],
+  "errors": [],
+  "summary": {
+    "files": 1,
+    "analyzed": 1,
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "errors": 0,
+    "max_grade": null
+  }
+}
+--- stderr
+

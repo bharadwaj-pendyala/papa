@@ -68,9 +68,11 @@ def build_parser() -> argparse.ArgumentParser:
                         help="exit 1 if a file's consensus grade is above N")
     parser.add_argument("--exclude", action="append", default=[], metavar="GLOB",
                         help="skip paths that match GLOB (repeatable)")
-    parser.add_argument("--format", choices=["md", "txt"], help="override format detection")
+    parser.add_argument("--format", choices=["md", "mdx", "txt"], help="override format detection")
     parser.add_argument("--stdin-filename", metavar="NAME",
                         help="name to show for stdin; its suffix picks the format")
+    parser.add_argument("--all", action="store_true", dest="show_all",
+                        help="show every finding; by default long output is capped")
     parser.add_argument("--summary", action="store_true",
                         help="show grades and counts only, without each finding")
     parser.add_argument("-q", "--quiet", action="store_true",
@@ -179,14 +181,16 @@ def _read(path: str) -> str:
 def _detect_format(path: str, override: str | None) -> str:
     if override:
         return override
-    return "txt" if Path(path).suffix.lower() == ".txt" else "md"
+    suffix = Path(path).suffix.lower()
+    return {".txt": "txt", ".mdx": "mdx"}.get(suffix, "md")
 
 
 def _emit(args: argparse.Namespace, run: Run) -> None:
     to_file = bool(args.output)
     color = args.report == "cli" and not to_file and _color_enabled(args.color)
     width = shutil.get_terminal_size((80, 24)).columns if sys.stdout.isatty() else 80
-    rendered = REPORTERS[args.report](run, color=color, width=width, details=not args.summary)
+    rendered = REPORTERS[args.report](run, color=color, width=width, details=not args.summary,
+                                      show_all=args.show_all)
     if to_file:
         Path(args.output).write_text(rendered, encoding="utf-8")
         if not args.quiet:

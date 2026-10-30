@@ -68,3 +68,9 @@ def test_readability_leaves_easy_sentence_alone():
 
 def text_of(finding, source):
     return source[finding.start:finding.end]
+
+
+def test_headings_and_table_cells_are_not_graded_as_sentences():
+    from papa import analyze
+    md = "## Markdown code-block awareness\n\n| Sophisticated multifaceted capability |\n|---|\n"
+    assert not [f for f in analyze(md).findings if f.category in ("hard-sentence", "very-hard-sentence")]

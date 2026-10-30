@@ -22,7 +22,7 @@ The cat sat on the mat. The dog ran in the sun. We had fun today.
 papa
 all-findings.md
 Grade 15, very hard to read
-ARI 14.4 · FK 13.4 · Fog 16.7
+ARI 14.9 · FK 13.4 · Fog 16.7
 6 sentences
 Very hard sentence1
 Hard sentence0

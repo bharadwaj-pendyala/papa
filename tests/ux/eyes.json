@@ -86,6 +86,17 @@
     {"id": "pyproject-tool-not-table", "argv": ["ok.md"], "cwd": "badtool", "exit": 0},
     {"id": "gate-fail-no-findings-wording", "argv": ["project/README.md", "--max-grade", "0"], "exit": 1, "stdout_absent": ["No issues found"]},
     {"id": "narrow-quote-keeps-context", "argv": ["all-findings.md"], "tty": true, "cols": 40, "exit": 0, "expect_ansi": true, "stdout_regex": ["grade 18\\+ \"Due\\s+to\\s+the\\s+fact"]},
-    {"id": "quiet-still-writes-output", "argv": ["all-findings.md", "-q", "--report", "html", "-o", "{out}/report.html"], "exit": 0, "html": "report.html", "stdout_empty": true}
+    {"id": "quiet-still-writes-output", "argv": ["all-findings.md", "-q", "--report", "html", "-o", "{out}/report.html"], "exit": 0, "html": "report.html", "stdout_empty": true},
+    {"id": "markdown-syntax-is-not-prose", "argv": ["readme-style.md", "--report", "concise"], "exit": 0, "check_width": false, "stdout_absent": ["![", "](", "img.shields", "<div", "**", "|", "https://", "[labeled"]},
+    {"id": "markdown-grade-is-prose-grade", "argv": ["readme-style.md", "--max-grade", "8"], "exit": 0},
+    {"id": "list-items-are-separate", "argv": ["readme-style.md", "--report", "json"], "exit": 0, "json": true, "stdout_absent": ["CLI command:  Python package"]},
+    {"id": "mdx-markup-is-not-prose", "argv": ["mdx-site/page.mdx", "--report", "concise"], "exit": 0, "check_width": false, "stdout_absent": ["import", "<Tab", "<Image", "items=", "export"]},
+    {"id": "mdx-grade-is-prose-grade", "argv": ["mdx-site/page.mdx", "--max-grade", "6"], "exit": 0},
+    {"id": "folder-finds-mdx", "argv": ["mdx-site"], "exit": 0, "stdout_contains": ["page.mdx", "plain.md", "Checked 2 files"]},
+    {"id": "glob-finds-mdx", "argv": ["mdx-site/**/*.mdx"], "exit": 0, "stdout_contains": ["page.mdx"]},
+    {"id": "long-file-output-is-bounded", "argv": ["long.md"], "exit": 0, "stdout_contains": ["more", "--all"]},
+    {"id": "long-file-all", "argv": ["long.md", "--all"], "exit": 0, "stdout_absent": ["--all"]},
+    {"id": "many-files-output-is-bounded", "argv": ["big"], "exit": 0, "stdout_contains": ["Checked 14 files", "--all"], "stdout_absent": ["'was shipped'"]},
+    {"id": "all-shows-everything", "argv": ["big", "--all"], "exit": 0, "stdout_contains": ["'was shipped'"], "stdout_absent": ["--all"]}
   ]
 }

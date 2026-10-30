@@ -76,7 +76,8 @@ nav.index .fail { color: #c92a2a; font-weight: 600; }
 """
 
 
-def render(run: Run, *, color: bool = False, width: int = 80, details: bool = True) -> str:
+def render(run: Run, *, color: bool = False, width: int = 80, details: bool = True,
+           show_all: bool = False) -> str:
     styles = "".join(f".hl-{cat}{{background:{bg};}}" for cat, bg in _BG.items())
     sections = "\n".join(
         f'<section class="wrap" id="file-{i}">\n<aside>{_sidebar(a)}</aside>\n'

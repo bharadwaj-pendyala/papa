@@ -2,9 +2,9 @@ $ --help
 [exit 0]
 --- stdout
 usage: papa [-h] [--report {cli,concise,json,html}] [-o FILE] [--max-grade N]
-            [--exclude GLOB] [--format {md,txt}] [--stdin-filename NAME]
-            [--summary] [-q] [--color {auto,always,never}] [--config FILE]
-            [--no-config] [--version]
+            [--exclude GLOB] [--format {md,mdx,txt}] [--stdin-filename NAME]
+            [--all] [--summary] [-q] [--color {auto,always,never}]
+            [--config FILE] [--no-config] [--version]
             [PATH ...]
 
 Hemingway-style readability linting for Markdown and plain text.
@@ -20,9 +20,11 @@ options:
   -o, --output FILE     write the report to FILE
   --max-grade N         exit 1 if a file's consensus grade is above N
   --exclude GLOB        skip paths that match GLOB (repeatable)
-  --format {md,txt}     override format detection
+  --format {md,mdx,txt}
+                        override format detection
   --stdin-filename NAME
                         name to show for stdin; its suffix picks the format
+  --all                 show every finding; by default long output is capped
   --summary             show grades and counts only, without each finding
   -q, --quiet           print nothing to stdout; -o files are still written
   --color {auto,always,never}

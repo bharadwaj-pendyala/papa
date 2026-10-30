@@ -1,0 +1,6 @@
+$ readme-style.md --report concise
+[exit 0]
+--- stdout
+readme-style.md:27:39: warning: Passive voice: 'are labeled' [passive]
+--- stderr
+

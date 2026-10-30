@@ -7,10 +7,10 @@ $ all-findings.md --report json
     {
       "file": "all-findings.md",
       "score": {
-        "ari": 14.4,
+        "ari": 14.9,
         "flesch_kincaid": 13.4,
         "gunning_fog": 16.7,
-        "consensus": 14.8486,
+        "consensus": 14.9937,
         "reading_grade": "Grade 15, very hard to read",
         "sentences": 6,
         "hard_sentences": 0,

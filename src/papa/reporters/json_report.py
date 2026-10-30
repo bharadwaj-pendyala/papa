@@ -51,5 +51,6 @@ def _finding(source: str, finding) -> dict:
     }
 
 
-def render(run: Run, *, color: bool = False, width: int = 80, details: bool = True) -> str:
+def render(run: Run, *, color: bool = False, width: int = 80, details: bool = True,
+           show_all: bool = False) -> str:
     return json.dumps(payload(run), indent=2, ensure_ascii=False, allow_nan=False) + "\n"

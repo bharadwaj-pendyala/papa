@@ -1,0 +1,6 @@
+$ mdx-site/page.mdx --report concise
+[exit 0]
+--- stdout
+
+--- stderr
+

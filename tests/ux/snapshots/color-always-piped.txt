@@ -4,7 +4,7 @@ $ all-findings.md --color always
 all-findings.md  ·  Grade 15, very hard to read
 
   1 very hard sentence · 2 passive · 2 complex phrases · 3 adverbs
-  mean of ARI 14.4, FK 13.4, Fog 16.7 · 6 sentences
+  mean of ARI 14.9, FK 13.4, Fog 16.7 · 6 sentences
 
   7:15    passive    'was shipped'
   7:39    complex    'in order to', consider 'to'

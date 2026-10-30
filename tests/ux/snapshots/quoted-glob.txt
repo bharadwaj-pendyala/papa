@@ -19,7 +19,7 @@ project/docs/generated/api.md  ·  Grade 13, hard to read
 project/docs/guide.md  ·  Grade 1, easy to read
 
   No flagged sentences or words.
-  mean of ARI 0.0, FK 0.0, Fog 2.4 · 4 sentences
+  mean of ARI 0.7, FK 0.0, Fog 2.4 · 4 sentences
 
 project/notes/meeting notes.md  ·  Grade 0, easy to read
 

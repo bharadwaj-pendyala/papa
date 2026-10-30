@@ -1,0 +1,24 @@
+$ big
+[exit 0]
+--- stdout
+  big/page-01.md  ·  Grade 15, very hard to read  ·  8 findings
+  big/page-02.md  ·  Grade 15, very hard to read  ·  8 findings
+  big/page-03.md  ·  Grade 15, very hard to read  ·  8 findings
+  big/page-04.md  ·  Grade 15, very hard to read  ·  8 findings
+  big/page-05.md  ·  Grade 15, very hard to read  ·  8 findings
+  big/page-06.md  ·  Grade 15, very hard to read  ·  8 findings
+  big/page-07.md  ·  Grade 15, very hard to read  ·  8 findings
+  big/page-08.md  ·  Grade 15, very hard to read  ·  8 findings
+  big/page-09.md  ·  Grade 15, very hard to read  ·  8 findings
+  big/page-10.md  ·  Grade 15, very hard to read  ·  8 findings
+  big/page-11.md  ·  Grade 15, very hard to read  ·  8 findings
+  big/page-12.md  ·  Grade 15, very hard to read  ·  8 findings
+  big/page-13.md  ·  Grade 15, very hard to read  ·  8 findings
+  big/page-14.md  ·  Grade 15, very hard to read  ·  8 findings
+
+Run papa on one file to see its findings, or add --all to see every finding.
+
+Checked 14 files.
+Hardest: big/page-01.md (grade 15.0).
+--- stderr
+

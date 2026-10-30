@@ -9,7 +9,7 @@ import re
 from pathlib import Path
 
 STDIN = "-"
-PROSE_SUFFIXES = {".md", ".markdown", ".txt"}
+PROSE_SUFFIXES = {".md", ".markdown", ".mdx", ".txt"}
 _GLOB_CHARS = set("*?[")
 
 
@@ -65,7 +65,7 @@ def _expand_one(arg: str) -> list[str]:
                 if not name.startswith(".") and Path(name).suffix.lower() in PROSE_SUFFIXES
             ]
         if not found:
-            raise InputError("no .md or .txt files in this folder")
+            raise InputError("no .md, .mdx or .txt files in this folder")
         return sorted(found)
     return [arg]
 

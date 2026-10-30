@@ -33,7 +33,7 @@ small:
 
 - CLI command: `papa`
 - Python package: `papa-lint`
-- Input: Markdown and plain text files, folders, quoted globs, and stdin
+- Input: Markdown, MDX, and plain text files, folders, quoted globs, and stdin
 - Reports: terminal, concise (`file:line:col`), JSON, and self-contained HTML
 - Config: `papa.toml` or `[tool.papa]` in `pyproject.toml`
 - CI gating: use `--max-grade` and the process exit code
@@ -52,8 +52,8 @@ Papa focuses on a narrow first job: make prose readability checks scriptable.
 - **Scores readability** with ARI, Flesch-Kincaid, and Gunning fog.
 - **Highlights like Hemingway** by marking hard sentences, passive voice,
   adverbs, and complex phrases.
-- **Handles Markdown safely** by ignoring frontmatter, fenced code, inline code,
-  and SVG while preserving offsets back to the original file.
+- **Handles Markdown and MDX** by ignoring frontmatter, code, tags, link URLs,
+  and badges while preserving offsets back to the original file.
 - **Emits JSON** so agents, scripts, or dashboards can consume the findings.
 - **Gates CI** by exiting non-zero when prose is harder than your max grade.
 
@@ -93,6 +93,14 @@ Tips
 
 Each finding starts with `line:column`. The grade is the mean of three
 readability formulas, shown as a US school grade.
+
+Papa grades prose only. It ignores code, HTML and JSX tags, MDX imports, link
+URLs, images, badges, and emphasis marks. Each list item, heading, and table
+cell counts as its own unit, and short headings or labels are not graded.
+
+Long output is capped. One file shows its 25 most severe findings. A run over
+more than 10 files shows one line per file. Add `--all` to see every finding.
+JSON and concise output always include every finding.
 
 ## ⚙️ Config
 
