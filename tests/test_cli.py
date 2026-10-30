@@ -122,3 +122,21 @@ def test_exclude_classes_follow_fnmatch_rules(tmp_path, capsys):
     out = capsys.readouterr().out
     assert "-.txt" in out and "A.txt" not in out and "x.txt" not in out
     assert main([str(tmp_path), "--exclude", str(tmp_path / "[z-a].txt"), "--report", "json"]) == 0
+
+
+def test_exclude_with_parent_folder_segments_still_matches(tmp_path, monkeypatch, capsys):
+    (tmp_path / "docs" / "generated").mkdir(parents=True)
+    (tmp_path / "work").mkdir()
+    _write(tmp_path / "docs", "a.md", EASY)
+    _write(tmp_path / "docs" / "generated", "api.md", HARD)
+    monkeypatch.chdir(tmp_path / "work")
+    assert main(["../docs", "--exclude", "../docs/generated/**", "--max-grade", "8"]) == 0
+
+
+def test_double_star_inside_a_name_does_not_cross_folders(tmp_path, capsys):
+    (tmp_path / "docs" / "generated").mkdir(parents=True)
+    _write(tmp_path / "docs", "a.md", EASY)
+    _write(tmp_path / "docs" / "generated", "api.md", HARD)
+    code = main([str(tmp_path / "docs"), "--exclude", str(tmp_path / "docs" / "**.md"), "--max-grade", "8"])
+    assert code == 1
+    assert "api.md" in capsys.readouterr().out

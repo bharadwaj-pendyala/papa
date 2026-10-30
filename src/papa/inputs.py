@@ -87,13 +87,15 @@ def _excluded(path: str, excludes: list[str]) -> bool:
 
 
 def _glob_regex(pattern: str) -> re.Pattern:
-    """Glob with the same meaning discovery uses: ``**/`` spans zero or more folders."""
+    """Glob with the same meaning discovery uses: a whole ``**`` component spans
+    zero or more folders. Anywhere else ``*`` stays inside one folder."""
     out, i = [], 0
     while i < len(pattern):
-        if pattern.startswith("**/", i):
+        whole_component = i == 0 or pattern[i - 1] == "/"
+        if whole_component and pattern.startswith("**/", i):
             out.append("(?:.*/)?")
             i += 3
-        elif pattern.startswith("**", i):
+        elif whole_component and pattern.startswith("**", i) and i + 2 == len(pattern):
             out.append(".*")
             i += 2
         elif pattern[i] == "*":
@@ -129,4 +131,5 @@ def _class_regex(body: str) -> str:
 
 def anchor(pattern: str, base: Path) -> str:
     """Make an exclude pattern absolute so it matches regardless of the cwd."""
-    return pattern if os.path.isabs(pattern) else (Path(os.path.abspath(base)) / pattern).as_posix()
+    # normpath folds '..' the same way input paths are folded, so they still line up.
+    return Path(os.path.normpath(os.path.join(os.path.abspath(base), pattern))).as_posix()
