@@ -29,7 +29,8 @@ _MDX_IMPORT = re.compile(r"^(?:import|export)\b.*?(?:;[ \t]*$|\n[ \t]*\n|\Z)", r
 _MDX_EXPRESSION = re.compile(_BRACES)
 _LINKED_IMAGE = re.compile(r"\[!\[[^\]]*\]\([^)]*\)\]\([^)]*\)")
 _IMAGE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
-_LINK = re.compile(r"\[([^\]\n]*)\](\([^)\s]*(?:\s+\"[^\"]*\")?\))")
+# A label may wrap onto the next line, but never across a blank line (a new paragraph).
+_LINK = re.compile(r"\[((?:[^\]\n]|\n(?![ \t]*\n))*)\](\([^)\s]*(?:\s+\"[^\"]*\")?\))")
 _LINK_DEFINITION = re.compile(r"^[ \t]{0,3}\[[^\]]+\]:[ \t]*\S.*$", re.MULTILINE)
 _URL = re.compile(r"https?://[^\s)>\]]+")
 _EMPHASIS = re.compile(r"\*\*|__|~~|(?<![\w*])\*(?=\S)|(?<=\S)\*(?![\w*])|(?<!\w)_(?=\S)|(?<=\S)_(?!\w)")

@@ -156,3 +156,9 @@ def test_findings_carry_a_prose_excerpt_even_inside_a_link():
     md = "Read [part one](/blog/one) of the multifaceted interdependent architectural sophistication series today.\n"
     hard = [f for f in analyze(md).findings if "sentence" in f.category]
     assert hard and hard[0].excerpt.startswith("Read part one of the")
+
+
+def test_link_label_wrapped_across_lines_keeps_only_the_text():
+    md = "To use a custom model, [check out this part\nof the docs](/guides/custom).\n"
+    clean, _ = ingest(md, "md")
+    assert " ".join(clean.split()) == "To use a custom model, check out this part of the docs."
