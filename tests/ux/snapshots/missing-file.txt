@@ -3,4 +3,4 @@ $ missing.md
 --- stdout
 
 --- stderr
-papa: cannot read missing.md: no such file or directory
+papa: missing.md: no such file or directory

@@ -15,7 +15,8 @@ Grade 15, very hard to read
   8:4     adverb     'basically'
   8:55    adverb     'really'
   15:1    very hard  grade 18+ "Due to
-                     the …"
+                     the fact that the
+                     mult…"
   15:1    complex    'Due to the fact
                      that', consider
                      'because'

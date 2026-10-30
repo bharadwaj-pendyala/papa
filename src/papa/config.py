@@ -29,8 +29,10 @@ def find(start: Path) -> Path | None:
         if candidate.is_file():
             return candidate
         pyproject = directory / "pyproject.toml"
-        if pyproject.is_file() and "papa" in (_read(pyproject).get("tool") or {}):
-            return pyproject
+        if pyproject.is_file():
+            tool = _read(pyproject).get("tool")
+            if isinstance(tool, dict) and "papa" in tool:
+                return pyproject
         if (directory / ".git").exists():
             return None
     return None

@@ -3,7 +3,7 @@ $ easy.txt missing.md --report html -o {out}/report.html
 --- stdout
 
 --- stderr
-papa: cannot read missing.md: no such file or directory
+papa: missing.md: no such file or directory
 papa: wrote {out}/report.html
 --- report.html (visible text)
 This report is incomplete

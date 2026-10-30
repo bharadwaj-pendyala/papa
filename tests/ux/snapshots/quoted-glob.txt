@@ -3,7 +3,7 @@ $ 'project/**/*.md'
 --- stdout
 project/README.md  ·  Grade 1, easy to read
 
-  No issues found.
+  No flagged sentences or words.
   mean of ARI 1.2, FK 0.6, Fog 1.8 · 2 sentences
 
 project/docs/generated/api.md  ·  Grade 13, hard to read
@@ -18,7 +18,7 @@ project/docs/generated/api.md  ·  Grade 13, hard to read
 
 project/docs/guide.md  ·  Grade 1, easy to read
 
-  No issues found.
+  No flagged sentences or words.
   mean of ARI 0.0, FK 0.0, Fog 2.4 · 4 sentences
 
 project/notes/meeting notes.md  ·  Grade 0, easy to read

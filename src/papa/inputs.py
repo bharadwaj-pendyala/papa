@@ -16,28 +16,35 @@ class InputError(Exception):
     pass
 
 
-def expand(args: list[str], excludes: list[str]) -> list[str]:
-    """Return display paths in argument order, deduplicated, with excludes removed.
+def expand(args: list[str], excludes: list[str]) -> tuple[list[str], list[tuple[str, str]]]:
+    """Return (paths, errors): display paths in argument order, deduplicated,
+    with excludes removed, plus one error for each argument that matched nothing.
 
     Explicit files pass through untouched, even when missing, so the reader can
     report them. Directories and globs only yield prose files and skip hidden
-    paths. Each exclude is an absolute fnmatch pattern.
+    paths. Each exclude is an absolute glob pattern.
     """
     if args.count(STDIN) > 1:
         raise InputError("stdin ('-') can only be read once; pass it a single time")
 
     paths: list[str] = []
+    errors: list[tuple[str, str]] = []
     seen: set[str] = set()
     for arg in args:
-        for path in _expand_one(arg):
+        try:
+            expanded = _expand_one(arg)
+        except InputError as error:
+            errors.append((arg, str(error)))
+            continue
+        for path in expanded:
             key = path if path == STDIN else os.path.realpath(path)
             if key in seen or _excluded(path, excludes):
                 continue
             seen.add(key)
             paths.append(path)
-    if args and not paths:
+    if args and not paths and not errors:
         raise InputError("every input was excluded by --exclude or the config exclude list")
-    return paths
+    return paths, errors
 
 
 def _expand_one(arg: str) -> list[str]:
@@ -46,7 +53,7 @@ def _expand_one(arg: str) -> list[str]:
     if _GLOB_CHARS & set(arg) and not Path(arg).exists():
         matches = [m for m in glob.glob(arg, recursive=True) if _is_discoverable(m)]
         if not matches:
-            raise InputError(f"no files match '{arg}'; check the pattern or the working directory")
+            raise InputError("no files match; check the pattern or the working directory")
         return sorted(os.path.normpath(m) for m in matches)
     if Path(arg).is_dir():
         found = []
@@ -57,7 +64,7 @@ def _expand_one(arg: str) -> list[str]:
                 if not name.startswith(".") and Path(name).suffix.lower() in PROSE_SUFFIXES
             ]
         if not found:
-            raise InputError(f"no .md or .txt files in '{arg}'")
+            raise InputError("no .md or .txt files in this folder")
         return sorted(found)
     return [arg]
 
@@ -94,6 +101,10 @@ def _glob_regex(pattern: str) -> re.Pattern:
         elif pattern[i] == "?":
             out.append("[^/]")
             i += 1
+        elif pattern[i] == "[" and (close := pattern.find("]", i + 2)) != -1:
+            body = pattern[i + 1:close]
+            out.append("[" + ("^" + body[1:] if body.startswith("!") else body).replace("\\", "\\\\") + "]")
+            i = close + 1
         else:
             out.append(re.escape(pattern[i]))
             i += 1

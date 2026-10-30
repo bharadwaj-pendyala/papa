@@ -3,4 +3,4 @@ $ bad-utf8.txt
 --- stdout
 
 --- stderr
-papa: cannot read bad-utf8.txt: invalid UTF-8 at byte 10; re-save it as UTF-8
+papa: bad-utf8.txt: invalid UTF-8 at byte 10; re-save it as UTF-8

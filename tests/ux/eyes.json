@@ -39,7 +39,7 @@
     {"id": "quoted-glob", "argv": ["project/**/*.md"], "exit": 0, "stdout_contains": ["meeting notes.md", "guide.md"], "stdout_absent": ["secret.md"]},
     {"id": "exclude", "argv": ["project/docs", "--exclude", "project/docs/generated/**"], "exit": 0, "stdout_contains": ["Checked 2 files"], "stdout_absent": ["api.md"]},
     {"id": "dedupe", "argv": ["easy.txt", "./easy.txt"], "exit": 0, "stdout_absent": ["Checked 2 files"]},
-    {"id": "unmatched-glob", "argv": ["nope/**/*.md"], "exit": 2, "stderr_contains": ["no files match 'nope/**/*.md'"]},
+    {"id": "unmatched-glob", "argv": ["nope/**/*.md"], "exit": 2, "stderr_contains": ["nope/**/*.md: no files match"]},
     {"id": "missing-file", "argv": ["missing.md"], "exit": 2, "stderr_contains": ["missing.md", "no such file"]},
     {"id": "mixed-missing-and-good", "argv": ["easy.txt", "missing.md"], "exit": 2, "stdout_contains": ["easy.txt"], "stderr_contains": ["missing.md"]},
     {"id": "bad-utf8", "argv": ["bad-utf8.txt"], "exit": 2, "stderr_contains": ["bad-utf8.txt", "UTF-8"]},
@@ -79,6 +79,12 @@
     {"id": "skipped-counts-explicit", "argv": ["code-only.md", "easy.txt"], "exit": 0, "stdout_contains": ["1 analyzed", "1 skipped"]},
     {"id": "config-shown", "argv": ["."], "cwd": "project", "exit": 0, "stdout_contains": ["papa.toml"]},
     {"id": "no-repeated-labels", "argv": ["all-findings.md"], "exit": 0, "stdout_absent": ["passive    Passive voice", "adverb     Adverb:"]},
-    {"id": "formula-line-explained", "argv": ["all-findings.md", "--summary"], "exit": 0, "stdout_contains": ["mean of ARI"]}
+    {"id": "formula-line-explained", "argv": ["all-findings.md", "--summary"], "exit": 0, "stdout_contains": ["mean of ARI"]},
+    {"id": "exclude-bracket", "argv": ["easy.txt", "singular.txt", "--exclude", "[e]asy.txt"], "exit": 0, "stdout_absent": ["easy.txt"]},
+    {"id": "json-unmatched-glob", "argv": ["nope/**/*.md", "easy.txt", "--report", "json"], "exit": 2, "json": true, "stdout_contains": ["no files match", "easy.txt"]},
+    {"id": "output-dir-missing", "argv": ["easy.txt", "--report", "json", "-o", "{out}/no/such/dir/r.json"], "exit": 2, "stderr_contains": ["cannot write"]},
+    {"id": "pyproject-tool-not-table", "argv": ["ok.md"], "cwd": "badtool", "exit": 0},
+    {"id": "gate-fail-no-findings-wording", "argv": ["project/README.md", "--max-grade", "0"], "exit": 1, "stdout_absent": ["No issues found"]},
+    {"id": "narrow-quote-keeps-context", "argv": ["all-findings.md"], "tty": true, "cols": 40, "exit": 0, "expect_ansi": true, "stdout_regex": ["grade 18\\+ \"Due\\s+to\\s+the\\s+fact"]}
   ]
 }

@@ -4,7 +4,7 @@ $ .
 README.md  ·  Grade 1, easy to read
   PASS  grade 1.2 is within --max-grade 8
 
-  No issues found.
+  No flagged sentences or words.
   mean of ARI 1.2, FK 0.6, Fog 1.8 · 2 sentences
 
 docs/faq.txt  ·  Grade 4, easy to read
@@ -19,7 +19,7 @@ docs/faq.txt  ·  Grade 4, easy to read
 docs/guide.md  ·  Grade 1, easy to read
   PASS  grade 0.6 is within --max-grade 8
 
-  No issues found.
+  No flagged sentences or words.
   mean of ARI 0.0, FK 0.0, Fog 2.4 · 4 sentences
 
 notes/meeting notes.md  ·  Grade 0, easy to read

@@ -50,9 +50,10 @@ def build_score(
     if max_grade is None:
         verdict, threshold = "pass", None
     else:
-        # gate on the raw consensus, not the rounded display grade: 10.4 is
-        # harder than 10 and must fail even though it displays as "Grade 10".
-        verdict = "fail" if consensus > max_grade else "pass"
+        # Gate on the consensus as JSON reports it (4 decimals), not the rounded
+        # display grade: 10.4 is harder than 10 and must fail even though it
+        # displays as "Grade 10".
+        verdict = "fail" if round(consensus, 4) > max_grade else "pass"
         clean_max = int(max_grade) if float(max_grade).is_integer() else max_grade
         threshold = {"max_grade": clean_max}
 

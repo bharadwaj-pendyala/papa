@@ -212,7 +212,8 @@ def _run_pty(cmd: list[str], cwd: Path, env: dict, cols: int, stdin: bytes | Non
     drain = threading.Thread(target=lambda: stderr_chunks.append(proc.stderr.read()), daemon=True)
     drain.start()
     if stdin is not None:
-        os.write(master, stdin + b"\x04")  # typed input, then Ctrl-D for end of input
+        # Ctrl-D ends input only at the start of a line; a partial line needs one to flush it first.
+        os.write(master, stdin + (b"" if stdin.endswith(b"\n") or not stdin else b"\x04") + b"\x04")
 
     chunks = []
     deadline = time.monotonic() + timeout
@@ -463,8 +464,10 @@ def _check_snapshot(project: Project, result: Result, actual: str) -> Check:
     path = project.snapshots / f"{result.case['id']}.txt"
     (result.out_dir / "snapshot.txt").write_text(actual, encoding="utf-8")
     if not path.exists():
-        return Check("snapshot", "fail", "no reviewed snapshot; inspect output, then run approve",
-                     extra={"artifact": str(result.out_dir / "snapshot.txt")})
+        return Check("snapshot", "fail", "new case: no reviewed snapshot yet. Read the output below; "
+                     "if it is right, run approve --case " + result.case["id"],
+                     "a reviewed snapshot at " + _rel(path), actual[:1500], None,
+                     {"artifact": str(result.out_dir / "snapshot.txt")})
     expected = path.read_text(encoding="utf-8")
     if expected == actual:
         return Check("snapshot", "pass")
@@ -626,9 +629,9 @@ def ansi_to_html(text: str, cols: int) -> str:
 def browser_checks(eyes, why: str, project: Project, result: Result) -> list[Check]:
     if not result.case.get("html") and not result.tty:
         return []
-    checks = [Check("browser-engine", "skip", why)] if why else []
     if eyes is None:
-        return checks
+        return [Check("browser-engine", "fail", f"--browser was requested but nothing can render: {why}")]
+    checks = [Check("browser-engine", "skip", why)] if why else []
     shots = []
     source = project.sources.get("html")
     page = result.out_dir / result.case["html"] if result.case.get("html") else None
@@ -688,7 +691,10 @@ def run(project: Project, only: list[str] | None, browser_wanted: bool) -> int:
             checks.extend(plugin.checks(result, project))
         checks.append(_check_snapshot(project, result, snapshot_text(project, result)))
         if browser_wanted:
-            checks.extend(browser_checks(eyes, why, project, result))
+            try:
+                checks.extend(browser_checks(eyes, why, project, result))
+            except Exception as error:  # one broken page must not lose the whole report
+                checks.append(Check("browser-engine", "fail", f"browser crashed: {str(error)[:300]}"))
         for check in checks:
             row = {"case": case["id"], **{k: v for k, v in vars(check).items() if v not in (None, "", {})}}
             if check.status == "fail":
@@ -705,14 +711,16 @@ def _reproduce(project: Project, result: Result) -> dict:
     command = [project.expand(part) for part in project.config["command"]] + result.argv
     env = {k: project.expand(v, result.out_dir)
            for source in (project.config.get("env", {}), case.get("env", {})) for k, v in source.items()}
-    stdin = f"< {case['stdin_file']}" if "stdin_file" in case else ("< /dev/null" if "stdin" not in case
-                                                                    else f"<<< {case['stdin']!r}")
-    shell = " ".join([*(f"{k}={_shell_quote(v)}" for k, v in env.items()),
-                      *(_shell_quote(a) for a in command)])
+    line = " ".join([*(f"{k}={_shell_quote(v)}" for k, v in env.items()), *(_shell_quote(a) for a in command)])
+    if "stdin_file" in case:
+        line += f" < {_shell_quote(case['stdin_file'])}"
+    elif "stdin" in case:
+        line = f"printf '%s' {_shell_quote(case['stdin'])} | {line}"
+    elif not result.tty:
+        line += " < /dev/null"
     return {
-        "cwd": _rel(result.cwd),
-        "shell": f"cd {_shell_quote(_rel(result.cwd))} && {shell} {stdin if not result.tty else ''}".rstrip(),
-        "tty": {"cols": result.cols} if result.tty else None,
+        "shell": f"cd {_shell_quote(str(result.cwd))} && {line}",
+        "note": f"run this in a real terminal {result.cols} columns wide" if result.tty else None,
         "timeout": project.timeout,
     }
 

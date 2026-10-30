@@ -3,7 +3,7 @@ $
 --- stdout
 <stdin>  ·  Grade 0, easy to read
 
-  No issues found.
+  No flagged sentences or words.
   mean of ARI 0.0, FK 0.0, Fog 2.1 · 3 sentences
 --- stderr
 

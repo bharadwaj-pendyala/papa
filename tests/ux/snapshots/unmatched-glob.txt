@@ -3,4 +3,4 @@ $ 'nope/**/*.md'
 --- stdout
 
 --- stderr
-papa: no files match 'nope/**/*.md'; check the pattern or the working directory
+papa: nope/**/*.md: no files match; check the pattern or the working directory

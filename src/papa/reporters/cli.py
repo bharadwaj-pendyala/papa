@@ -66,7 +66,7 @@ def _file_block(analysis: Analysis, color: bool, width: int, details: bool) -> s
         (plural(score.adverbs, "adverb"), "blue"),
     ]
     flagged = [(text, code) for text, code in counts if not text.startswith("0 ")]
-    lines += _wrap_parts(flagged, width, color) if flagged else [_c("  No issues found.", "green", on=color)]
+    lines += _wrap_parts(flagged, width, color) if flagged else [_c("  No flagged sentences or words.", "green", on=color)]
     formulas = [
         (f"mean of ARI {_grade(score.ari)}, FK {_grade(score.flesch_kincaid)}, "
          f"Fog {_grade(score.gunning_fog)}", "grey"),
@@ -89,7 +89,7 @@ def _flagged_line(source: str, finding: Finding, loc: str, loc_width: int, color
     badge = _c(f"{_BADGE[finding.category]:<{_BADGE_WIDTH}}", COLOR[finding.category], on=color)
     if finding.category in (HARD, VERY_HARD):
         grade = re.search(r"grade [\d+]+", finding.message).group()
-        room = max(width - prefix_len - len(grade) - 4, 12)
+        room = max(width - prefix_len - len(grade) - 4, 30)
         quote = " ".join(source[finding.start:finding.end].split())
         if len(quote) > room:
             quote = quote[:room - 1] + "…"

@@ -105,22 +105,25 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         settings = _settings(args)
-        paths = inputs.expand(args.files or [inputs.STDIN], settings.exclude)
+        paths, input_errors = inputs.expand(args.files or [inputs.STDIN], settings.exclude)
     except (config.ConfigError, inputs.InputError) as error:
         return _fail(str(error))
 
-    run = Run(analyses=[], skipped=[], errors=[], max_grade=settings.max_grade,
+    run = Run(analyses=[], skipped=[], errors=input_errors, max_grade=settings.max_grade,
               config=_display_path(settings.path) if settings.path else None)
     for path in paths:
         _check_one(path, args, run)
 
     for path, message in run.errors:
-        print(f"papa: cannot read {path}: {message}", file=sys.stderr)
+        print(f"papa: {path}: {message}", file=sys.stderr)
     for path, reason in run.skipped:
         print(f"papa: skipped {path}: {reason}", file=sys.stderr)
 
     if not args.quiet and (run.analyses or args.report in ("json", "html")):
-        _emit(args, run)
+        try:
+            _emit(args, run)
+        except OSError as error:
+            return _fail(f"cannot write {args.output}: {(error.strerror or str(error)).lower()}")
 
     if run.errors or not run.analyses:
         return 2

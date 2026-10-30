@@ -11,7 +11,7 @@ project/docs/faq.txt  ·  Grade 4, easy to read
 
 project/docs/guide.md  ·  Grade 1, easy to read
 
-  No issues found.
+  No flagged sentences or words.
   mean of ARI 0.0, FK 0.0, Fog 2.4 · 4 sentences
 
 Tips

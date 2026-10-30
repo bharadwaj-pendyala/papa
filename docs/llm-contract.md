@@ -7,7 +7,7 @@ and a prompt an agent can use to rewrite flagged spans.
 ## 1. Get the findings
 
 ```bash
-papa post.md --report json > findings.json
+papa post.md --max-grade 10 --report json > findings.json
 ```
 
 ## 2. The JSON shape
@@ -111,7 +111,7 @@ FINDINGS:
 ## 4. Close the loop
 
 ```bash
-papa post.revised.md --report json > findings.next.json
+papa post.revised.md --max-grade 10 --report json > findings.next.json
 ```
 
 Re run Papa on the revision and compare `consensus`, finding counts, and

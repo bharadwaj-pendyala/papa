@@ -80,3 +80,34 @@ def test_html_scan_flags_meta_refresh_and_inline_handlers(tmp_path):
 def test_wide_characters_count_as_two_terminal_cells():
     assert eyes.cells("日本") == 4
     assert eyes.cells("abc") == 3
+
+
+def test_tty_stdin_without_trailing_newline_still_reaches_eof(tmp_path):
+    project = _project(tmp_path, [{"id": "cat", "argv": ["cat"], "tty": True, "stdin": "hello",
+                                   "stdout_contains": ["hello"]}], timeout=3)
+    checks = _checks(project, "cat")
+    assert "runs" not in checks
+    assert checks["stdout-contains"].status == "pass"
+
+
+def test_browser_requested_but_unavailable_is_a_failure(tmp_path):
+    project = _project(tmp_path, [{"id": "a", "argv": ["echo hi"], "tty": True}])
+    result = eyes.run_case(project, project.cases()[0])
+    checks = eyes.browser_checks(None, "no browser", project, result)
+    assert any(c.status == "fail" for c in checks)
+
+
+def test_first_run_of_a_new_case_points_at_the_captured_output(tmp_path):
+    project = _project(tmp_path, [{"id": "new", "argv": ["echo hi"]}])
+    result = eyes.run_case(project, project.cases()[0])
+    check = eyes._check_snapshot(project, result, eyes.snapshot_text(project, result))
+    assert check.status == "fail" and "hi" in check.actual
+
+
+def test_reproduce_keeps_multiline_stdin_intact(tmp_path):
+    project = _project(tmp_path, [{"id": "a", "argv": ["cat"], "stdin": "one\ntwo\n"}])
+    result = eyes.run_case(project, project.cases()[0])
+    import subprocess
+    shell = eyes._reproduce(project, result)["shell"]
+    out = subprocess.run(["sh", "-c", shell], capture_output=True, text=True, cwd=tmp_path).stdout
+    assert out == "one\ntwo\n"

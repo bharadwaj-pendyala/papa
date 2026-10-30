@@ -4,7 +4,7 @@ $ project/README.md --max-grade 1.2
 project/README.md  ·  Grade 1, easy to read
   FAIL  grade 1.21 is above --max-grade 1.2
 
-  No issues found.
+  No flagged sentences or words.
   mean of ARI 1.2, FK 0.6, Fog 1.8 · 2 sentences
 --- stderr
 
