@@ -10,7 +10,7 @@ can run locally or in CI, emit JSON for automation, and generate a self-containe
 HTML report.
 
 [![CI](https://img.shields.io/github/actions/workflow/status/bharadwaj-pendyala/papa/ci.yml?branch=main)](https://github.com/bharadwaj-pendyala/papa/actions)
-[![PyPI](https://img.shields.io/pypi/v/papa-lint.svg)](https://pypi.org/project/papa-lint/)
+[![PyPI](https://img.shields.io/pypi/v/papa-lint?label=pypi)](https://pypi.org/project/papa-lint/)
 [![Downloads](https://img.shields.io/pypi/dm/papa-lint.svg)](https://pypi.org/project/papa-lint/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/bharadwaj-pendyala/papa?style=social)](https://github.com/bharadwaj-pendyala/papa/stargazers)
