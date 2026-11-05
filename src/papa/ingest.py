@@ -125,8 +125,9 @@ def _strip_spans(text: str, fmt: str) -> list[tuple[int, int]]:
         code.append((frontmatter.start(), frontmatter.end()))
     for pattern in (_FENCED, _SVG):
         code.extend((m.start(), m.end()) for m in pattern.finditer(text))
-    blocks = list(code)  # don't strip inline backticks that live inside a fence/svg
+    blocks = _merge(list(code))  # don't strip inline backticks that live inside a fence/svg
     code += [(m.start(), m.end()) for m in _INLINE.finditer(text) if not _inside(m.start(), blocks)]
+    code = _merge(code)
 
     markup: list[tuple[int, int]] = []
     whole = [_COMMENT, _TAG, _LINKED_IMAGE, _IMAGE, _LINK_DEFINITION, _URL, _EMPHASIS,
@@ -143,8 +144,9 @@ def _strip_spans(text: str, fmt: str) -> list[tuple[int, int]]:
     return _merge(code + [span for span in markup if not _inside(span[0], code)])
 
 
-def _inside(pos: int, spans: list[tuple[int, int]]) -> bool:
-    return any(a <= pos < b for a, b in spans)
+def _inside(pos: int, merged: list[tuple[int, int]]) -> bool:
+    i = bisect_right(merged, pos, key=lambda span: span[0]) - 1
+    return i >= 0 and pos < merged[i][1]
 
 
 def _merge(spans: list[tuple[int, int]]) -> list[tuple[int, int]]:

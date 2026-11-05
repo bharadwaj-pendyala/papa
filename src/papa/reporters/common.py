@@ -2,11 +2,22 @@
 
 from __future__ import annotations
 
+import re
+from bisect import bisect_right
 
-def line_col(source: str, offset: int) -> tuple[int, int]:
-    """1-based line and column (in code points) of ``offset`` in ``source``."""
-    line = source.count("\n", 0, offset) + 1
-    return line, offset - (source.rfind("\n", 0, offset) + 1) + 1
+
+class LineIndex:
+    """1-based line and column (in code points) of an offset in ``source``.
+
+    Line starts are found once, so a file with many findings is not rescanned for each one.
+    """
+
+    def __init__(self, source: str):
+        self._starts = [0] + [m.end() for m in re.finditer("\n", source)]
+
+    def line_col(self, offset: int) -> tuple[int, int]:
+        line = bisect_right(self._starts, offset)
+        return line, offset - self._starts[line - 1] + 1
 
 
 def display_grade(value: float) -> float:

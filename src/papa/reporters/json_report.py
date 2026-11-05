@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 
 from ..models import Analysis, Run
-from .common import line_col
+from .common import LineIndex
 
 SCHEMA_VERSION = "0.2"
 
@@ -30,16 +30,17 @@ def payload(run: Run) -> dict:
 
 
 def file_payload(analysis: Analysis) -> dict:
+    index = LineIndex(analysis.source)
     return {
         "file": analysis.path,
         "score": analysis.score.to_dict(),
-        "findings": [_finding(analysis.source, f) for f in analysis.findings],
+        "findings": [_finding(index, f) for f in analysis.findings],
     }
 
 
-def _finding(source: str, finding) -> dict:
-    line, column = line_col(source, finding.start)
-    end_line, end_column = line_col(source, finding.end)
+def _finding(index: LineIndex, finding) -> dict:
+    line, column = index.line_col(finding.start)
+    end_line, end_column = index.line_col(finding.end)
     return {
         "start": finding.start,
         "end": finding.end,

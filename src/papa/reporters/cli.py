@@ -16,7 +16,7 @@ from ..models import (
     Finding,
     Run,
 )
-from .common import display_grade as _grade, gate_grade, line_col, plural
+from .common import LineIndex, display_grade as _grade, gate_grade, plural
 
 _ANSI = {
     "yellow": "33", "red": "31", "blue": "34", "green": "32",
@@ -125,7 +125,8 @@ def _file_block(analysis: Analysis, color: bool, width: int, details: bool, limi
 
     if details and analysis.findings:
         shown = _shown_findings(analysis.findings, limit)
-        locations = [line_col(analysis.source, f.start) for f in shown]
+        index = LineIndex(analysis.source)
+        locations = [index.line_col(f.start) for f in shown]
         loc_width = max(len(f"{line}:{col}") for line, col in locations)
         lines.append("")
         for finding, (line, col) in zip(shown, locations):

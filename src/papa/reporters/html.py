@@ -18,7 +18,7 @@ from ..models import (
     Finding,
     Run,
 )
-from .common import display_grade, line_col, plural
+from .common import LineIndex, display_grade, plural
 
 _BG = {
     HARD: "#fff3bf",
@@ -115,8 +115,9 @@ def _findings_list(analysis: Analysis) -> str:
     if not analysis.findings:
         return ""
     items = []
+    index = LineIndex(analysis.source)
     for finding in analysis.findings:
-        line, col = line_col(analysis.source, finding.start)
+        line, col = index.line_col(finding.start)
         items.append(
             f'<li><span class="loc">{line}:{col}</span>'
             f'<span class="tag" style="background:{_BG[finding.category]}">{_LABEL[finding.category]}</span>'
