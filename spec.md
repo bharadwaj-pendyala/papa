@@ -75,12 +75,12 @@ Papa maps each highlight category to an existing analyzer, normalizes findings i
 
 | Hemingway highlight        | Color  | Papa source signal                                  |
 |----------------------------|--------|-----------------------------------------------------|
-| Hard sentence (grade ≥10)  | yellow | `textstat` per-sentence grade (ARI / Flesch-Kincaid)|
-| Very hard sentence (≥14)   | red    | `textstat` per-sentence grade                       |
+| Hard sentence (grade ≥10)  | yellow | built-in per-sentence grade (ARI / Flesch-Kincaid)   |
+| Very hard sentence (≥14)   | red    | built-in per-sentence grade                         |
 | Adverb                     | blue   | `-ly` heuristic w/ exception list (write-good style)|
 | Passive voice              | green  | be-verb + past-participle heuristic                 |
 | Complex / weasel phrase    | purple | `proselint` + curated phrase list                   |
-| Readability grade panel    | —      | `textstat` document-level (ARI, FK, Gunning fog)    |
+| Readability grade panel    | —      | built-in document-level (ARI, FK, Gunning fog)      |
 | Inclusive-language (opt-in)| teal   | `alex`                                              |
 
 Design choice: the few write-good heuristics (passive, adverbs) are **reimplemented in-language** (~40 lines) so the core has minimal cross-runtime deps; heavier analyzers (`proselint`, `alex`, `vale`) are **optional plugins** invoked only if installed/enabled.
@@ -98,7 +98,7 @@ Design choice: the few write-good heuristics (passive, adverbs) are **reimplemen
                         ▼
                  ┌─────────────┐   pluggable, each returns
                  │  Analyzers  │   List[Finding{start,end,category,color,msg,severity}]
-                 │  (registry) │   • readability (textstat)
+                 │  (registry) │   • readability (built-in)
                  └──────┬──────┘   • passive • adverbs • complex-phrase
                         │          • proselint* • alex* • vale*  (*optional)
                         ▼
