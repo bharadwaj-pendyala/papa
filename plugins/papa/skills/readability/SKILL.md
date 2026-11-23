@@ -12,7 +12,7 @@ papa grades prose like the Hemingway editor. The grade is a US school grade. Und
 Use the `grade_files` or `grade_text` tool from the papa MCP server. If the tools are not available, run the CLI:
 
 ```bash
-uvx --from papa-lint papa <files> --report json
+uvx --from papa-lint papa <files> --report json --max-grade <grade>
 ```
 
 Use the max grade from the user, then from `papa.toml`. If neither sets one, use 10.
