@@ -55,3 +55,9 @@ def test_server_lists_both_tools_as_read_only():
     tools = anyio.run(server.list_tools)
     assert {t.name for t in tools} == {"grade_text", "grade_files"}
     assert all(t.annotations.read_only_hint for t in tools)
+
+
+def test_grade_text_uses_the_config_max_grade(tmp_path, monkeypatch):
+    (tmp_path / "papa.toml").write_text("[papa]\nmax-grade = 0\n")
+    monkeypatch.chdir(tmp_path)
+    assert grade_text(PASSIVE)["files"][0]["score"]["verdict"] == "fail"

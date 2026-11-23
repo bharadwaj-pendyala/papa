@@ -38,9 +38,10 @@ def grade_text(text: str, filename: str = "draft.md", max_grade: float | None = 
     """Grade the readability of Markdown or plain text and list each hard sentence,
     passive verb, adverb, and complex phrase with its line, column, and a fix hint.
 
-    filename only picks the format: .md, .mdx, or .txt. max_grade defaults to 10.
+    filename only picks the format: .md, .mdx, or .txt. max_grade defaults to the
+    max-grade in papa.toml, then to 10.
     """
-    max_grade = DEFAULT_MAX_GRADE if max_grade is None else max_grade
+    max_grade = _settings(max_grade).max_grade
     run = Run(analyses=[], skipped=[], errors=[], max_grade=max_grade)
     analysis = analyze(text, path=filename, fmt=_detect_format(filename, None), max_grade=max_grade)
     if analysis.clean.strip():
@@ -57,14 +58,9 @@ def grade_files(paths: list[str], max_grade: float | None = None) -> dict:
     Uses max-grade and exclude from the nearest papa.toml or pyproject.toml.
     max_grade overrides the config. Without either, the max grade is 10.
     """
-    found = config.find(Path.cwd())
-    settings = config.load(found) if found else config.Config()
+    settings = _settings(max_grade)
     base = settings.path.parent if settings.path else Path.cwd()
     excludes = [inputs.anchor(pattern, base) for pattern in settings.exclude]
-    if max_grade is not None:
-        settings.max_grade = max_grade
-    elif settings.max_grade is None:
-        settings.max_grade = DEFAULT_MAX_GRADE
 
     try:
         files, errors = inputs.expand([p for p in paths if p != inputs.STDIN], excludes)
@@ -74,6 +70,16 @@ def grade_files(paths: list[str], max_grade: float | None = None) -> dict:
     for path in files:
         _grade_file(path, run)
     return payload(run)
+
+
+def _settings(max_grade: float | None) -> config.Config:
+    found = config.find(Path.cwd())
+    settings = config.load(found) if found else config.Config()
+    if max_grade is not None:
+        settings.max_grade = max_grade
+    elif settings.max_grade is None:
+        settings.max_grade = DEFAULT_MAX_GRADE
+    return settings
 
 
 def _grade_file(path: str, run: Run) -> None:
