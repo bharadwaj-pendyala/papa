@@ -111,10 +111,12 @@ def block_breaks(text: str, fmt: str, offset_map: OffsetMap) -> set[int]:
     for heading in _HEADING.finditer(text):
         line_end = text.find("\n", heading.end())
         starts += [heading.start(), line_end if line_end != -1 else len(text)]
-    for row in _TABLE_ROW.finditer(text):
+    templates = _templates(text, []) if fmt == "md" else []
+    # A "|" inside a Liquid filter is not a table cell boundary.
+    for row in _TABLE_ROW.finditer(_mask(text, [t.span() for t in templates], "x")):
         starts += [row.start() + i for i, ch in enumerate(row.group()) if ch == "|"]
     if fmt == "md":
-        for tag in _templates(text, []):
+        for tag in templates:
             line_start = text.rfind("\n", 0, tag.start()) + 1
             line_end = text.find("\n", tag.end())
             # Only a tag alone on its line ends a block; one inside a wrapped sentence does not.
@@ -143,13 +145,16 @@ def _strip_spans(text: str, fmt: str) -> list[tuple[int, int]]:
              _HEADING, _SETEXT, _LIST_ITEM, _QUOTE, _CALLOUT, _RULE, _TABLE_DIVIDER]
     if fmt == "mdx":
         whole = [_MDX_IMPORT, _MDX_EXPRESSION, *whole]
+    templates = [m.span() for m in _templates(text, code)] if fmt == "md" else []
+    # Match the rest on a copy where each template tag is plain filler, so a
+    # {{< ref >}} in a link target or a "|" filter in a table cell reads as one token.
+    scan = _mask(text, templates, "x")
     for pattern in whole:
-        markup += [(m.start(), m.end()) for m in pattern.finditer(text)]
-    if fmt == "md":
-        markup += [(m.start(), m.end()) for m in _templates(text, code)]
-    for link in _LINK.finditer(text):
+        markup += [(m.start(), m.end()) for m in pattern.finditer(scan)]
+    markup += templates
+    for link in _LINK.finditer(scan):
         markup += [(link.start(), link.start() + 1), (link.start(2) - 1, link.end())]
-    for row in _TABLE_ROW.finditer(text):
+    for row in _TABLE_ROW.finditer(scan):
         markup += [(row.start() + i, row.start() + i + 1) for i, ch in enumerate(row.group()) if ch == "|"]
 
     return _merge(code + [span for span in markup if not _inside(span[0], code)])
@@ -157,10 +162,15 @@ def _strip_spans(text: str, fmt: str) -> list[tuple[int, int]]:
 
 def _templates(text: str, code: list[tuple[int, int]]) -> list[re.Match]:
     # Blank out code first, so a literal "{{" in inline code cannot open a match.
-    masked = list(text)
-    for start, end in code:
-        masked[start:end] = " " * (end - start)
-    return list(_TEMPLATE.finditer("".join(masked)))
+    return list(_TEMPLATE.finditer(_mask(text, code, " ")))
+
+
+def _mask(text: str, spans: list[tuple[int, int]], fill: str) -> str:
+    """Replace each span's characters with ``fill``, keeping offsets and newlines."""
+    chars = list(text)
+    for start, end in spans:
+        chars[start:end] = [c if c == "\n" else fill for c in text[start:end]]
+    return "".join(chars)
 
 
 def _inside(pos: int, merged: list[tuple[int, int]]) -> bool:

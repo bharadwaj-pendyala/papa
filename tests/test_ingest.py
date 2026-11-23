@@ -184,3 +184,15 @@ def test_a_template_variable_inside_a_wrapped_line_does_not_split_the_sentence()
 def test_a_brace_opener_in_inline_code_does_not_hide_a_later_tag():
     md = "Start a variable with `{{`.\n\nThe current version is {{ site.version }} today.\n"
     assert "site.version" not in _graded(md)
+
+
+def test_a_ref_shortcode_in_a_link_target_leaves_only_the_link_text():
+    md = 'Follow [the migration guide]({{< ref "migrate.md" >}}#upgrade) before upgrading.\n'
+    assert " ".join(_graded(md).split()) == "Follow the migration guide before upgrading."
+
+
+def test_a_liquid_filter_pipe_is_not_a_table_cell_boundary():
+    row = "| Note |\n|---|\n| This guide applies to {} in all regions. |\n"
+    with_filter = analyze(row.format('{{ page.product | default: "the service" }}'), path="a.md")
+    plain = analyze(row.format("the service"), path="a.md")
+    assert with_filter.score.sentences == plain.score.sentences
