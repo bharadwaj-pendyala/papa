@@ -104,7 +104,7 @@
     {"id": "sarif-path-with-space", "argv": ["project/notes", "--report", "sarif", "-o", "{out}/papa.sarif"], "exit": 0, "stderr_contains": ["wrote"]},
     {"id": "sarif-uri-is-encoded", "argv": ["project/notes", "--report", "sarif"], "exit": 0, "check_width": false, "stdout_contains": ["meeting%20notes.md"]},
     {"id": "sarif-with-error", "argv": ["easy.txt", "missing.md", "--report", "sarif"], "exit": 2, "check_width": false, "stdout_contains": ["missing.md", "\"executionSuccessful\": false"]},
-    {"id": "github-annotations", "argv": ["all-findings.md", "--report", "github"], "exit": 0, "check_width": false, "stdout_regex": ["(?m)^::warning file=all-findings\\.md,line=7,endLine=7,col=\\d+,endColumn=\\d+,title=papa passive::Passive voice: 'was shipped'\\. Name who"]},
+    {"id": "github-annotations", "argv": ["all-findings.md", "--report", "github"], "exit": 0, "check_width": false, "stdout_regex": ["(?m)^::warning file=all-findings\\.md,line=7,endLine=7,col=15,endColumn=25,title=papa passive::Passive voice: 'was shipped'\\. Name who"]},
     {"id": "github-gate-fail", "argv": ["hard.md", "--max-grade", "8", "--report", "github"], "exit": 1, "check_width": false, "stdout_regex": ["(?m)^::error file=hard\\.md,line=1,endLine=1,col=1,endColumn=1,title=papa max-grade::Grade [\\d.]+ is above --max-grade 8"]},
     {"id": "github-escapes-paths", "argv": ["project/notes", "--report", "github"], "exit": 0, "check_width": false, "stdout_contains": ["file=project/notes/meeting notes.md,"]},
     {"id": "markdown-summary", "argv": ["easy.txt", "hard.md", "--max-grade", "8", "--report", "markdown"], "exit": 1, "check_width": false, "stdout_contains": ["## Papa readability", "| File | Grade |", "`hard.md`", "1 passed, 1 failed", "<details>"]},
@@ -117,6 +117,8 @@
     {"id": "allow-empty-all-excluded", "argv": ["easy.txt", "--exclude", "easy.txt", "--allow-empty"], "exit": 0},
     {"id": "allow-empty-still-fails-missing", "argv": ["missing.md", "--allow-empty"], "exit": 2, "stderr_contains": ["no such file"]},
     {"id": "allow-empty-still-gates", "argv": ["hard.md", "--max-grade", "8", "--allow-empty"], "exit": 1},
+    {"id": "allow-empty-excluded-still-writes-sarif", "argv": ["easy.txt", "--exclude", "easy.txt", "--allow-empty", "--report", "sarif"], "exit": 0, "check_width": false, "stdout_contains": ["\"results\": []"]},
+    {"id": "markdown-gate-precision", "argv": ["project/README.md", "--max-grade", "1.2", "--report", "markdown"], "cwd": ".", "exit": 1, "check_width": false, "stdout_absent": ["| 1.2 | :x: fail"]},
     {"id": "all-shows-everything", "argv": ["big", "--all"], "exit": 0, "stdout_contains": ["'was shipped'"], "stdout_absent": ["--all"]}
   ]
 }

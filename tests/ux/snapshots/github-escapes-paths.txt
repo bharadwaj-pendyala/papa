@@ -1,6 +1,6 @@
 $ project/notes --report github
 [exit 0]
 --- stdout
-::warning file=project/notes/meeting notes.md,line=1,endLine=1,col=28,endColumn=39,title=papa passive::Passive voice: 'was changed'. Name who does the action and make them the subject.
+::warning file=project/notes/meeting notes.md,line=1,endLine=1,col=28,endColumn=38,title=papa passive::Passive voice: 'was changed'. Name who does the action and make them the subject.
 --- stderr
 

@@ -34,8 +34,8 @@ def _command(kind: str, path: str, region: tuple[int, int, int, int] | None, cat
         line, col, end_line, end_col = region
         props += [f"line={line}", f"endLine={end_line}"]
         if line == end_line:
-            # GitHub reads columns only on a one-line annotation.
-            props += [f"col={col}", f"endColumn={end_col}"]
+            # GitHub reads columns only on a one-line annotation, and its endColumn is inclusive.
+            props += [f"col={col}", f"endColumn={max(end_col - 1, col)}"]
     props.append(f"title={_property('papa ' + category)}")
     return f"::{kind} {','.join(props)}::{_data(message)}"
 

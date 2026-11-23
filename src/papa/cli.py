@@ -130,12 +130,7 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         settings = _settings(args)
-        paths, input_errors = inputs.expand(args.files or [inputs.STDIN], settings.exclude)
-    except inputs.AllExcluded as error:
-        if args.allow_empty:
-            print(f"papa: {error}", file=sys.stderr)
-            return 0
-        return _fail(str(error))
+        paths, input_errors = _expand(args, settings)
     except (config.ConfigError, inputs.InputError) as error:
         return _fail(str(error))
 
@@ -158,6 +153,16 @@ def main(argv: list[str] | None = None) -> int:
     if run.errors or not (run.analyses or args.allow_empty):
         return 2
     return 1 if any(a.score.verdict == "fail" for a in run.analyses) else 0
+
+
+def _expand(args: argparse.Namespace, settings: config.Config) -> tuple[list[str], list[tuple[str, str]]]:
+    try:
+        return inputs.expand(args.files or [inputs.STDIN], settings.exclude)
+    except inputs.AllExcluded as error:
+        if not args.allow_empty:
+            raise
+        print(f"papa: {error}", file=sys.stderr)
+        return [], []
 
 
 def _settings(args: argparse.Namespace) -> config.Config:

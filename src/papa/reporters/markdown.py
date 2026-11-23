@@ -7,7 +7,7 @@ import re
 
 from ..models import Analysis, Run
 from .cli import _BADGE, PER_FILE_LIMIT, SINGLE_FILE_LIMIT, _shown_findings, _summary
-from .common import LineIndex, display_grade, plural
+from .common import LineIndex, display_grade, gate_grade, plural
 
 # A PR comment holds at most 65,536 characters; this keeps a large docs tree under it.
 DETAILED_FILES_LIMIT = 20
@@ -40,7 +40,9 @@ def _table(analyses: list[Analysis], gated: bool) -> list[str]:
     rows = [head, "|---|---|---|---|" if gated else "|---|---|---|"]
     for analysis in analyses:
         score = analysis.score
-        cells = [f"`{_code(analysis.path)}`", f"{display_grade(round(score.consensus, 1))}"]
+        grade = (gate_grade(score.consensus, score.threshold["max_grade"], score.verdict == "fail")
+                 if score.threshold else f"{display_grade(round(score.consensus, 1))}")
+        cells = [f"`{_code(analysis.path)}`", grade]
         if gated:
             cells.append(":x: fail" if score.verdict == "fail" else ":white_check_mark: pass")
         cells.append(str(len(analysis.findings)))
