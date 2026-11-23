@@ -16,9 +16,12 @@ from .cli import _detect_format
 from .models import Run
 from .reporters.json_report import payload
 
+DEFAULT_MAX_GRADE = 10.0
+
 INSTRUCTIONS = """\
 papa grades prose like the Hemingway editor. The grade is a US school grade:
-under 10 is easy to read. To improve a draft:
+under 10 is easy to read. Without a max_grade from the user or papa.toml, the
+tools grade against 10. To improve a draft:
 1. Call grade_text or grade_files.
 2. Fix the findings, most severe first: very-hard-sentence, hard-sentence,
    passive, complex-phrase, adverb. Each finding has a hint.
@@ -35,9 +38,9 @@ def grade_text(text: str, filename: str = "draft.md", max_grade: float | None = 
     """Grade the readability of Markdown or plain text and list each hard sentence,
     passive verb, adverb, and complex phrase with its line, column, and a fix hint.
 
-    filename only picks the format: .md, .mdx, or .txt. Set max_grade to get a
-    pass or fail verdict.
+    filename only picks the format: .md, .mdx, or .txt. max_grade defaults to 10.
     """
+    max_grade = DEFAULT_MAX_GRADE if max_grade is None else max_grade
     run = Run(analyses=[], skipped=[], errors=[], max_grade=max_grade)
     analysis = analyze(text, path=filename, fmt=_detect_format(filename, None), max_grade=max_grade)
     if analysis.clean.strip():
@@ -52,7 +55,7 @@ def grade_files(paths: list[str], max_grade: float | None = None) -> dict:
     """Grade Markdown and text files, folders, or globs, like the papa CLI.
 
     Uses max-grade and exclude from the nearest papa.toml or pyproject.toml.
-    max_grade overrides the config.
+    max_grade overrides the config. Without either, the max grade is 10.
     """
     found = config.find(Path.cwd())
     settings = config.load(found) if found else config.Config()
@@ -60,6 +63,8 @@ def grade_files(paths: list[str], max_grade: float | None = None) -> dict:
     excludes = [inputs.anchor(pattern, base) for pattern in settings.exclude]
     if max_grade is not None:
         settings.max_grade = max_grade
+    elif settings.max_grade is None:
+        settings.max_grade = DEFAULT_MAX_GRADE
 
     try:
         files, errors = inputs.expand([p for p in paths if p != inputs.STDIN], excludes)

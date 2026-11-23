@@ -1,7 +1,8 @@
-import anyio
 import pytest
 
 pytest.importorskip("mcp")
+
+import anyio  # noqa: E402
 
 from papa.mcp_server import grade_files, grade_text, server  # noqa: E402
 
@@ -16,6 +17,19 @@ def test_grade_text_returns_the_json_contract():
 
 def test_grade_text_gives_a_verdict_with_max_grade():
     assert grade_text(PASSIVE, max_grade=0)["files"][0]["score"]["verdict"] == "fail"
+
+
+def test_grade_text_grades_against_10_by_default():
+    hard = "The multifaceted implementation demonstrates considerable architectural sophistication. " * 3
+    result = grade_text(hard)
+    assert result["summary"]["max_grade"] == 10
+    assert result["files"][0]["score"]["verdict"] == "fail"
+
+
+def test_grade_files_grades_against_10_without_config(tmp_path, monkeypatch):
+    (tmp_path / "a.md").write_text(PASSIVE)
+    monkeypatch.chdir(tmp_path)
+    assert grade_files(["a.md"])["summary"]["max_grade"] == 10
 
 
 def test_grade_text_skips_code_only_drafts():
