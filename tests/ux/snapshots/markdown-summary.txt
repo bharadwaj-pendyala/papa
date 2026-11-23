@@ -1,0 +1,22 @@
+$ easy.txt hard.md --max-grade 8 --report markdown
+[exit 1]
+--- stdout
+## Papa readability
+
+Checked 2 files: 1 passed, 1 failed (--max-grade 8).
+
+| File | Grade | Result | Findings |
+|---|---|---|---|
+| `hard.md` | 34.6 | :x: fail | 2 |
+| `easy.txt` | 0.0 | :white_check_mark: pass | 0 |
+
+<details><summary><code>hard.md</code>: Grade 35, very hard to read · 2 findings</summary>
+
+| Line | Kind | Text | Tip |
+|---|---|---|---|
+| 1:1 | very hard | The multifaceted implementation demonstrates considerable architectural sophist… | Split the sentence or cut words. Aim for one idea per sentence. |
+| 1:151 | adverb | consistently | Cut the adverb or use a stronger verb. |
+
+</details>
+--- stderr
+

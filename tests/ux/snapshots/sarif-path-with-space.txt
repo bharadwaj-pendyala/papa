@@ -1,0 +1,6 @@
+$ project/notes --report sarif -o {out}/papa.sarif
+[exit 0]
+--- stdout
+
+--- stderr
+papa: wrote {out}/papa.sarif

@@ -23,6 +23,9 @@ Examples:
   papa post.md --report concise        file:line:col lines for editors
   papa post.md --report json           findings for scripts and LLMs
   papa post.md --report html -o report.html
+  papa docs/ --report sarif -o papa.sarif
+  papa docs/ --report github           annotations in GitHub Actions
+  papa docs/ --report markdown         a job summary or PR comment
 
 Config:
   papa reads [papa] from the nearest papa.toml, or [tool.papa] from
@@ -34,6 +37,10 @@ Exit codes:
   2  usage, config, or input error, or no input had prose to check
      (files with no prose are skipped with a note on stderr)
 """
+
+
+# Machine formats always write a document, even when no file had prose.
+_ALWAYS_EMIT = ("json", "html", "sarif", "markdown", "github")
 
 
 class _HelpFormatter(argparse.RawDescriptionHelpFormatter):
@@ -69,6 +76,9 @@ def build_parser() -> argparse.ArgumentParser:
         epilog=EXAMPLES,
         formatter_class=_HelpFormatter,
     )
+    if hasattr(parser, "color"):
+        # Python 3.14 colors help by default; keep it plain so it reads the same everywhere.
+        parser.color = False
     parser.add_argument("files", nargs="*", metavar="PATH",
                         help="files, folders, or quoted globs; '-' or a pipe reads stdin")
     parser.add_argument("--report", choices=list(REPORTERS), default="cli",
@@ -131,7 +141,7 @@ def main(argv: list[str] | None = None) -> int:
     for path, reason in run.skipped:
         print(f"papa: skipped {path}: {reason}", file=sys.stderr)
 
-    if (not args.quiet or args.output) and (run.analyses or args.report in ("json", "html")):
+    if (not args.quiet or args.output) and (run.analyses or args.report in _ALWAYS_EMIT):
         try:
             _emit(args, run)
         except OSError as error:

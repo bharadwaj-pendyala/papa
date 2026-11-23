@@ -1,0 +1,46 @@
+$ long.md --report markdown
+[exit 0]
+--- stdout
+## Papa readability
+
+Checked 1 file.
+
+| File | Grade | Findings |
+|---|---|---|
+| `long.md` | 15.0 | 32 |
+
+<details open><summary><code>long.md</code>: Grade 15, very hard to read · 32 findings</summary>
+
+| Line | Kind | Text | Tip |
+|---|---|---|---|
+| 2:15 | passive | was shipped | Name who does the action and make them the subject. |
+| 2:39 | complex | in order to | Use 'to'. |
+| 3:4 | adverb | basically | Cut the adverb or use a stronger verb. |
+| 3:55 | adverb | really | Cut the adverb or use a stronger verb. |
+| 10:1 | very hard | Due to the fact that the multifaceted implementation demonstrates considerable … | Split the sentence or cut words. Aim for one idea per sentence. |
+| 10:1 | complex | Due to the fact that | Use 'because'. |
+| 10:172 | adverb | consistently | Cut the adverb or use a stronger verb. |
+| 10:279 | passive | was postponed | Name who does the action and make them the subject. |
+| 14:15 | passive | was shipped | Name who does the action and make them the subject. |
+| 14:39 | complex | in order to | Use 'to'. |
+| 15:4 | adverb | basically | Cut the adverb or use a stronger verb. |
+| 15:55 | adverb | really | Cut the adverb or use a stronger verb. |
+| 22:1 | very hard | Due to the fact that the multifaceted implementation demonstrates considerable … | Split the sentence or cut words. Aim for one idea per sentence. |
+| 22:1 | complex | Due to the fact that | Use 'because'. |
+| 22:279 | passive | was postponed | Name who does the action and make them the subject. |
+| 26:15 | passive | was shipped | Name who does the action and make them the subject. |
+| 26:39 | complex | in order to | Use 'to'. |
+| 34:1 | very hard | Due to the fact that the multifaceted implementation demonstrates considerable … | Split the sentence or cut words. Aim for one idea per sentence. |
+| 34:1 | complex | Due to the fact that | Use 'because'. |
+| 34:279 | passive | was postponed | Name who does the action and make them the subject. |
+| 38:15 | passive | was shipped | Name who does the action and make them the subject. |
+| 38:39 | complex | in order to | Use 'to'. |
+| 46:1 | very hard | Due to the fact that the multifaceted implementation demonstrates considerable … | Split the sentence or cut words. Aim for one idea per sentence. |
+| 46:1 | complex | Due to the fact that | Use 'because'. |
+| 46:279 | passive | was postponed | Name who does the action and make them the subject. |
+
+7 more findings. Add `--all` to see every finding.
+
+</details>
+--- stderr
+

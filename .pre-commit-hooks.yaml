@@ -1,0 +1,8 @@
+- id: papa
+  name: papa readability
+  description: Grade Markdown and text files and fail above the max grade in papa.toml.
+  entry: papa
+  args: [--report, concise]
+  language: python
+  types_or: [markdown, mdx, plain-text]
+  require_serial: true

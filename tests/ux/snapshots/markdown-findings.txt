@@ -1,0 +1,27 @@
+$ all-findings.md --report markdown
+[exit 0]
+--- stdout
+## Papa readability
+
+Checked 1 file.
+
+| File | Grade | Findings |
+|---|---|---|
+| `all-findings.md` | 15.0 | 8 |
+
+<details open><summary><code>all-findings.md</code>: Grade 15, very hard to read · 8 findings</summary>
+
+| Line | Kind | Text | Tip |
+|---|---|---|---|
+| 7:15 | passive | was shipped | Name who does the action and make them the subject. |
+| 7:39 | complex | in order to | Use 'to'. |
+| 8:4 | adverb | basically | Cut the adverb or use a stronger verb. |
+| 8:55 | adverb | really | Cut the adverb or use a stronger verb. |
+| 15:1 | very hard | Due to the fact that the multifaceted implementation demonstrates considerable … | Split the sentence or cut words. Aim for one idea per sentence. |
+| 15:1 | complex | Due to the fact that | Use 'because'. |
+| 15:172 | adverb | consistently | Cut the adverb or use a stronger verb. |
+| 15:279 | passive | was postponed | Name who does the action and make them the subject. |
+
+</details>
+--- stderr
+

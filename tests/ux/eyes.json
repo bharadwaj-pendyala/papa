@@ -98,6 +98,21 @@
     {"id": "long-file-output-is-bounded", "argv": ["long.md"], "exit": 0, "stdout_contains": ["more", "--all"]},
     {"id": "long-file-all", "argv": ["long.md", "--all"], "exit": 0, "stdout_absent": ["--all"]},
     {"id": "many-files-output-is-bounded", "argv": ["big"], "exit": 0, "stdout_contains": ["Checked 14 files", "--all"], "stdout_absent": ["'was shipped'"]},
+    {"id": "help-lists-ci-reports", "argv": ["--help"], "exit": 0, "stdout_contains": ["sarif", "github", "markdown", "--report sarif -o papa.sarif"]},
+    {"id": "sarif-single", "argv": ["all-findings.md", "--report", "sarif"], "exit": 0, "check_width": false, "stdout_contains": ["\"version\": \"2.1.0\"", "\"ruleId\": \"passive\"", "\"columnKind\": \"unicodeCodePoints\""]},
+    {"id": "sarif-gate-fail", "argv": ["hard.md", "--max-grade", "8", "--report", "sarif"], "exit": 1, "check_width": false, "stdout_contains": ["\"ruleId\": \"max-grade\"", "\"level\": \"error\""]},
+    {"id": "sarif-path-with-space", "argv": ["project/notes", "--report", "sarif", "-o", "{out}/papa.sarif"], "exit": 0, "stderr_contains": ["wrote"]},
+    {"id": "sarif-uri-is-encoded", "argv": ["project/notes", "--report", "sarif"], "exit": 0, "check_width": false, "stdout_contains": ["meeting%20notes.md"]},
+    {"id": "sarif-with-error", "argv": ["easy.txt", "missing.md", "--report", "sarif"], "exit": 2, "check_width": false, "stdout_contains": ["missing.md", "\"executionSuccessful\": false"]},
+    {"id": "github-annotations", "argv": ["all-findings.md", "--report", "github"], "exit": 0, "check_width": false, "stdout_regex": ["(?m)^::warning file=all-findings\\.md,line=7,endLine=7,col=\\d+,endColumn=\\d+,title=papa passive::Passive voice: 'was shipped'\\. Name who"]},
+    {"id": "github-gate-fail", "argv": ["hard.md", "--max-grade", "8", "--report", "github"], "exit": 1, "check_width": false, "stdout_regex": ["(?m)^::error file=hard\\.md,line=1,endLine=1,col=1,endColumn=1,title=papa max-grade::Grade [\\d.]+ is above --max-grade 8"]},
+    {"id": "github-escapes-paths", "argv": ["project/notes", "--report", "github"], "exit": 0, "check_width": false, "stdout_contains": ["file=project/notes/meeting notes.md,"]},
+    {"id": "markdown-summary", "argv": ["easy.txt", "hard.md", "--max-grade", "8", "--report", "markdown"], "exit": 1, "check_width": false, "stdout_contains": ["## Papa readability", "| File | Grade |", "`hard.md`", "1 passed, 1 failed", "<details>"]},
+    {"id": "markdown-findings", "argv": ["all-findings.md", "--report", "markdown"], "exit": 0, "check_width": false, "stdout_contains": ["was shipped", "Name who does the action"]},
+    {"id": "markdown-is-capped", "argv": ["long.md", "--report", "markdown"], "exit": 0, "check_width": false, "stdout_contains": ["more"]},
+    {"id": "markdown-all", "argv": ["long.md", "--report", "markdown", "--all"], "exit": 0, "check_width": false, "stdout_absent": ["more finding"]},
+    {"id": "markdown-with-error", "argv": ["easy.txt", "missing.md", "--report", "markdown"], "exit": 2, "check_width": false, "stdout_contains": ["missing.md"]},
+    {"id": "markdown-escapes-markup", "argv": ["html-bait.md", "--report", "markdown"], "exit": 0, "check_width": false, "stdout_absent": ["<script>"]},
     {"id": "all-shows-everything", "argv": ["big", "--all"], "exit": 0, "stdout_contains": ["'was shipped'"], "stdout_absent": ["--all"]}
   ]
 }

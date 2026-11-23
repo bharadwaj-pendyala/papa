@@ -1,0 +1,14 @@
+$ easy.txt missing.md --report markdown
+[exit 2]
+--- stdout
+## Papa readability
+
+Checked 2 files: 1 analyzed, 1 error.
+
+| File | Grade | Findings |
+|---|---|---|
+| `easy.txt` | 0.0 | 0 |
+
+- :warning: `missing.md`: no such file or directory
+--- stderr
+papa: missing.md: no such file or directory

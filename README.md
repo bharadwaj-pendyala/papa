@@ -34,12 +34,13 @@ small:
 - CLI command: `papa`
 - Python package: `papa-lint`
 - Input: Markdown, MDX, and plain text files, folders, quoted globs, and stdin
-- Reports: terminal, concise (`file:line:col`), JSON, and self-contained HTML
+- Reports: terminal, concise (`file:line:col`), JSON, self-contained HTML,
+  SARIF, GitHub annotations, and Markdown
+- GitHub Action and pre-commit hook
 - Config: `papa.toml` or `[tool.papa]` in `pyproject.toml`
 - CI gating: use `--max-grade` and the process exit code
 
-GitHub Action packaging, SARIF/Markdown reporters, optional external linters,
-and built-in LLM rewriting are roadmap items.
+Optional external linters and built-in LLM rewriting are roadmap items.
 
 ## Why Papa?
 
@@ -131,28 +132,90 @@ writes a note on stderr for each skipped file.
 
 ## 🧪 CI usage
 
-Papa does not need a dedicated GitHub Action yet. Install it in your workflow
-and let `--max-grade` fail the job when prose crosses your threshold:
+### GitHub Action
+
+Add one step to a workflow. Papa annotates hard sentences on the PR diff,
+writes a report to the job summary, and fails the job above your max grade.
 
 ```yaml
 name: readability
 on: pull_request
+permissions:
+  contents: read
+  pull-requests: write   # only for comment: true
 jobs:
   papa:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: bharadwaj-pendyala/papa@v0
         with:
-          python-version: "3.11"
-      - run: python -m pip install papa-lint
-      - run: papa README.md docs/ --max-grade 10 --report concise
+          paths: README.md docs/
+          max-grade: 10
+          comment: true
 ```
 
-`--report concise` prints one `file:line:col: severity: message` line for each
-finding. A failed gate is the only `error` line.
+| Input | Default | What it does |
+|---|---|---|
+| `paths` | `.` | Files, folders, or quoted globs, separated by spaces or new lines. |
+| `max-grade` | from `papa.toml` | Fail when a file's grade is above this number. |
+| `args` | | Extra flags, such as `--exclude 'docs/generated/**'`. |
+| `annotations` | `true` | Show findings on the PR diff. |
+| `summary` | `true` | Write the Markdown report to the job summary. |
+| `comment` | `false` | Post the report on the PR and update it on each push. |
+| `sarif-file` | | Also write SARIF for GitHub code scanning. |
+| `python-version` | `3.12` | Python that runs papa. |
 
-For local development, run the same command before opening a PR.
+The action sets two outputs: `exit-code` and `report`, the path to the
+Markdown report. GitHub shows at most 10 warning annotations per step, so
+the job summary is the full list.
+
+To see findings in the **Security** tab, write SARIF and upload it:
+
+```yaml
+      - uses: bharadwaj-pendyala/papa@v0
+        with:
+          sarif-file: papa.sarif
+      - uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: papa.sarif
+```
+
+### pre-commit
+
+```yaml
+repos:
+  - repo: https://github.com/bharadwaj-pendyala/papa
+    rev: v0.2.0
+    hooks:
+      - id: papa
+        args: [--report, concise, --max-grade, "10"]
+```
+
+Without `--max-grade` here or in `papa.toml`, the hook prints findings and
+never blocks a commit.
+
+### Any other CI
+
+Install papa and let `--max-grade` set the exit code:
+
+```bash
+pipx run --spec papa-lint papa README.md docs/ --max-grade 10 --report concise
+```
+
+| Report | Use it for |
+|---|---|
+| `cli` | People in a terminal. |
+| `concise` | Editors and grep: one `file:line:col: severity: message` line per finding. |
+| `json` | Scripts and LLM agents. See [docs/llm-contract.md](docs/llm-contract.md). |
+| `html` | A self-contained page with highlights. |
+| `sarif` | GitHub code scanning and other SARIF viewers. |
+| `github` | Annotations from any GitHub Actions step. |
+| `markdown` | A job summary or PR comment. |
+
+In every report, findings are advice. Only a failed `--max-grade` gate is an
+error.
 
 ## 🤖 LLM workflow
 
@@ -224,8 +287,6 @@ print(result.score.verdict)
 
 ## 🗺️ Roadmap
 
-- GitHub Action wrapper
-- SARIF and Markdown reporters for PR annotations and summaries
 - Built-in `--suggest` workflow for LLM-assisted rewrites
 - MDX, HTML, and reStructuredText ingestion
 - Optional integrations with tools such as `proselint`, `alex`, and `vale`

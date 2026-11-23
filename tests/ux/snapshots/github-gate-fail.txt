@@ -1,0 +1,8 @@
+$ hard.md --max-grade 8 --report github
+[exit 1]
+--- stdout
+::error file=hard.md,line=1,endLine=1,col=1,endColumn=1,title=papa max-grade::Grade 34.6 is above --max-grade 8. Grade 35, very hard to read.
+::warning file=hard.md,line=1,endLine=1,col=1,endColumn=277,title=papa very-hard-sentence::Very hard to read (grade 18+). Split the sentence or cut words. Aim for one idea per sentence.
+::notice file=hard.md,line=1,endLine=1,col=151,endColumn=163,title=papa adverb::Adverb: 'consistently'. Cut the adverb or use a stronger verb.
+--- stderr
+
