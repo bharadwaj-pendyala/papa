@@ -1,18 +1,16 @@
 $ 
-[exit 0 tty 80 cols]
+[exit 0 tty 100 cols]
 --- stdout
-usage: papa [-h] [--report {cli,concise,json,html,sarif,github,markdown}]
-            [-o FILE] [--max-grade N] [--exclude GLOB] [--format {md,mdx,txt}]
-            [--stdin-filename NAME] [--all] [--allow-empty] [--summary] [-q]
-            [--color {auto,always,never}] [--config FILE] [--no-config]
-            [--version]
+usage: papa [-h] [--report {cli,concise,json,html,sarif,github,markdown}] [-o FILE]
+            [--max-grade N] [--exclude GLOB] [--format {md,mdx,txt}] [--stdin-filename NAME]
+            [--all] [--allow-empty] [--summary] [-q] [--color {auto,always,never}] [--config FILE]
+            [--no-config] [--version]
             [PATH ...]
 
 Hemingway-style readability linting for Markdown and plain text.
 
 positional arguments:
-  PATH                  files, folders, or quoted globs; '-' or a pipe reads
-                        stdin
+  PATH                  files, folders, or quoted globs; '-' or a pipe reads stdin
 
 options:
   -h, --help            show this help message and exit

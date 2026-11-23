@@ -23,7 +23,7 @@
   },
   "cases": [
     {"id": "help", "argv": ["--help"], "exit": 0, "stdout_contains": ["Examples:", "papa docs/ --max-grade 10", "Exit codes:"]},
-    {"id": "no-args-tty", "argv": [], "tty": true, "exit": 0, "stdout_contains": ["Examples:"]},
+    {"id": "no-args-tty", "argv": [], "tty": true, "cols": 100, "exit": 0, "stdout_contains": ["Examples:"]},
     {"id": "no-args-empty-stdin", "argv": [], "stdin": "", "exit": 2, "stderr_contains": ["no prose on stdin"]},
     {"id": "singular-piped", "argv": ["singular.txt"], "exit": 0, "stdout_contains": ["1 sentence", "1 adverb", "1 passive"]},
     {"id": "all-findings-tty-80", "argv": ["all-findings.md"], "tty": true, "cols": 80, "exit": 0, "stdout_contains": ["all-findings.md", "Grade"], "expect_ansi": true},
