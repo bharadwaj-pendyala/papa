@@ -1,0 +1,17 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "papa",
+  "description": "Readability grading for Markdown and text, from the papa linter.",
+  "owner": {
+    "name": "Bharadwaj Pendyala"
+  },
+  "plugins": [
+    {
+      "name": "papa",
+      "description": "Grade docs like the Hemingway editor and rewrite flagged sentences until the grade passes.",
+      "source": "./plugins/papa",
+      "category": "productivity",
+      "homepage": "https://bharadwaj-pendyala.github.io/papa/"
+    }
+  ]
+}

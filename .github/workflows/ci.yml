@@ -19,7 +19,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install
-        run: pip install -e ".[dev]"
+        run: pip install -e ".[dev,mcp]"
       - name: Test
         run: pytest -q
       - name: UX checks (eyes)
