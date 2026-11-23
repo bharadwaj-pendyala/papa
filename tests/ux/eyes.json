@@ -113,6 +113,10 @@
     {"id": "markdown-all", "argv": ["long.md", "--report", "markdown", "--all"], "exit": 0, "check_width": false, "stdout_absent": ["more finding"]},
     {"id": "markdown-with-error", "argv": ["easy.txt", "missing.md", "--report", "markdown"], "exit": 2, "check_width": false, "stdout_contains": ["missing.md"]},
     {"id": "markdown-escapes-markup", "argv": ["html-bait.md", "--report", "markdown"], "exit": 0, "check_width": false, "stdout_absent": ["<script>"]},
+    {"id": "allow-empty-code-only", "argv": ["code-only.md", "--allow-empty"], "exit": 0, "stderr_contains": ["no prose"]},
+    {"id": "allow-empty-all-excluded", "argv": ["easy.txt", "--exclude", "easy.txt", "--allow-empty"], "exit": 0},
+    {"id": "allow-empty-still-fails-missing", "argv": ["missing.md", "--allow-empty"], "exit": 2, "stderr_contains": ["no such file"]},
+    {"id": "allow-empty-still-gates", "argv": ["hard.md", "--max-grade", "8", "--allow-empty"], "exit": 1},
     {"id": "all-shows-everything", "argv": ["big", "--all"], "exit": 0, "stdout_contains": ["'was shipped'"], "stdout_absent": ["--all"]}
   ]
 }

@@ -3,7 +3,7 @@ $
 --- stdout
 usage: papa [-h] [--report {cli,concise,json,html,sarif,github,markdown}]
             [-o FILE] [--max-grade N] [--exclude GLOB] [--format {md,mdx,txt}]
-            [--stdin-filename NAME] [--all] [--summary] [-q]
+            [--stdin-filename NAME] [--all] [--allow-empty] [--summary] [-q]
             [--color {auto,always,never}] [--config FILE] [--no-config]
             [--version]
             [PATH ...]
@@ -26,6 +26,7 @@ options:
   --stdin-filename NAME
                         name to show for stdin; its suffix picks the format
   --all                 show every finding; by default long output is capped
+  --allow-empty         exit 0, not 2, when no input has prose to check
   --summary             show grades and counts only, without each finding
   -q, --quiet           print nothing to stdout; -o files are still written
   --color {auto,always,never}
@@ -54,6 +55,7 @@ Exit codes:
   0  no file failed --max-grade (findings alone never fail a run)
   1  at least one file is harder than --max-grade
   2  usage, config, or input error, or no input had prose to check
-     (files with no prose are skipped with a note on stderr)
+     (files with no prose are skipped with a note on stderr; --allow-empty
+     makes that case exit 0, as pre-commit needs)
 --- stderr
 

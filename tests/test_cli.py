@@ -140,3 +140,18 @@ def test_double_star_inside_a_name_does_not_cross_folders(tmp_path, capsys):
     code = main([str(tmp_path / "docs"), "--exclude", str(tmp_path / "docs" / "**.md"), "--max-grade", "8"])
     assert code == 1
     assert "api.md" in capsys.readouterr().out
+
+
+def test_allow_empty_passes_when_only_code_was_given(tmp_path, capsys):
+    path = _write(tmp_path, "code.md", "```\nx = 1\n```\n")
+    assert main([path]) == 2
+    assert main([path, "--allow-empty"]) == 0
+
+
+def test_allow_empty_passes_when_every_input_is_excluded(tmp_path, capsys):
+    path = _write(tmp_path, "easy.md", EASY)
+    assert main([path, "--exclude", path, "--allow-empty"]) == 0
+
+
+def test_allow_empty_still_fails_on_a_missing_file(tmp_path, capsys):
+    assert main([str(tmp_path / "nope.md"), "--allow-empty"]) == 2

@@ -6,11 +6,13 @@ import os
 import shlex
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 
 def papa(*args: str) -> int:
-    return subprocess.run([sys.executable, "-m", "papa", *args]).returncode
+    # -I keeps a papa.py in the checked-out repo from shadowing the installed papa.
+    return subprocess.run([sys.executable, "-I", "-m", "papa", *args]).returncode
 
 
 def main() -> None:
@@ -23,12 +25,18 @@ def main() -> None:
 
     if env.get("INPUT_ANNOTATIONS") == "true":
         papa(*common, "--report", "github")
+    sarif_code = 0
     if env.get("INPUT_SARIF_FILE"):
         Path(env["INPUT_SARIF_FILE"]).parent.mkdir(parents=True, exist_ok=True)
-        papa(*common, "--report", "sarif", "-o", env["INPUT_SARIF_FILE"], "-q")
+        sarif_code = papa(*common, "--report", "sarif", "-o", env["INPUT_SARIF_FILE"], "-q")
 
-    report = Path(env.get("RUNNER_TEMP", ".")) / "papa-report.md"
+    # One file per step, so a job that runs the action twice keeps both reports.
+    fd, name = tempfile.mkstemp(prefix="papa-report-", suffix=".md", dir=env.get("RUNNER_TEMP"))
+    os.close(fd)
+    report = Path(name)
     code = papa(*common, "--report", "markdown", "-o", str(report), "-q")
+    if sarif_code == 2:
+        code = 2
     if env.get("INPUT_SUMMARY") == "true" and report.is_file() and env.get("GITHUB_STEP_SUMMARY"):
         with open(env["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as summary:
             summary.write(report.read_text(encoding="utf-8"))

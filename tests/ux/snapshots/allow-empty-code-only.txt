@@ -1,0 +1,6 @@
+$ code-only.md --allow-empty
+[exit 0]
+--- stdout
+
+--- stderr
+papa: skipped code-only.md: no prose found (only code or markup)

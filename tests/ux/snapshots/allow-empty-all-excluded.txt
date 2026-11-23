@@ -1,0 +1,6 @@
+$ easy.txt --exclude easy.txt --allow-empty
+[exit 0]
+--- stdout
+
+--- stderr
+papa: every input was excluded by --exclude or the config exclude list

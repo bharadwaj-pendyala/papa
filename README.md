@@ -170,16 +170,22 @@ The action sets two outputs: `exit-code` and `report`, the path to the
 Markdown report. GitHub shows at most 10 warning annotations per step, so
 the job summary is the full list.
 
-To see findings in the **Security** tab, write SARIF and upload it:
+To see findings in the **Security** tab, write SARIF and upload it. The
+upload needs `security-events: write` permission:
 
 ```yaml
-      - uses: bharadwaj-pendyala/papa@v0
-        with:
-          sarif-file: papa.sarif
-      - uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
-          sarif_file: papa.sarif
+permissions:
+  contents: read
+  security-events: write
+steps:
+  - uses: actions/checkout@v4
+  - uses: bharadwaj-pendyala/papa@v0
+    with:
+      sarif-file: papa.sarif
+  - uses: github/codeql-action/upload-sarif@v3
+    if: always()
+    with:
+      sarif_file: papa.sarif
 ```
 
 ### pre-commit
@@ -190,11 +196,12 @@ repos:
     rev: v0.2.0
     hooks:
       - id: papa
-        args: [--report, concise, --max-grade, "10"]
+        args: [--report, concise, --allow-empty, --max-grade, "10"]
 ```
 
 Without `--max-grade` here or in `papa.toml`, the hook prints findings and
-never blocks a commit.
+never blocks a commit. The hook passes `--allow-empty`, so a commit with only
+excluded or code-only files still goes through. Keep it when you set `args`.
 
 ### Any other CI
 

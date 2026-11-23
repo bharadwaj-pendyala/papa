@@ -17,6 +17,10 @@ class InputError(Exception):
     pass
 
 
+class AllExcluded(InputError):
+    pass
+
+
 def expand(args: list[str], excludes: list[str]) -> tuple[list[str], list[tuple[str, str]]]:
     """Return (paths, errors): display paths in argument order, deduplicated,
     with excludes removed, plus one error for each argument that matched nothing.
@@ -44,7 +48,7 @@ def expand(args: list[str], excludes: list[str]) -> tuple[list[str], list[tuple[
             seen.add(key)
             paths.append(path)
     if args and not paths and not errors:
-        raise InputError("every input was excluded by --exclude or the config exclude list")
+        raise AllExcluded("every input was excluded by --exclude or the config exclude list")
     return paths, errors
 
 

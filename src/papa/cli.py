@@ -35,7 +35,8 @@ Exit codes:
   0  no file failed --max-grade (findings alone never fail a run)
   1  at least one file is harder than --max-grade
   2  usage, config, or input error, or no input had prose to check
-     (files with no prose are skipped with a note on stderr)
+     (files with no prose are skipped with a note on stderr; --allow-empty
+     makes that case exit 0, as pre-commit needs)
 """
 
 
@@ -93,6 +94,8 @@ def build_parser() -> argparse.ArgumentParser:
                         help="name to show for stdin; its suffix picks the format")
     parser.add_argument("--all", action="store_true", dest="show_all",
                         help="show every finding; by default long output is capped")
+    parser.add_argument("--allow-empty", action="store_true",
+                        help="exit 0, not 2, when no input has prose to check")
     parser.add_argument("--summary", action="store_true",
                         help="show grades and counts only, without each finding")
     parser.add_argument("-q", "--quiet", action="store_true",
@@ -128,6 +131,11 @@ def main(argv: list[str] | None = None) -> int:
     try:
         settings = _settings(args)
         paths, input_errors = inputs.expand(args.files or [inputs.STDIN], settings.exclude)
+    except inputs.AllExcluded as error:
+        if args.allow_empty:
+            print(f"papa: {error}", file=sys.stderr)
+            return 0
+        return _fail(str(error))
     except (config.ConfigError, inputs.InputError) as error:
         return _fail(str(error))
 
@@ -147,7 +155,7 @@ def main(argv: list[str] | None = None) -> int:
         except OSError as error:
             return _fail(f"cannot write {args.output}: {(error.strerror or str(error)).lower()}")
 
-    if run.errors or not run.analyses:
+    if run.errors or not (run.analyses or args.allow_empty):
         return 2
     return 1 if any(a.score.verdict == "fail" for a in run.analyses) else 0
 
