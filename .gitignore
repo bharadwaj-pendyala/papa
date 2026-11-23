@@ -6,3 +6,5 @@ __pycache__/
 dist/
 .venv/
 artifacts/
+site/assets/
+site/report.html
