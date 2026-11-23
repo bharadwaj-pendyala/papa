@@ -233,8 +233,12 @@ flags, and grade it again until the file passes.
 **Claude Code plugin.** It adds a `readability` skill and the papa MCP server:
 
 ```text
-/plugin install papa --marketplace bharadwaj-pendyala/papa
+/plugin marketplace add bharadwaj-pendyala/papa
+/plugin install papa@papa
 ```
+
+On Claude Code 2.1.275 or later, one command does both:
+`/plugin install papa --marketplace bharadwaj-pendyala/papa`.
 
 **MCP server.** Any MCP client can run it. It needs `uv`:
 
