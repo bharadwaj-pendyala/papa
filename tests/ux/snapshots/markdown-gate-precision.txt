@@ -1,0 +1,12 @@
+$ project/README.md --max-grade 1.2 --report markdown
+[exit 1]
+--- stdout
+## Papa readability
+
+Checked 1 file: 0 passed, 1 failed (--max-grade 1.2).
+
+| File | Grade | Result | Findings |
+|---|---|---|---|
+| `project/README.md` | 1.21 | :x: fail | 0 |
+--- stderr
+

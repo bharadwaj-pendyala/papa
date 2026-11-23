@@ -11,7 +11,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
@@ -32,3 +32,47 @@ jobs:
         with:
           name: eyes-${{ matrix.python-version }}
           path: artifacts/eyes
+
+  action:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run the action on passing files
+        id: pass
+        uses: ./
+        with:
+          paths: tests/ux/corpora/easy.txt "tests/ux/corpora/project/notes/meeting notes.md"
+          max-grade: "12"
+          sarif-file: out/papa.sarif
+      - name: Run the action on a failing file
+        id: fail
+        continue-on-error: true
+        uses: ./
+        with:
+          paths: tests/ux/corpora/hard.md
+          max-grade: "8"
+      - name: Check the outputs
+        env:
+          PASS_CODE: ${{ steps.pass.outputs.exit-code }}
+          FAIL_CODE: ${{ steps.fail.outputs.exit-code }}
+          FAIL_OUTCOME: ${{ steps.fail.outcome }}
+          REPORT: ${{ steps.pass.outputs.report }}
+        run: |
+          test "$PASS_CODE" = 0
+          test "$FAIL_CODE" = 1
+          test "$FAIL_OUTCOME" = failure
+          grep -q "meeting notes.md" "$REPORT"
+          python -c "import json; assert json.load(open('out/papa.sarif'))['version'] == '2.1.0'"
+
+  readability:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+      - uses: ./
+        with:
+          paths: README.md CONTRIBUTING.md docs/
+          max-grade: "10"
+          comment: ${{ github.event_name == 'pull_request' }}

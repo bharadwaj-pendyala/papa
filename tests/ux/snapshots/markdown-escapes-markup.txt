@@ -1,0 +1,20 @@
+$ html-bait.md --report markdown
+[exit 0]
+--- stdout
+## Papa readability
+
+Checked 1 file.
+
+| File | Grade | Findings |
+|---|---|---|
+| `html-bait.md` | 5.6 | 1 |
+
+<details open><summary><code>html-bait.md</code>: Grade 6, easy to read · 1 finding</summary>
+
+| Line | Kind | Text | Tip |
+|---|---|---|---|
+| 1:74 | passive | was escaped | Name who does the action and make them the subject. |
+
+</details>
+--- stderr
+

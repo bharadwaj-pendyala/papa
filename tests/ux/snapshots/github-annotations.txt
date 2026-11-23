@@ -1,0 +1,13 @@
+$ all-findings.md --report github
+[exit 0]
+--- stdout
+::warning file=all-findings.md,line=7,endLine=7,col=15,endColumn=25,title=papa passive::Passive voice: 'was shipped'. Name who does the action and make them the subject.
+::warning file=all-findings.md,line=7,endLine=7,col=39,endColumn=49,title=papa complex-phrase::Complex phrase: 'in order to', consider 'to'
+::notice file=all-findings.md,line=8,endLine=8,col=4,endColumn=12,title=papa adverb::Adverb: 'basically'. Cut the adverb or use a stronger verb.
+::notice file=all-findings.md,line=8,endLine=8,col=55,endColumn=60,title=papa adverb::Adverb: 'really'. Cut the adverb or use a stronger verb.
+::warning file=all-findings.md,line=15,endLine=15,col=1,endColumn=292,title=papa very-hard-sentence::Very hard to read (grade 18+). Split the sentence or cut words. Aim for one idea per sentence.
+::warning file=all-findings.md,line=15,endLine=15,col=1,endColumn=20,title=papa complex-phrase::Complex phrase: 'Due to the fact that', consider 'because'
+::notice file=all-findings.md,line=15,endLine=15,col=172,endColumn=183,title=papa adverb::Adverb: 'consistently'. Cut the adverb or use a stronger verb.
+::warning file=all-findings.md,line=15,endLine=15,col=279,endColumn=291,title=papa passive::Passive voice: 'was postponed'. Name who does the action and make them the subject.
+--- stderr
+

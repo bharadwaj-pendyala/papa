@@ -23,6 +23,9 @@ Examples:
   papa post.md --report concise        file:line:col lines for editors
   papa post.md --report json           findings for scripts and LLMs
   papa post.md --report html -o report.html
+  papa docs/ --report sarif -o papa.sarif
+  papa docs/ --report github           annotations in GitHub Actions
+  papa docs/ --report markdown         a job summary or PR comment
 
 Config:
   papa reads [papa] from the nearest papa.toml, or [tool.papa] from
@@ -32,8 +35,13 @@ Exit codes:
   0  no file failed --max-grade (findings alone never fail a run)
   1  at least one file is harder than --max-grade
   2  usage, config, or input error, or no input had prose to check
-     (files with no prose are skipped with a note on stderr)
+     (files with no prose are skipped with a note on stderr; --allow-empty
+     makes that case exit 0, as pre-commit needs)
 """
+
+
+# Machine formats always write a document, even when no file had prose.
+_ALWAYS_EMIT = ("json", "html", "sarif", "markdown", "github")
 
 
 class _HelpFormatter(argparse.RawDescriptionHelpFormatter):
@@ -69,6 +77,9 @@ def build_parser() -> argparse.ArgumentParser:
         epilog=EXAMPLES,
         formatter_class=_HelpFormatter,
     )
+    if hasattr(parser, "color"):
+        # Python 3.14 colors help by default; keep it plain so it reads the same everywhere.
+        parser.color = False
     parser.add_argument("files", nargs="*", metavar="PATH",
                         help="files, folders, or quoted globs; '-' or a pipe reads stdin")
     parser.add_argument("--report", choices=list(REPORTERS), default="cli",
@@ -83,6 +94,8 @@ def build_parser() -> argparse.ArgumentParser:
                         help="name to show for stdin; its suffix picks the format")
     parser.add_argument("--all", action="store_true", dest="show_all",
                         help="show every finding; by default long output is capped")
+    parser.add_argument("--allow-empty", action="store_true",
+                        help="exit 0, not 2, when no input has prose to check")
     parser.add_argument("--summary", action="store_true",
                         help="show grades and counts only, without each finding")
     parser.add_argument("-q", "--quiet", action="store_true",
@@ -117,7 +130,7 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         settings = _settings(args)
-        paths, input_errors = inputs.expand(args.files or [inputs.STDIN], settings.exclude)
+        paths, input_errors = _expand(args, settings)
     except (config.ConfigError, inputs.InputError) as error:
         return _fail(str(error))
 
@@ -131,15 +144,25 @@ def main(argv: list[str] | None = None) -> int:
     for path, reason in run.skipped:
         print(f"papa: skipped {path}: {reason}", file=sys.stderr)
 
-    if (not args.quiet or args.output) and (run.analyses or args.report in ("json", "html")):
+    if (not args.quiet or args.output) and (run.analyses or args.report in _ALWAYS_EMIT):
         try:
             _emit(args, run)
         except OSError as error:
             return _fail(f"cannot write {args.output}: {(error.strerror or str(error)).lower()}")
 
-    if run.errors or not run.analyses:
+    if run.errors or not (run.analyses or args.allow_empty):
         return 2
     return 1 if any(a.score.verdict == "fail" for a in run.analyses) else 0
+
+
+def _expand(args: argparse.Namespace, settings: config.Config) -> tuple[list[str], list[tuple[str, str]]]:
+    try:
+        return inputs.expand(args.files or [inputs.STDIN], settings.exclude)
+    except inputs.AllExcluded as error:
+        if not args.allow_empty:
+            raise
+        print(f"papa: {error}", file=sys.stderr)
+        return [], []
 
 
 def _settings(args: argparse.Namespace) -> config.Config:

@@ -18,6 +18,8 @@ SUMMARY_KEYS = {"files", "analyzed", "passed", "failed", "skipped", "errors", "m
 
 
 def checks(result, project) -> list[Check]:
+    if _report(result.case) == "sarif" and result.stdout.strip():
+        return [_sarif_check(result.stdout)]
     if not result.case.get("json"):
         return []
     try:
@@ -94,3 +96,30 @@ def _offset_problems(data: dict, cwd: Path, case: dict) -> list[str]:
 def _line_col(source: str, offset: int) -> tuple[int, int]:
     line = source.count("\n", 0, offset) + 1
     return line, offset - (source.rfind("\n", 0, offset) + 1) + 1
+
+
+def _report(case: dict) -> str | None:
+    argv = case.get("argv", [])
+    return argv[argv.index("--report") + 1] if "--report" in argv[:-1] else None
+
+
+def _sarif_check(stdout: str) -> Check:
+    try:
+        data = json.loads(stdout)
+        run = data["runs"][0]
+        rules = {rule["id"] for rule in run["tool"]["driver"]["rules"]}
+        problems = [] if data["version"] == "2.1.0" else ["version must be 2.1.0"]
+        for result in run["results"]:
+            region = result["locations"][0]["physicalLocation"]["region"]
+            if result["ruleId"] not in rules:
+                problems.append(f"ruleId {result['ruleId']!r} is not a declared rule")
+            if result["level"] not in ("error", "warning", "note"):
+                problems.append(f"bad level {result['level']!r}")
+            if region["startLine"] < 1 or region["startColumn"] < 1:
+                problems.append(f"region must be 1-based, got {region}")
+            if (region["endLine"], region["endColumn"]) < (region["startLine"], region["startColumn"]):
+                problems.append(f"region ends before it starts: {region}")
+    except (ValueError, KeyError, IndexError, TypeError) as error:
+        problems = [f"not a SARIF 2.1.0 log: {error!r}"]
+    return Check("papa-sarif", "fail" if problems else "pass", "; ".join(problems[:5]),
+                 "SARIF 2.1.0 with declared rules and 1-based regions", source="src/papa/reporters/sarif.py")

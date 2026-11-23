@@ -1,10 +1,11 @@
 $ --help
 [exit 0]
 --- stdout
-usage: papa [-h] [--report {cli,concise,json,html}] [-o FILE] [--max-grade N]
-            [--exclude GLOB] [--format {md,mdx,txt}] [--stdin-filename NAME]
-            [--all] [--summary] [-q] [--color {auto,always,never}]
-            [--config FILE] [--no-config] [--version]
+usage: papa [-h] [--report {cli,concise,json,html,sarif,github,markdown}]
+            [-o FILE] [--max-grade N] [--exclude GLOB] [--format {md,mdx,txt}]
+            [--stdin-filename NAME] [--all] [--allow-empty] [--summary] [-q]
+            [--color {auto,always,never}] [--config FILE] [--no-config]
+            [--version]
             [PATH ...]
 
 Hemingway-style readability linting for Markdown and plain text.
@@ -15,7 +16,7 @@ positional arguments:
 
 options:
   -h, --help            show this help message and exit
-  --report {cli,concise,json,html}
+  --report {cli,concise,json,html,sarif,github,markdown}
                         output format (default: cli)
   -o, --output FILE     write the report to FILE
   --max-grade N         exit 1 if a file's consensus grade is above N
@@ -25,6 +26,7 @@ options:
   --stdin-filename NAME
                         name to show for stdin; its suffix picks the format
   --all                 show every finding; by default long output is capped
+  --allow-empty         exit 0, not 2, when no input has prose to check
   --summary             show grades and counts only, without each finding
   -q, --quiet           print nothing to stdout; -o files are still written
   --color {auto,always,never}
@@ -41,6 +43,9 @@ Examples:
   papa post.md --report concise        file:line:col lines for editors
   papa post.md --report json           findings for scripts and LLMs
   papa post.md --report html -o report.html
+  papa docs/ --report sarif -o papa.sarif
+  papa docs/ --report github           annotations in GitHub Actions
+  papa docs/ --report markdown         a job summary or PR comment
 
 Config:
   papa reads [papa] from the nearest papa.toml, or [tool.papa] from
@@ -50,6 +55,7 @@ Exit codes:
   0  no file failed --max-grade (findings alone never fail a run)
   1  at least one file is harder than --max-grade
   2  usage, config, or input error, or no input had prose to check
-     (files with no prose are skipped with a note on stderr)
+     (files with no prose are skipped with a note on stderr; --allow-empty
+     makes that case exit 0, as pre-commit needs)
 --- stderr
 

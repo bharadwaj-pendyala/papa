@@ -1,0 +1,81 @@
+name: Papa readability
+description: Grade the readability of Markdown and text, annotate hard sentences on the PR, and fail above a max grade.
+author: Bharadwaj Pendyala
+branding:
+  icon: book-open
+  color: yellow
+
+inputs:
+  paths:
+    description: Files, folders, or quoted globs to check, separated by spaces or new lines.
+    default: "."
+  max-grade:
+    description: Fail the step when a file's grade is above this number. Empty uses papa.toml, or no gate.
+    default: ""
+  args:
+    description: Extra papa arguments, such as `--exclude 'docs/generated/**'`.
+    default: ""
+  annotations:
+    description: Show findings as annotations on the PR diff.
+    default: "true"
+  summary:
+    description: Write a Markdown report to the job summary.
+    default: "true"
+  comment:
+    description: Post the report as a PR comment and update it on each push. Needs `pull-requests write` permission.
+    default: "false"
+  sarif-file:
+    description: Also write a SARIF file to this path, for github/codeql-action/upload-sarif.
+    default: ""
+  python-version:
+    description: Python version to run papa with.
+    default: "3.12"
+  github-token:
+    description: Token for the PR comment.
+    default: ${{ github.token }}
+
+outputs:
+  exit-code:
+    description: "papa's exit code: 0 passed, 1 a file is above the max grade, 2 usage or input error."
+    value: ${{ steps.papa.outputs.exit-code }}
+  report:
+    description: Path to the Markdown report.
+    value: ${{ steps.papa.outputs.report }}
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+
+    - name: Install papa
+      shell: bash
+      run: python -I -m pip install --disable-pip-version-check --quiet "$GITHUB_ACTION_PATH"
+
+    - name: Run papa
+      id: papa
+      shell: bash
+      env:
+        INPUT_PATHS: ${{ inputs.paths }}
+        INPUT_MAX_GRADE: ${{ inputs.max-grade }}
+        INPUT_ARGS: ${{ inputs.args }}
+        INPUT_ANNOTATIONS: ${{ inputs.annotations }}
+        INPUT_SUMMARY: ${{ inputs.summary }}
+        INPUT_SARIF_FILE: ${{ inputs.sarif-file }}
+      run: python -I "$GITHUB_ACTION_PATH/action/run.py"
+
+    - name: Comment on the PR
+      if: inputs.comment == 'true' && github.event.pull_request.number
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+        PR: ${{ github.event.pull_request.number }}
+        REPORT: ${{ steps.papa.outputs.report }}
+      run: bash "$GITHUB_ACTION_PATH/action/comment.sh"
+
+    - name: Apply the readability gate
+      shell: bash
+      env:
+        CODE: ${{ steps.papa.outputs.exit-code }}
+      run: exit "$CODE"
