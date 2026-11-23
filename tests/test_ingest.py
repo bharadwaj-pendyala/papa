@@ -1,3 +1,4 @@
+from papa import analyze
 from papa.ingest import ingest
 
 
@@ -162,3 +163,24 @@ def test_link_label_wrapped_across_lines_keeps_only_the_text():
     md = "To use a custom model, [check out this part\nof the docs](/guides/custom).\n"
     clean, _ = ingest(md, "md")
     assert " ".join(clean.split()) == "To use a custom model, check out this part of the docs."
+
+
+def _graded(text, fmt="md"):
+    return ingest(text, fmt)[0]
+
+
+def test_mdx_style_props_with_double_braces_keep_the_prose_between_them():
+    mdx = ('<Callout style={{\n  color: "red"\n}\n}}>\nRead the migration guide.\n</Callout>\n\n'
+           '<Callout style={{ color: "blue" }}>\nOther text.\n</Callout>\n')
+    assert "Read the migration guide." in _graded(mdx, "mdx")
+
+
+def test_a_template_variable_inside_a_wrapped_line_does_not_split_the_sentence():
+    one_line = analyze("Use the command to launch {{ site.product }} on your machine.\n", path="a.md")
+    wrapped = analyze("Use the command to launch\n{{ site.product }} on your machine.\n", path="a.md")
+    assert wrapped.score.sentences == one_line.score.sentences == 1
+
+
+def test_a_brace_opener_in_inline_code_does_not_hide_a_later_tag():
+    md = "Start a variable with `{{`.\n\nThe current version is {{ site.version }} today.\n"
+    assert "site.version" not in _graded(md)

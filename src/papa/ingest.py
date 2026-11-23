@@ -113,7 +113,14 @@ def block_breaks(text: str, fmt: str, offset_map: OffsetMap) -> set[int]:
         starts += [heading.start(), line_end if line_end != -1 else len(text)]
     for row in _TABLE_ROW.finditer(text):
         starts += [row.start() + i for i, ch in enumerate(row.group()) if ch == "|"]
-    for tag in (*_TAG.finditer(text), *_TEMPLATE.finditer(text)):
+    if fmt == "md":
+        for tag in _templates(text, []):
+            line_start = text.rfind("\n", 0, tag.start()) + 1
+            line_end = text.find("\n", tag.end())
+            # Only a tag alone on its line ends a block; one inside a wrapped sentence does not.
+            if not text[line_start:tag.start()].strip() and not text[tag.end():line_end if line_end != -1 else None].strip():
+                starts += [tag.start(), tag.end()]
+    for tag in _TAG.finditer(text):
         line_start = text.rfind("\n", 0, tag.start()) + 1
         if not text[line_start:tag.start()].strip():
             starts += [tag.start(), tag.end()]
@@ -132,18 +139,28 @@ def _strip_spans(text: str, fmt: str) -> list[tuple[int, int]]:
     code = _merge(code)
 
     markup: list[tuple[int, int]] = []
-    whole = [_COMMENT, _TAG, _TEMPLATE, _LINKED_IMAGE, _IMAGE, _LINK_DEFINITION, _URL, _EMPHASIS,
+    whole = [_COMMENT, _TAG, _LINKED_IMAGE, _IMAGE, _LINK_DEFINITION, _URL, _EMPHASIS,
              _HEADING, _SETEXT, _LIST_ITEM, _QUOTE, _CALLOUT, _RULE, _TABLE_DIVIDER]
     if fmt == "mdx":
         whole = [_MDX_IMPORT, _MDX_EXPRESSION, *whole]
     for pattern in whole:
         markup += [(m.start(), m.end()) for m in pattern.finditer(text)]
+    if fmt == "md":
+        markup += [(m.start(), m.end()) for m in _templates(text, code)]
     for link in _LINK.finditer(text):
         markup += [(link.start(), link.start() + 1), (link.start(2) - 1, link.end())]
     for row in _TABLE_ROW.finditer(text):
         markup += [(row.start() + i, row.start() + i + 1) for i, ch in enumerate(row.group()) if ch == "|"]
 
     return _merge(code + [span for span in markup if not _inside(span[0], code)])
+
+
+def _templates(text: str, code: list[tuple[int, int]]) -> list[re.Match]:
+    # Blank out code first, so a literal "{{" in inline code cannot open a match.
+    masked = list(text)
+    for start, end in code:
+        masked[start:end] = " " * (end - start)
+    return list(_TEMPLATE.finditer("".join(masked)))
 
 
 def _inside(pos: int, merged: list[tuple[int, int]]) -> bool:
