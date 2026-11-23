@@ -3,7 +3,8 @@
 set -euo pipefail
 
 marker="<!-- papa-readability -->"
-[ -f "$REPORT" ] || { echo "papa: no report to post"; exit 0; }
+# papa writes no report on a config or usage error; keep the last good comment then.
+[ -s "$REPORT" ] || { echo "papa: no report to post"; exit 0; }
 body="$(printf '%s\n%s' "$marker" "$(head -c 60000 "$REPORT")")"
 
 existing=$(gh api "repos/$GITHUB_REPOSITORY/issues/$PR/comments" --paginate \

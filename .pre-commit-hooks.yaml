@@ -6,3 +6,4 @@
   language: python
   types_or: [markdown, mdx, plain-text]
   require_serial: true
+  verbose: true
