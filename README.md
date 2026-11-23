@@ -171,11 +171,12 @@ Markdown report. GitHub shows at most 10 warning annotations per step, so
 the job summary is the full list.
 
 To see findings in the **Security** tab, write SARIF and upload it. The
-upload needs `security-events: write` permission:
+upload needs these permissions:
 
 ```yaml
 permissions:
   contents: read
+  actions: read
   security-events: write
 steps:
   - uses: actions/checkout@v4
