@@ -1,0 +1,10 @@
+$ hugo/pods.md --max-grade 7
+[exit 0]
+--- stdout
+hugo/pods.md  ·  Grade 6, easy to read
+  PASS  grade 6.2 is within --max-grade 7
+
+  No flagged sentences or words.
+  mean of ARI 4.5, FK 5.1, Fog 8.9 · 5 sentences
+--- stderr
+

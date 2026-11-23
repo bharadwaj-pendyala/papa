@@ -27,6 +27,8 @@ _BRACES = r"\{(?:[^{}]|\{[^{}]*\})*\}"  # two levels: icon={<img width={20} />}
 _TAG = re.compile(rf"</?[A-Za-z][\w.:-]*(?:\s(?:[^<>{{}}]|{_BRACES})*)?/?>", re.DOTALL)
 _MDX_IMPORT = re.compile(r"^(?:import|export)\b.*?(?:;[ \t]*$|\n[ \t]*\n|\Z)", re.DOTALL | re.MULTILINE)
 _MDX_EXPRESSION = re.compile(_BRACES)
+# Hugo shortcodes ({{< >}}, {{% %}}), Liquid and Jinja tags ({% %}), and {{ }} variables.
+_TEMPLATE = re.compile(r"\{\{[<%].*?[%>]\}\}|\{%.*?%\}|\{\{.*?\}\}", re.DOTALL)
 _LINKED_IMAGE = re.compile(r"\[!\[[^\]]*\]\([^)]*\)\]\([^)]*\)")
 _IMAGE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
 # A label may wrap onto the next line, but never across a blank line (a new paragraph).
@@ -111,7 +113,7 @@ def block_breaks(text: str, fmt: str, offset_map: OffsetMap) -> set[int]:
         starts += [heading.start(), line_end if line_end != -1 else len(text)]
     for row in _TABLE_ROW.finditer(text):
         starts += [row.start() + i for i, ch in enumerate(row.group()) if ch == "|"]
-    for tag in _TAG.finditer(text):
+    for tag in (*_TAG.finditer(text), *_TEMPLATE.finditer(text)):
         line_start = text.rfind("\n", 0, tag.start()) + 1
         if not text[line_start:tag.start()].strip():
             starts += [tag.start(), tag.end()]
@@ -130,7 +132,7 @@ def _strip_spans(text: str, fmt: str) -> list[tuple[int, int]]:
     code = _merge(code)
 
     markup: list[tuple[int, int]] = []
-    whole = [_COMMENT, _TAG, _LINKED_IMAGE, _IMAGE, _LINK_DEFINITION, _URL, _EMPHASIS,
+    whole = [_COMMENT, _TAG, _TEMPLATE, _LINKED_IMAGE, _IMAGE, _LINK_DEFINITION, _URL, _EMPHASIS,
              _HEADING, _SETEXT, _LIST_ITEM, _QUOTE, _CALLOUT, _RULE, _TABLE_DIVIDER]
     if fmt == "mdx":
         whole = [_MDX_IMPORT, _MDX_EXPRESSION, *whole]
