@@ -35,6 +35,8 @@ from papa.reporters.json_report import file_payload
 
 def check(text):
     analysis = analyze(text, path="draft.md")
+    if not analysis.clean.strip():
+        return json.dumps({"skipped": True})
     return json.dumps({"html": _render_spans(analysis.source, analysis.findings),
                        "report": file_payload(analysis)})
 `;
@@ -81,14 +83,16 @@ function show(result) {
 
 let timer;
 loadGrader().then((check) => {
+  const empty = (message) => {
+    panel.hidden = true;
+    rendered.textContent = message;
+    tips.innerHTML = "";
+  };
   const run = () => {
-    if (!draft.value.trim()) {
-      panel.hidden = true;
-      rendered.textContent = "Type or paste some prose on the left.";
-      tips.innerHTML = "";
-      return;
-    }
-    show(JSON.parse(check(draft.value)));
+    if (!draft.value.trim()) return empty("Type or paste some prose on the left.");
+    const result = JSON.parse(check(draft.value));
+    if (result.skipped) return empty("No prose to grade. Papa skips code blocks and markup.");
+    show(result);
   };
   statusEl.textContent = "Updates as you type";
   draft.addEventListener("input", () => { clearTimeout(timer); timer = setTimeout(run, 250); });
