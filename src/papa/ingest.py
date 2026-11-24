@@ -262,6 +262,10 @@ def _brace_end(text: str, i: int) -> int:
             if end != -1:
                 k = end
                 continue
+        if text.startswith("//", k):
+            close = text.find("\n", k)
+            k = len(text) if close == -1 else close
+            continue
         if text.startswith("/*", k):
             close = text.find("*/", k + 2)
             k = len(text) if close == -1 else close + 2

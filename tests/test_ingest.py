@@ -230,3 +230,9 @@ def test_an_inline_expression_at_a_line_start_does_not_split_the_sentence():
     one_line = analyze("Install {productName} on your machine.\n", path="a.mdx", fmt="mdx")
     wrapped = analyze("Install\n{productName} on your machine.\n", path="a.mdx", fmt="mdx")
     assert wrapped.score.sentences == one_line.score.sentences == 1
+
+
+def test_a_glob_in_a_js_line_comment_does_not_open_a_block_comment():
+    mdx = ('<FileList\n  files={files.filter(file => {\n    // Include src/** in the examples.\n'
+           '    return file.startsWith("src/");\n  })}\n/>\n\nRead the migration guide.\n')
+    assert " ".join(_graded(mdx, "mdx").split()) == "Read the migration guide."
