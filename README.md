@@ -100,9 +100,9 @@ URLs, images, badges, and emphasis marks. Each list item, heading, and table
 cell counts as its own unit, and short headings or labels are not graded.
 
 A folder or glob finds `.md`, `.mdx`, and `.txt` files. It skips hidden
-folders, `node_modules`, files that git ignores, and files that are not docs:
-`requirements*.txt`, `robots.txt`, `CMakeLists.txt`, and license or notice
-files. Name a file to check it anyway.
+folders, `node_modules`, `LICENSES`, files that git ignores, and files that
+are not docs: `requirements*.txt`, `robots.txt`, `CMakeLists.txt`, and
+license or notice files. Name a file to check it anyway.
 
 Long output is capped. One file shows its 25 most severe findings. A run over
 more than 10 files shows one line per file. Add `--all` to see every finding.

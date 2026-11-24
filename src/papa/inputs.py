@@ -13,9 +13,9 @@ STDIN = "-"
 PROSE_SUFFIXES = {".md", ".markdown", ".mdx", ".txt"}
 _GLOB_CHARS = set("*?[")
 # Folder and glob scans skip these: they hold dependencies, config, or legal text, not docs.
-_SKIP_DIRS = {"node_modules"}
+_SKIP_DIRS = {"node_modules", "LICENSES"}
 _NOT_DOCS = re.compile(
-    r"(?:requirements|constraints)[\w.-]*\.txt|robots\.txt|cmakelists\.txt|(?:licen[cs]e(?:-\w+)?|copying|notice)(?:\.\w+)?",
+    r"(?:requirements|constraints)[\w.-]*\.txt|robots\.txt|cmakelists\.txt|(?:licen[cs]e(?:-\w+)?|copying|notices?|third[_-]party[_-](?:notices?|licen[cs]es?))(?:\.\w+)?",
     re.IGNORECASE,
 )
 

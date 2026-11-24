@@ -23,6 +23,7 @@ from .scoring import document_grades
 from .sentences import split_sentences
 
 __version__ = "0.2.3"
+_SENTENCE_END = re.compile(r"[.!?][\"'\u201d\u2019)\]]*$")
 __all__ = ["analyze", "Analysis", "DocumentScore", "Finding"]
 
 
@@ -54,7 +55,7 @@ def analyze(
 def _graded(sentences: list[tuple[int, int, str]]) -> list[tuple[int, int, str]]:
     # A short heading or label like "Authentication configuration" has many
     # syllables and no sentence around it, so the formulas read it as grade 17.
-    prose = [s for s in sentences if s[2][-1] in ".!?" or len(WORD.findall(s[2])) >= MIN_WORDS]
+    prose = [s for s in sentences if _SENTENCE_END.search(s[2]) or len(WORD.findall(s[2])) >= MIN_WORDS]
     return prose or sentences
 
 

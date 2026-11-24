@@ -275,3 +275,14 @@ def test_fence_indented_under_a_list_item_is_stripped():
 def test_short_heading_does_not_raise_the_grade():
     with_heading = analyze("# Authentication configuration\n\nRun the app.\n").score.consensus
     assert with_heading == analyze("Run the app.\n").score.consensus
+
+
+def test_fence_opened_on_a_list_marker_line_is_stripped():
+    text = "- ```bash\n  pip install --upgrade some-package-name && configure --environment production\n  ```\n- Open the app.\n"
+    clean, _ = ingest(text, "md")
+    assert "pip" not in clean and "Open the app" in clean
+
+
+def test_short_quoted_sentence_still_counts_toward_the_grade():
+    quoted = analyze("“Documentation configuration is extraordinarily complicated.”\n\nRun the app.\n").score.consensus
+    assert quoted > analyze("Run the app.\n").score.consensus

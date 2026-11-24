@@ -181,3 +181,13 @@ def test_folder_scan_skips_git_ignored_files(tmp_path, capsys):
 
 def test_named_file_is_graded_even_when_scans_skip_it(tmp_path):
     assert main([_write(tmp_path, "LICENSE.md", HARD), "--max-grade", "10"]) == 1
+
+
+def test_folder_scan_skips_third_party_notices_and_licenses_folder(tmp_path, capsys):
+    _write(tmp_path, "README.md", EASY)
+    _write(tmp_path, "THIRD_PARTY_NOTICES.txt", HARD)
+    (tmp_path / "LICENSES").mkdir()
+    _write(tmp_path, "LICENSES/MIT.txt", HARD)
+    assert main([str(tmp_path), "--max-grade", "10"]) == 0
+    out = capsys.readouterr().out
+    assert "NOTICES" not in out and "MIT.txt" not in out

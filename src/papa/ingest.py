@@ -16,9 +16,9 @@ import re
 from bisect import bisect_right
 
 _FRONTMATTER = re.compile(r"\A---\n.*?\n---[ \t]*(?:\n|\Z)", re.DOTALL)
-# A fence may be indented, as it is under a list item.
+# A fence may be indented under a list item, or open on the list marker's line.
 _FENCED = re.compile(
-    r"(?:\A|\n)[ \t]*(`{3,}|~{3,})[^\n]*\n(?:.*?\n)?[ \t]*\1[ \t]*(?=\n|\Z)", re.DOTALL
+    r"(?:\A|\n)[ \t]*(?:(?:[-*+]|\d{1,9}[.)])[ \t]+)?(`{3,}|~{3,})[^\n]*\n(?:.*?\n)?[ \t]*\1[ \t]*(?=\n|\Z)", re.DOTALL
 )
 _SVG = re.compile(r"<svg\b.*?</svg>", re.DOTALL | re.IGNORECASE)
 _INLINE = re.compile(r"`[^`\n]+`")
