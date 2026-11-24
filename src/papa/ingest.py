@@ -27,6 +27,8 @@ _BRACES = r"\{(?:[^{}]|\{[^{}]*\})*\}"  # two levels: icon={<img width={20} />}
 _TAG = re.compile(rf"</?[A-Za-z][\w.:-]*(?:\s(?:[^<>{{}}]|{_BRACES})*)?/?>", re.DOTALL)
 _MDX_IMPORT = re.compile(r"^(?:import|export)\b.*?(?:;[ \t]*$|\n[ \t]*\n|\Z)", re.DOTALL | re.MULTILINE)
 _MDX_EXPRESSION = re.compile(_BRACES)
+# Hugo shortcodes ({{< >}}, {{% %}}), Liquid and Jinja tags ({% %}), and {{ }} variables.
+_TEMPLATE = re.compile(r"\{\{[<%].*?[%>]\}\}|\{%.*?%\}|\{\{.*?\}\}", re.DOTALL)
 _LINKED_IMAGE = re.compile(r"\[!\[[^\]]*\]\([^)]*\)\]\([^)]*\)")
 _IMAGE = re.compile(r"!\[[^\]]*\]\([^)]*\)")
 # A label may wrap onto the next line, but never across a blank line (a new paragraph).
@@ -109,8 +111,17 @@ def block_breaks(text: str, fmt: str, offset_map: OffsetMap) -> set[int]:
     for heading in _HEADING.finditer(text):
         line_end = text.find("\n", heading.end())
         starts += [heading.start(), line_end if line_end != -1 else len(text)]
-    for row in _TABLE_ROW.finditer(text):
+    templates = _templates(text, _code_spans(text)) if fmt == "md" else []
+    # A "|" inside a Liquid filter is not a table cell boundary.
+    for row in _TABLE_ROW.finditer(_mask(text, [t.span() for t in templates], "x")):
         starts += [row.start() + i for i, ch in enumerate(row.group()) if ch == "|"]
+    if fmt == "md":
+        for tag in templates:
+            line_start = text.rfind("\n", 0, tag.start()) + 1
+            line_end = text.find("\n", tag.end())
+            # Only a tag alone on its line ends a block; one inside a wrapped sentence does not.
+            if not text[line_start:tag.start()].strip() and not text[tag.end():line_end if line_end != -1 else None].strip():
+                starts += [tag.start(), tag.end()]
     for tag in _TAG.finditer(text):
         line_start = text.rfind("\n", 0, tag.start()) + 1
         if not text[line_start:tag.start()].strip():
@@ -118,7 +129,7 @@ def block_breaks(text: str, fmt: str, offset_map: OffsetMap) -> set[int]:
     return {offset_map.to_clean(pos) for pos in starts}
 
 
-def _strip_spans(text: str, fmt: str) -> list[tuple[int, int]]:
+def _code_spans(text: str) -> list[tuple[int, int]]:
     code: list[tuple[int, int]] = []
     frontmatter = _FRONTMATTER.match(text)
     if frontmatter:
@@ -127,21 +138,43 @@ def _strip_spans(text: str, fmt: str) -> list[tuple[int, int]]:
         code.extend((m.start(), m.end()) for m in pattern.finditer(text))
     blocks = _merge(list(code))  # don't strip inline backticks that live inside a fence/svg
     code += [(m.start(), m.end()) for m in _INLINE.finditer(text) if not _inside(m.start(), blocks)]
-    code = _merge(code)
+    return _merge(code)
+
+
+def _strip_spans(text: str, fmt: str) -> list[tuple[int, int]]:
+    code = _code_spans(text)
 
     markup: list[tuple[int, int]] = []
     whole = [_COMMENT, _TAG, _LINKED_IMAGE, _IMAGE, _LINK_DEFINITION, _URL, _EMPHASIS,
              _HEADING, _SETEXT, _LIST_ITEM, _QUOTE, _CALLOUT, _RULE, _TABLE_DIVIDER]
     if fmt == "mdx":
         whole = [_MDX_IMPORT, _MDX_EXPRESSION, *whole]
+    templates = [m.span() for m in _templates(text, code)] if fmt == "md" else []
+    # Match the rest on a copy where each template tag is plain filler, so a
+    # {{< ref >}} in a link target or a "|" filter in a table cell reads as one token.
+    scan = _mask(text, templates, "x")
     for pattern in whole:
-        markup += [(m.start(), m.end()) for m in pattern.finditer(text)]
-    for link in _LINK.finditer(text):
+        markup += [(m.start(), m.end()) for m in pattern.finditer(scan)]
+    markup += templates
+    for link in _LINK.finditer(scan):
         markup += [(link.start(), link.start() + 1), (link.start(2) - 1, link.end())]
-    for row in _TABLE_ROW.finditer(text):
+    for row in _TABLE_ROW.finditer(scan):
         markup += [(row.start() + i, row.start() + i + 1) for i, ch in enumerate(row.group()) if ch == "|"]
 
     return _merge(code + [span for span in markup if not _inside(span[0], code)])
+
+
+def _templates(text: str, code: list[tuple[int, int]]) -> list[re.Match]:
+    # Blank out code first, so a literal "{{" in inline code cannot open a match.
+    return list(_TEMPLATE.finditer(_mask(text, code, " ")))
+
+
+def _mask(text: str, spans: list[tuple[int, int]], fill: str) -> str:
+    """Replace each span's characters with ``fill``, keeping offsets and newlines."""
+    chars = list(text)
+    for start, end in spans:
+        chars[start:end] = [c if c == "\n" else fill for c in text[start:end]]
+    return "".join(chars)
 
 
 def _inside(pos: int, merged: list[tuple[int, int]]) -> bool:

@@ -1,0 +1,40 @@
+$ hugo/pods.md --report json
+[exit 0]
+--- stdout
+{
+  "version": "0.2",
+  "files": [
+    {
+      "file": "hugo/pods.md",
+      "score": {
+        "ari": 4.5,
+        "flesch_kincaid": 5.1,
+        "gunning_fog": 8.9,
+        "consensus": 6.1636,
+        "reading_grade": "Grade 6, easy to read",
+        "sentences": 5,
+        "hard_sentences": 0,
+        "very_hard_sentences": 0,
+        "adverbs": 0,
+        "passive": 0,
+        "complex_phrases": 0,
+        "verdict": "pass",
+        "threshold": null
+      },
+      "findings": []
+    }
+  ],
+  "skipped": [],
+  "errors": [],
+  "summary": {
+    "files": 1,
+    "analyzed": 1,
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "errors": 0,
+    "max_grade": null
+  }
+}
+--- stderr
+
