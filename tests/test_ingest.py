@@ -196,3 +196,10 @@ def test_a_liquid_filter_pipe_is_not_a_table_cell_boundary():
     with_filter = analyze(row.format('{{ page.product | default: "the service" }}'), path="a.md")
     plain = analyze(row.format("the service"), path="a.md")
     assert with_filter.score.sentences == plain.score.sentences
+
+
+def test_braces_in_inline_code_do_not_join_table_cells():
+    md = ("| Opening syntax | Closing syntax |\n| --- | --- |\n"
+          "| Enter `{{` to open a variable | Enter `}}` to close it |\n")
+    plain = md.replace("`{{`", "`x`").replace("`}}`", "`y`")
+    assert analyze(md, path="a.md").score.sentences == analyze(plain, path="a.md").score.sentences

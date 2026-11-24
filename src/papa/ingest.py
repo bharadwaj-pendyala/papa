@@ -111,7 +111,7 @@ def block_breaks(text: str, fmt: str, offset_map: OffsetMap) -> set[int]:
     for heading in _HEADING.finditer(text):
         line_end = text.find("\n", heading.end())
         starts += [heading.start(), line_end if line_end != -1 else len(text)]
-    templates = _templates(text, []) if fmt == "md" else []
+    templates = _templates(text, _code_spans(text)) if fmt == "md" else []
     # A "|" inside a Liquid filter is not a table cell boundary.
     for row in _TABLE_ROW.finditer(_mask(text, [t.span() for t in templates], "x")):
         starts += [row.start() + i for i, ch in enumerate(row.group()) if ch == "|"]
@@ -129,7 +129,7 @@ def block_breaks(text: str, fmt: str, offset_map: OffsetMap) -> set[int]:
     return {offset_map.to_clean(pos) for pos in starts}
 
 
-def _strip_spans(text: str, fmt: str) -> list[tuple[int, int]]:
+def _code_spans(text: str) -> list[tuple[int, int]]:
     code: list[tuple[int, int]] = []
     frontmatter = _FRONTMATTER.match(text)
     if frontmatter:
@@ -138,7 +138,11 @@ def _strip_spans(text: str, fmt: str) -> list[tuple[int, int]]:
         code.extend((m.start(), m.end()) for m in pattern.finditer(text))
     blocks = _merge(list(code))  # don't strip inline backticks that live inside a fence/svg
     code += [(m.start(), m.end()) for m in _INLINE.finditer(text) if not _inside(m.start(), blocks)]
-    code = _merge(code)
+    return _merge(code)
+
+
+def _strip_spans(text: str, fmt: str) -> list[tuple[int, int]]:
+    code = _code_spans(text)
 
     markup: list[tuple[int, int]] = []
     whole = [_COMMENT, _TAG, _LINKED_IMAGE, _IMAGE, _LINK_DEFINITION, _URL, _EMPHASIS,
