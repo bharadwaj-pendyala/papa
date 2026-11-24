@@ -236,3 +236,8 @@ def test_a_glob_in_a_js_line_comment_does_not_open_a_block_comment():
     mdx = ('<FileList\n  files={files.filter(file => {\n    // Include src/** in the examples.\n'
            '    return file.startsWith("src/");\n  })}\n/>\n\nRead the migration guide.\n')
     assert " ".join(_graded(mdx, "mdx").split()) == "Read the migration guide."
+
+
+def test_jsx_tag_names_may_start_with_a_dollar_or_underscore():
+    mdx = 'Read this.\n\n<$CodeSample path="/src/main.ts" lines={[[1, -1]]} />\n\n<_Note />\n'
+    assert " ".join(_graded(mdx, "mdx").split()) == "Read this."

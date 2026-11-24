@@ -170,7 +170,7 @@ def _strip_spans(text: str, fmt: str) -> list[tuple[int, int]]:
     return _merge(code + [span for span in markup if not _inside(span[0], code)])
 
 
-_TAG_NAME = re.compile(r"</?[A-Za-z][\w.:-]*(?=[\s/>])|<>|</>")
+_TAG_NAME = re.compile(r"</?[A-Za-z$_][\w$.:-]*(?=[\s/>])|<>|</>")
 
 
 def _jsx_spans(text: str, code: list[tuple[int, int]]) -> list[tuple[int, int]]:
