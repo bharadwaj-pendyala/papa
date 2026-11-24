@@ -195,6 +195,8 @@ def _tag_end(text: str, i: int) -> int:
     name = _TAG_NAME.match(text, i)
     if not name:
         return -1
+    if name.group() in ("<>", "</>"):
+        return name.end()
     k = name.end()
     while k < len(text):
         ch = text[k]
@@ -215,6 +217,29 @@ def _tag_end(text: str, i: int) -> int:
     return -1
 
 
+def _element_end(text: str, i: int) -> int:
+    """End of the JSX element that opens at ``i``, children and closing tag included."""
+    end = _tag_end(text, i)
+    if end == -1 or text[i + 1] == "/" or text[end - 2:end] == "/>":
+        return end
+    depth, k = 1, end
+    while k < len(text):
+        if text[k] == "{":
+            close = _brace_end(text, k)
+            k = close if close != -1 else k + 1
+        elif text[k] == "<" and (tag := _tag_end(text, k)) != -1:
+            if text[k + 1] == "/":
+                depth -= 1
+            elif text[tag - 2:tag] != "/>":
+                depth += 1
+            k = tag
+            if depth == 0:
+                return k
+        else:
+            k += 1
+    return -1
+
+
 def _brace_end(text: str, i: int) -> int:
     depth, k = 0, i
     while k < len(text):
@@ -225,6 +250,12 @@ def _brace_end(text: str, i: int) -> int:
         if ch == "`":
             k = _template_literal_end(text, k)
             continue
+        if ch == "<" and _TAG_NAME.match(text, k):
+            # JSX inside an expression: its text is not JavaScript, so an apostrophe is not a quote.
+            end = _element_end(text, k)
+            if end != -1:
+                k = end
+                continue
         if text.startswith("/*", k):
             close = text.find("*/", k + 2)
             k = len(text) if close == -1 else close + 2

@@ -203,3 +203,14 @@ def test_braces_in_inline_code_do_not_join_table_cells():
           "| Enter `{{` to open a variable | Enter `}}` to close it |\n")
     plain = md.replace("`{{`", "`x`").replace("`}}`", "`y`")
     assert analyze(md, path="a.md").score.sentences == analyze(plain, path="a.md").score.sentences
+
+
+def test_a_jsx_fragment_keeps_its_prose():
+    mdx = "<>\nRead the migration guide.\n</>\n\n> A quote follows.\n"
+    assert "Read the migration guide." in _graded(mdx, "mdx")
+
+
+def test_jsx_text_with_an_apostrophe_inside_an_expression_is_stripped():
+    mdx = "Before.\n\n{ready && <span>You're ready.</span>}\n\nAfter the check.\n"
+    clean = _graded(mdx, "mdx")
+    assert "ready &&" not in clean and "After the check." in clean
