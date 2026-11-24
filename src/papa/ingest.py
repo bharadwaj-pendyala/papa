@@ -26,7 +26,6 @@ _COMMENT = re.compile(r"<!--.*?-->", re.DOTALL)
 _BRACES = r"\{(?:[^{}]|\{[^{}]*\})*\}"  # two levels: icon={<img width={20} />}
 _TAG = re.compile(rf"</?[A-Za-z][\w.:-]*(?:\s(?:[^<>{{}}]|{_BRACES})*)?/?>", re.DOTALL)
 _MDX_IMPORT = re.compile(r"^(?:import|export)\b.*?(?:;[ \t]*$|\n[ \t]*\n|\Z)", re.DOTALL | re.MULTILINE)
-_MDX_EXPRESSION = re.compile(_BRACES)
 # Hugo shortcodes ({{< >}}, {{% %}}), Liquid and Jinja tags ({% %}), and {{ }} variables.
 _TEMPLATE = re.compile(r"\{\{[<%].*?[%>]\}\}|\{%.*?%\}|\{\{.*?\}\}", re.DOTALL)
 _LINKED_IMAGE = re.compile(r"\[!\[[^\]]*\]\([^)]*\)\]\([^)]*\)")
@@ -122,10 +121,11 @@ def block_breaks(text: str, fmt: str, offset_map: OffsetMap) -> set[int]:
             # Only a tag alone on its line ends a block; one inside a wrapped sentence does not.
             if not text[line_start:tag.start()].strip() and not text[tag.end():line_end if line_end != -1 else None].strip():
                 starts += [tag.start(), tag.end()]
-    for tag in _TAG.finditer(text):
-        line_start = text.rfind("\n", 0, tag.start()) + 1
-        if not text[line_start:tag.start()].strip():
-            starts += [tag.start(), tag.end()]
+    tags = _jsx_spans(text, _code_spans(text)) if fmt == "mdx" else [m.span() for m in _TAG.finditer(text)]
+    for start, end in tags:
+        line_start = text.rfind("\n", 0, start) + 1
+        if not text[line_start:start].strip():
+            starts += [start, end]
     return {offset_map.to_clean(pos) for pos in starts}
 
 
@@ -148,8 +148,11 @@ def _strip_spans(text: str, fmt: str) -> list[tuple[int, int]]:
     whole = [_COMMENT, _TAG, _LINKED_IMAGE, _IMAGE, _LINK_DEFINITION, _URL, _EMPHASIS,
              _HEADING, _SETEXT, _LIST_ITEM, _QUOTE, _CALLOUT, _RULE, _TABLE_DIVIDER]
     if fmt == "mdx":
-        whole = [_MDX_IMPORT, _MDX_EXPRESSION, *whole]
+        # JSX props hold real JavaScript, so a scanner finds their ends, not a regex.
+        whole = [_MDX_IMPORT, *(p for p in whole if p is not _TAG)]
     templates = [m.span() for m in _templates(text, code)] if fmt == "md" else []
+    if fmt == "mdx":
+        markup += _jsx_spans(text, code)
     # Match the rest on a copy where each template tag is plain filler, so a
     # {{< ref >}} in a link target or a "|" filter in a table cell reads as one token.
     scan = _mask(text, templates, "x")
@@ -162,6 +165,107 @@ def _strip_spans(text: str, fmt: str) -> list[tuple[int, int]]:
         markup += [(row.start() + i, row.start() + i + 1) for i, ch in enumerate(row.group()) if ch == "|"]
 
     return _merge(code + [span for span in markup if not _inside(span[0], code)])
+
+
+_TAG_NAME = re.compile(r"</?[A-Za-z][\w.:-]*(?=[\s/>])|<>|</>")
+
+
+def _jsx_spans(text: str, code: list[tuple[int, int]]) -> list[tuple[int, int]]:
+    """Spans of JSX tags and {expressions} in MDX, outside code."""
+    spans, i, n = [], 0, len(text)
+    code_starts = {start: end for start, end in code}
+    while i < n:
+        if i in code_starts:
+            i = code_starts[i]
+            continue
+        end = -1
+        if text[i] == "{":
+            end = _brace_end(text, i)
+        elif text[i] == "<":
+            end = _tag_end(text, i)
+        if end == -1:
+            i += 1
+            continue
+        spans.append((i, end))
+        i = end
+    return spans
+
+
+def _tag_end(text: str, i: int) -> int:
+    name = _TAG_NAME.match(text, i)
+    if not name:
+        return -1
+    k = name.end()
+    while k < len(text):
+        ch = text[k]
+        if ch == ">":
+            return k + 1
+        if text.startswith("/>", k):
+            return k + 2
+        if ch == "<":
+            return -1
+        if ch in "\"'":
+            k = _string_end(text, k, stop_at_newline=False)
+        elif ch == "{":
+            k = _brace_end(text, k)
+            if k == -1:
+                return -1
+        else:
+            k += 1
+    return -1
+
+
+def _brace_end(text: str, i: int) -> int:
+    depth, k = 0, i
+    while k < len(text):
+        ch = text[k]
+        if ch in "\"'":
+            k = _string_end(text, k, stop_at_newline=True)
+            continue
+        if ch == "`":
+            k = _template_literal_end(text, k)
+            continue
+        if text.startswith("/*", k):
+            close = text.find("*/", k + 2)
+            k = len(text) if close == -1 else close + 2
+            continue
+        if ch == "{":
+            depth += 1
+        elif ch == "}":
+            depth -= 1
+            if depth == 0:
+                return k + 1
+        k += 1
+    return -1
+
+
+def _string_end(text: str, i: int, stop_at_newline: bool) -> int:
+    quote, k = text[i], i + 1
+    while k < len(text):
+        if text[k] == "\\":
+            k += 2
+        elif text[k] == quote:
+            return k + 1
+        elif text[k] == "\n" and stop_at_newline:
+            return k
+        else:
+            k += 1
+    return len(text)
+
+
+def _template_literal_end(text: str, i: int) -> int:
+    k = i + 1
+    while k < len(text):
+        if text[k] == "\\":
+            k += 2
+        elif text[k] == "`":
+            return k + 1
+        elif text.startswith("${", k):
+            end = _brace_end(text, k + 1)
+            k = len(text) if end == -1 else end
+        else:
+            k += 1
+    return len(text)
 
 
 def _templates(text: str, code: list[tuple[int, int]]) -> list[re.Match]:
