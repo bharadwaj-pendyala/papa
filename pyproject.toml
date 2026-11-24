@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "papa-lint"
-version = "0.1.0"
+version = "0.2.0"
 description = "Hemingway-grade readability for your docs pipeline: CLI, library and CI gate."
 readme = "README.md"
 requires-python = ">=3.11"
@@ -26,6 +26,7 @@ dependencies = ["textstat>=0.7.3"]
 [project.optional-dependencies]
 dev = ["pytest>=7"]
 eyes = ["userlens[browser]"]
+mcp = ["mcp>=2,<3"]
 
 [project.urls]
 Homepage = "https://github.com/bharadwaj-pendyala/papa"
@@ -34,6 +35,7 @@ Issues = "https://github.com/bharadwaj-pendyala/papa/issues"
 
 [project.scripts]
 papa = "papa.cli:main"
+papa-mcp = "papa.mcp_server:main"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/papa"]

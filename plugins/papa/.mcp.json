@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "papa": {
+      "command": "uvx",
+      "args": ["--from", "papa-lint[mcp]>=0.2", "papa-mcp"]
+    }
+  }
+}
