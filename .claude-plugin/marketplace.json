@@ -11,7 +11,7 @@
       "description": "Grade docs like the Hemingway editor and rewrite flagged sentences until the grade passes.",
       "source": "./plugins/papa",
       "category": "productivity",
-      "homepage": "https://bharadwaj-pendyala.github.io/papa/"
+      "homepage": "https://papa.bharad.dev/"
     }
   ]
 }
