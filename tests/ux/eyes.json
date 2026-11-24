@@ -121,6 +121,7 @@
     {"id": "markdown-gate-precision", "argv": ["project/README.md", "--max-grade", "1.2", "--report", "markdown"], "cwd": ".", "exit": 1, "check_width": false, "stdout_absent": ["| 1.2 | :x: fail"]},
     {"id": "template-tags-are-not-prose", "argv": ["hugo/pods.md", "--report", "json"], "exit": 0, "json": true, "stdout_absent": ["feature-state", "{{", "{%", "include", "alert", "site.version"]},
     {"id": "template-tags-grade", "argv": ["hugo/pods.md", "--max-grade", "7"], "exit": 0, "stdout_contains": ["PASS"]},
+    {"id": "mdx-js-props-are-not-prose", "argv": ["mdx-props/api-table.mdx", "--report", "json"], "exit": 0, "json": true, "stdout_absent": ["keyframes", "animate-", "dedent", "rotate", "nested", "color"], "stdout_contains": ["\"sentences\": 2"]},
     {"id": "all-shows-everything", "argv": ["big", "--all"], "exit": 0, "stdout_contains": ["'was shipped'"], "stdout_absent": ["--all"]}
   ]
 }

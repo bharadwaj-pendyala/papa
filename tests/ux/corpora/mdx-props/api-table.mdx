@@ -1,0 +1,28 @@
+import { ApiTable } from "@/components/api-table.tsx";
+import dedent from "dedent";
+
+export const title = "animation";
+
+<ApiTable
+  rows={[
+    [
+      "animate-spin",
+      dedent`
+        animation: var(--animate-spin); /* spin 1s linear infinite */
+
+        @keyframes spin {
+          to {
+            transform: rotate(360deg);
+          }
+        }
+      `,
+    ],
+    ["animate-none", "animation: none;"],
+  ]}
+/>
+
+Use the spin utility to rotate a loading icon.
+
+<Example props={{ label: `a ${"nested"} value`, style: { color: "red" } }}>
+  Hover the button to see the effect.
+</Example>

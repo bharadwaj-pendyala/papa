@@ -1,0 +1,40 @@
+$ mdx-props/api-table.mdx --report json
+[exit 0]
+--- stdout
+{
+  "version": "0.2",
+  "files": [
+    {
+      "file": "mdx-props/api-table.mdx",
+      "score": {
+        "ari": 2.3,
+        "flesch_kincaid": 6.0,
+        "gunning_fog": 5.7,
+        "consensus": 4.6535,
+        "reading_grade": "Grade 5, easy to read",
+        "sentences": 2,
+        "hard_sentences": 0,
+        "very_hard_sentences": 0,
+        "adverbs": 0,
+        "passive": 0,
+        "complex_phrases": 0,
+        "verdict": "pass",
+        "threshold": null
+      },
+      "findings": []
+    }
+  ],
+  "skipped": [],
+  "errors": [],
+  "summary": {
+    "files": 1,
+    "analyzed": 1,
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "errors": 0,
+    "max_grade": null
+  }
+}
+--- stderr
+
