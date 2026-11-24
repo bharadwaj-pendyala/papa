@@ -23,10 +23,10 @@
   .who a:hover { text-decoration: underline; }
   .who small { display: block; font: 13px/1.4 var(--mono); color: var(--ink-soft); overflow-wrap: anywhere; }
   .track { position: relative; height: 28px; background: linear-gradient(to right, transparent calc(var(--ten) - 1px), var(--ink-soft) calc(var(--ten) - 1px), var(--ink-soft) var(--ten), transparent var(--ten)); }
-  .bar { position: absolute; inset: 4px auto 4px 0; border-radius: 4px; }
-  .bar.easy { background: var(--passive); }
-  .bar.hard { background: var(--hard); }
-  .bar.very { background: var(--very-hard); }
+  .fill { position: absolute; inset: 4px auto 4px 0; border-radius: 4px; }
+  .fill.easy { background: var(--passive); }
+  .fill.hard { background: var(--hard); }
+  .fill.very { background: var(--very-hard); }
   .grade { font: 800 28px/1 var(--display); text-align: right; font-variant-numeric: tabular-nums; }
   .stats { grid-column: 2 / -1; display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 14px; color: var(--ink-soft); }
   .stats a { color: inherit; }
@@ -40,10 +40,12 @@
   @media (max-width: 720px) {
     .board-head, .board, .method { padding-left: 16px; padding-right: 16px; }
     .row, .scale { grid-template-columns: 1.8em minmax(0, 1fr) 3.5em; }
-    .track { grid-column: 2 / 3; grid-row: 2; }
-    .grade { grid-row: 1 / 3; grid-column: 3; }
-    .scale span:nth-child(2), .scale span:nth-child(4) { display: none; }
-    .scale span:nth-child(3) { grid-column: 2; }
+    .rank { grid-row: 1; }
+    .who { grid-column: 2; grid-row: 1; }
+    .grade { grid-column: 3; grid-row: 1; }
+    .track { grid-column: 2 / 4; grid-row: 2; }
+    .stats { grid-column: 2 / 4; grid-row: 3; }
+    .scale { display: none; }
   }
 </style>
 </head>
@@ -103,7 +105,7 @@
     return `<li class="row">
       <span class="rank">${i + 1}</span>
       <span class="who"><a href="${esc(tree)}">${esc(p.name)}</a><small>${esc(p.repo)}/${esc(p.scope)}</small></span>
-      <span class="track"><span class="bar ${band}" style="width:${pct(p.grade)}"></span></span>
+      <span class="track"><span class="fill ${band}" style="width:${pct(p.grade)}"></span></span>
       <span class="grade">${p.grade.toFixed(1)}</span>
       <span class="stats">
         <span>${p.files} files · ${p.sentences.toLocaleString()} sentences</span>
