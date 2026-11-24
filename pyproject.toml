@@ -21,7 +21,7 @@ classifiers = [
     "Programming Language :: Python :: 3.13",
     "Topic :: Text Processing :: Linguistic",
 ]
-dependencies = ["textstat>=0.7.10,<0.8"]
+dependencies = ["textstat>=0.7.11,<0.8"]
 
 [project.optional-dependencies]
 dev = ["pytest>=7"]
