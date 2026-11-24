@@ -17,9 +17,9 @@ HTML report.
 
 [**Quickstart**](#-quickstart) · [**CI usage**](#-ci-usage) · [**Agents**](#-agents) · [**How it works**](#-how-it-works) · [**Roadmap**](#-roadmap)
 
-**[Try it in your browser](https://bharadwaj-pendyala.github.io/papa/#try)**
-with no install. Or see a [sample HTML report](https://bharadwaj-pendyala.github.io/papa/report.html)
-and the [docs readability leaderboard](https://bharadwaj-pendyala.github.io/papa/leaderboard.html)
+**[Try it in your browser](https://papa.bharad.dev/#try)**
+with no install. Or see a [sample HTML report](https://papa.bharad.dev/report.html)
+and the [docs readability leaderboard](https://papa.bharad.dev/leaderboard.html)
 for 14 open-source projects.
 
 </div>
