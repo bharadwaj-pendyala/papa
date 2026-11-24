@@ -1,1 +1,2 @@
 tests/ux/corpora/** -text
+src/papa/data/corpora/cmudict/** -text -diff linguist-generated

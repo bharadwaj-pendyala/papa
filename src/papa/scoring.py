@@ -7,9 +7,16 @@ ARI + FK (spec §5 table). All scoring runs on normalized text.
 
 from __future__ import annotations
 
+from pathlib import Path
+
+import nltk
 import textstat
 
 from .normalize import normalize
+
+# textstat downloads NLTK's CMU dictionary on first use, which fails offline and
+# can change grades between machines. papa ships the corpus and reads it first.
+nltk.data.path.insert(0, str(Path(__file__).parent / "data"))
 
 
 def _formula_grades(text: str) -> tuple[float, float, float]:

@@ -1,0 +1,7 @@
+corpora/cmudict/ is the Carnegie Mellon Pronouncing Dictionary
+(cmudict 0.7a), as packaged by NLTK. Copyright (C) 1993-2008 Carnegie
+Mellon University. All rights reserved. It is redistributed under the
+BSD-style terms in corpora/cmudict/README.
+
+textstat uses it to count syllables. papa ships it so that grading never
+downloads anything and gives the same grade online and offline.

@@ -45,13 +45,8 @@ async function loadGrader() {
   const { wheel } = await (await fetch("assets/wheel.json")).json();
   const pyodide = await loadPyodide();
   await pyodide.loadPackage(["micropip", "nltk", "setuptools"]);
-  // textstat counts syllables with NLTK's CMU dictionary. A browser cannot run
-  // nltk.download, so the site ships the corpus next to the wheel.
-  const corpus = new Uint8Array(await (await fetch("assets/cmudict.zip")).arrayBuffer());
-  pyodide.FS.mkdirTree("/home/pyodide/nltk_data/corpora");
-  pyodide.FS.writeFile("/home/pyodide/nltk_data/corpora/cmudict.zip", corpus);
+  // The wheel ships the CMU dictionary that textstat needs, so nothing downloads at runtime.
   await pyodide.pyimport("micropip").install(new URL(`assets/${wheel}`, location.href).href);
-  pyodide.runPython("import nltk; nltk.data.path.insert(0, '/home/pyodide/nltk_data')");
   pyodide.runPython(GLUE);
   return pyodide.globals.get("check");
 }
