@@ -99,12 +99,13 @@ def _not_git_ignored(paths: list[str]) -> list[str]:
     absolute = [os.path.abspath(p) for p in paths]
     try:
         result = subprocess.run(
-            ["git", "-C", os.path.commonpath([os.path.dirname(a) for a in absolute]), "check-ignore", "--stdin", "-z"],
+            ["git", "-C", os.path.commonpath([os.path.dirname(a) for a in absolute]), "check-ignore", "--no-index", "--stdin", "-z"],
             input="\0".join(absolute), capture_output=True, text=True, check=False,
         )
     except OSError:
         return paths
     # 0: some paths are ignored. 1: none are. Anything else: not a repo, or git failed.
+    # --no-index also lets a path inside a submodule through instead of failing the batch.
     if result.returncode != 0:
         return paths
     ignored = set(result.stdout.split("\0"))

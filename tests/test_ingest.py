@@ -286,3 +286,9 @@ def test_fence_opened_on_a_list_marker_line_is_stripped():
 def test_short_quoted_sentence_still_counts_toward_the_grade():
     quoted = analyze("“Documentation configuration is extraordinarily complicated.”\n\nRun the app.\n").score.consensus
     assert quoted > analyze("Run the app.\n").score.consensus
+
+
+def test_indented_backticks_inside_a_fence_do_not_close_it():
+    text = '```python\ndoc = """\n    ```\n    Run the multifaceted reconfiguration of interdependent subsystems now.\n"""\n```\n\nRun the app.\n'
+    clean, _ = ingest(text, "md")
+    assert "multifaceted" not in clean and "Run the app" in clean

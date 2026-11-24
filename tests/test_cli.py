@@ -191,3 +191,21 @@ def test_folder_scan_skips_third_party_notices_and_licenses_folder(tmp_path, cap
     assert main([str(tmp_path), "--max-grade", "10"]) == 0
     out = capsys.readouterr().out
     assert "NOTICES" not in out and "MIT.txt" not in out
+
+
+def test_folder_scan_skips_git_ignored_files_next_to_a_submodule(tmp_path, capsys):
+    sub = tmp_path / "sub"
+    subprocess.run(["git", "init", "-q", str(sub)], check=True)
+    _write(sub, "README.md", EASY)
+    git = ["git", "-C", str(sub), "-c", "user.email=t@t", "-c", "user.name=t"]
+    subprocess.run([*git, "add", "."], check=True)
+    subprocess.run([*git, "commit", "-qm", "init"], check=True)
+    repo = tmp_path / "repo"
+    subprocess.run(["git", "init", "-q", str(repo)], check=True)
+    subprocess.run(["git", "-C", str(repo), "-c", "protocol.file.allow=always", "submodule", "add", "-q", str(sub), "sub"], check=True)
+    _write(repo, ".gitignore", "build/\n")
+    _write(repo, "README.md", EASY)
+    (repo / "build").mkdir()
+    _write(repo, "build/out.md", HARD)
+    assert main([str(repo), "--max-grade", "10"]) == 0
+    assert "build" not in capsys.readouterr().out
