@@ -241,3 +241,14 @@ def test_a_glob_in_a_js_line_comment_does_not_open_a_block_comment():
 def test_jsx_tag_names_may_start_with_a_dollar_or_underscore():
     mdx = 'Read this.\n\n<$CodeSample path="/src/main.ts" lines={[[1, -1]]} />\n\n<_Note />\n'
     assert " ".join(_graded(mdx, "mdx").split()) == "Read this."
+
+
+def test_a_comparison_in_an_mdx_export_is_not_a_tag():
+    mdx = ("export const isUnderLimit = (total, _limit) => total<_limit\n\n"
+           "Read the migration guide.\n\n> Keep a backup.\n")
+    assert "Read the migration guide." in _graded(mdx, "mdx")
+
+
+def test_a_tag_never_spans_a_blank_line():
+    mdx = "Compare a <b and c\n\nRead the migration guide.\n\n> Keep a backup.\n"
+    assert "Read the migration guide." in _graded(mdx, "mdx")

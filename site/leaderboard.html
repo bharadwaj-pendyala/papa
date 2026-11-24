@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Docs readability leaderboard · Papa</title>
+<meta name="description" content="Papa graded the docs of 14 open-source projects. See whose docs are easiest to read, which pages are hardest, and how the grade is measured.">
+<meta property="og:title" content="Which open-source docs are easiest to read?">
+<meta property="og:description" content="Papa graded the docs of 14 projects, from FastAPI to Kubernetes.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+  .board-head { max-width: 1180px; margin: 0 auto; padding: 40px 24px 8px; }
+  .board-head h1 { font: 800 clamp(34px, 5.4vw, 64px)/1.05 var(--display); letter-spacing: -0.025em; margin: 0 0 18px; max-width: 18ch; }
+  .board-head p { max-width: 42em; color: var(--ink-soft); margin: 0 0 12px; }
+  .board { max-width: 1180px; margin: 0 auto; padding: 24px 24px 56px; }
+  .rows { list-style: none; margin: 0; padding: 0; border-top: 1.5px solid var(--ink); }
+  .row { display: grid; grid-template-columns: 2.2em minmax(0, 13em) minmax(0, 1fr) 4.5em; gap: 4px 16px; align-items: center; padding: 14px 0; border-bottom: 1px solid var(--rule); }
+  .rank { font: 600 15px var(--mono); color: var(--ink-soft); }
+  .who a { font: 800 20px/1.2 var(--display); text-decoration: none; }
+  .who a:hover { text-decoration: underline; }
+  .who small { display: block; font: 13px/1.4 var(--mono); color: var(--ink-soft); overflow-wrap: anywhere; }
+  .track { position: relative; height: 28px; background: linear-gradient(to right, transparent calc(var(--ten) - 1px), var(--ink-soft) calc(var(--ten) - 1px), var(--ink-soft) var(--ten), transparent var(--ten)); }
+  .bar { position: absolute; inset: 4px auto 4px 0; border-radius: 4px; }
+  .bar.easy { background: var(--passive); }
+  .bar.hard { background: var(--hard); }
+  .bar.very { background: var(--very-hard); }
+  .grade { font: 800 28px/1 var(--display); text-align: right; font-variant-numeric: tabular-nums; }
+  .stats { grid-column: 2 / -1; display: flex; flex-wrap: wrap; gap: 4px 18px; font-size: 14px; color: var(--ink-soft); }
+  .stats a { color: inherit; }
+  .scale { display: grid; grid-template-columns: 2.2em minmax(0, 13em) minmax(0, 1fr) 4.5em; gap: 16px; font: 12px var(--mono); color: var(--ink-soft); padding: 0 0 6px; }
+  .scale span:nth-child(3) { position: relative; }
+  .scale i { position: absolute; left: var(--ten); transform: translateX(-50%); font-style: normal; }
+  .method { max-width: 1180px; margin: 0 auto; padding: 0 24px 64px; }
+  .method h2 { margin-bottom: 14px; }
+  .method ul { max-width: 44em; padding-left: 20px; color: var(--ink-soft); }
+  .method li + li { margin-top: 6px; }
+  @media (max-width: 720px) {
+    .board-head, .board, .method { padding-left: 16px; padding-right: 16px; }
+    .row, .scale { grid-template-columns: 1.8em minmax(0, 1fr) 3.5em; }
+    .track { grid-column: 2 / 3; grid-row: 2; }
+    .grade { grid-row: 1 / 3; grid-column: 3; }
+    .scale span:nth-child(2), .scale span:nth-child(4) { display: none; }
+    .scale span:nth-child(3) { grid-column: 2; }
+  }
+</style>
+</head>
+<body>
+<header class="bar">
+  <a class="mark" href="./">papa</a>
+  <nav>
+    <a href="./#try">Try it</a>
+    <a href="leaderboard.html" aria-current="page">Leaderboard</a>
+    <a href="https://github.com/bharadwaj-pendyala/papa">GitHub</a>
+  </nav>
+</header>
+
+<main>
+  <section class="board-head">
+    <p class="eyebrow">Docs readability leaderboard</p>
+    <h1>Which open-source docs are easiest to read?</h1>
+    <p id="intro">Papa graded the docs of 14 projects. The grade is a US school grade: under 10 reads easily. Lower is better.</p>
+  </section>
+
+  <section class="board" aria-label="Projects ranked by grade">
+    <div class="scale" aria-hidden="true"><span></span><span>Project</span><span><i>grade 10</i></span><span></span></div>
+    <ol class="rows" id="rows"></ol>
+  </section>
+
+  <section class="method" aria-labelledby="method-title">
+    <h2 id="method-title">How the grade is measured</h2>
+    <ul>
+      <li>Each file's grade is the mean of three formulas: ARI, Flesch-Kincaid, and Gunning fog. A project's grade is the mean of its files, weighted by sentences.</li>
+      <li>Papa grades prose only. It skips code blocks, inline code, JSX and HTML tags, MDX expressions, Hugo shortcodes, link URLs, and front matter.</li>
+      <li>A hard sentence reads at grade 10 or above, and a very hard one at grade 14 or above. Papa does not judge accuracy, structure, or examples, and short API reference pages can score high on long technical words alone.</li>
+      <li id="source-note">Each project links to the folder and commit that papa graded.</li>
+    </ul>
+    <p>Run it on your own docs: <code>pipx run --spec papa-lint papa docs/</code>, or <a href="./#try">paste a page into the playground</a>.</p>
+  </section>
+</main>
+
+<footer class="foot">
+  <p>Grades come from <a href="https://github.com/bharadwaj-pendyala/papa">papa</a>, an open-source readability linter. A score is a prompt to look, not a verdict on a project.</p>
+</footer>
+
+<script type="module">
+  const data = await (await fetch("leaderboard.json")).json();
+  const max = 13;
+  const pct = (grade) => `${Math.min(100, (grade / max) * 100)}%`;
+  document.documentElement.style.setProperty("--ten", pct(10));
+  document.getElementById("intro").textContent =
+    `Papa ${data.papa} graded the docs of ${data.projects.length} projects on ${data.date}. ` +
+    "The grade is a US school grade: under 10 reads easily. Lower is better.";
+  document.getElementById("source-note").textContent =
+    `Each project links to the folder and commit that papa graded. ${data.note}`;
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => `&#${c.charCodeAt(0)};`);
+  document.getElementById("rows").innerHTML = data.projects.map((p, i) => {
+    const tree = `https://github.com/${p.repo}/tree/${p.commit}/${p.scope}`;
+    const worst = `https://github.com/${p.repo}/blob/${p.commit}/${p.worst}`;
+    const band = p.grade < 10 ? "easy" : p.grade < 11 ? "hard" : "very";
+    return `<li class="row">
+      <span class="rank">${i + 1}</span>
+      <span class="who"><a href="${esc(tree)}">${esc(p.name)}</a><small>${esc(p.repo)}/${esc(p.scope)}</small></span>
+      <span class="track"><span class="bar ${band}" style="width:${pct(p.grade)}"></span></span>
+      <span class="grade">${p.grade.toFixed(1)}</span>
+      <span class="stats">
+        <span>${p.files} files · ${p.sentences.toLocaleString()} sentences</span>
+        <span>${p.over10}% of files above grade 10</span>
+        <span>${p.very_hard}% very hard sentences</span>
+        <span>${p.passive}% passive</span>
+        <span>Hardest page: <a href="${esc(worst)}">${esc(p.worst.split("/").pop())}</a> (${p.worst_grade})</span>
+      </span>
+    </li>`;
+  }).join("");
+</script>
+</body>
+</html>

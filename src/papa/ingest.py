@@ -121,7 +121,11 @@ def block_breaks(text: str, fmt: str, offset_map: OffsetMap) -> set[int]:
             # Only a tag alone on its line ends a block; one inside a wrapped sentence does not.
             if not text[line_start:tag.start()].strip() and not text[tag.end():line_end if line_end != -1 else None].strip():
                 starts += [tag.start(), tag.end()]
-    tags = _jsx_spans(text, _code_spans(text)) if fmt == "mdx" else [m.span() for m in _TAG.finditer(text)]
+    if fmt == "mdx":
+        esm = [(m.start(), m.end()) for m in _MDX_IMPORT.finditer(text)]
+        tags = _jsx_spans(text, _merge(_code_spans(text) + esm))
+    else:
+        tags = [m.span() for m in _TAG.finditer(text)]
     for start, end in tags:
         line_start = text.rfind("\n", 0, start) + 1
         line_end = text.find("\n", end)
@@ -155,7 +159,8 @@ def _strip_spans(text: str, fmt: str) -> list[tuple[int, int]]:
         whole = [_MDX_IMPORT, *(p for p in whole if p is not _TAG)]
     templates = [m.span() for m in _templates(text, code)] if fmt == "md" else []
     if fmt == "mdx":
-        markup += _jsx_spans(text, code)
+        esm = [(m.start(), m.end()) for m in _MDX_IMPORT.finditer(text)]
+        markup += _jsx_spans(text, _merge(code + esm))
     # Match the rest on a copy where each template tag is plain filler, so a
     # {{< ref >}} in a link target or a "|" filter in a table cell reads as one token.
     scan = _mask(text, templates, "x")
@@ -208,7 +213,7 @@ def _tag_end(text: str, i: int) -> int:
             return k + 1
         if text.startswith("/>", k):
             return k + 2
-        if ch == "<":
+        if ch == "<" or text.startswith("\n\n", k):
             return -1
         if ch in "\"'":
             # JSX attribute strings have no escapes: "C:\" ends at its second quote.
