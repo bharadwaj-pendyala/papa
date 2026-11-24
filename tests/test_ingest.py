@@ -252,3 +252,26 @@ def test_a_comparison_in_an_mdx_export_is_not_a_tag():
 def test_a_tag_never_spans_a_blank_line():
     mdx = "Compare a <b and c\n\nRead the migration guide.\n\n> Keep a backup.\n"
     assert "Read the migration guide." in _graded(mdx, "mdx")
+
+
+def test_crlf_frontmatter_and_code_are_not_graded():
+    lf = "---\ntitle: Setup guide for configuration\n---\n\nRun the app.\n\n```bash\npip install --upgrade some-package-name && configure --environment production\n```\n"
+    crlf = lf.replace("\n", "\r\n")
+    assert analyze(crlf).score.consensus == analyze(lf).score.consensus
+
+
+def test_crlf_findings_point_at_the_original_text():
+    source = "Intro line here.\r\n\r\nThe report was written by the team.\r\nIt basically works.\r\n"
+    found = {f.category: source[f.start:f.end] for f in analyze(source).findings}
+    assert found == {"passive": "was written", "adverb": "basically"}
+
+
+def test_fence_indented_under_a_list_item_is_stripped():
+    text = "1. Run the installer.\n\n   ```bash\n   pip install --upgrade some-package-name && configure\n   ```\n\n2. Open the app.\n"
+    clean, _ = ingest(text, "md")
+    assert "pip" not in clean and "Open the app" in clean
+
+
+def test_short_heading_does_not_raise_the_grade():
+    with_heading = analyze("# Authentication configuration\n\nRun the app.\n").score.consensus
+    assert with_heading == analyze("Run the app.\n").score.consensus

@@ -58,9 +58,10 @@ def build_score(
         threshold = {"max_grade": clean_max}
 
     return DocumentScore(
-        ari=round(ari, 1),
-        flesch_kincaid=round(fk, 1),
-        gunning_fog=round(fog, 1),
+        # Adding 0.0 turns a rounded -0.0 into 0.0.
+        ari=round(ari, 1) + 0.0,
+        flesch_kincaid=round(fk, 1) + 0.0,
+        gunning_fog=round(fog, 1) + 0.0,
         consensus=round(consensus, 4),
         reading_grade=label,
         sentences=sentence_count,

@@ -4,7 +4,7 @@ $ mdx-site
 mdx-site/page.mdx  ·  Grade 3, easy to read
 
   No flagged sentences or words.
-  mean of ARI 3.7, FK 2.4, Fog 3.8 · 6 sentences
+  mean of ARI 2.6, FK 1.7, Fog 3.7 · 6 sentences
 
 mdx-site/plain.md  ·  Grade 1, easy to read
 
@@ -12,6 +12,6 @@ mdx-site/plain.md  ·  Grade 1, easy to read
   mean of ARI 1.4, FK 0.0, Fog 3.2 · 1 sentence
 
 Checked 2 files.
-Hardest: mdx-site/page.mdx (grade 3.3).
+Hardest: mdx-site/page.mdx (grade 2.7).
 --- stderr
 

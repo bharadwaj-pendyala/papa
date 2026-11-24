@@ -1,4 +1,5 @@
 import json
+import subprocess
 
 from papa import analyze
 from papa.cli import main
@@ -155,3 +156,28 @@ def test_allow_empty_passes_when_every_input_is_excluded(tmp_path, capsys):
 
 def test_allow_empty_still_fails_on_a_missing_file(tmp_path, capsys):
     assert main([str(tmp_path / "nope.md"), "--allow-empty"]) == 2
+
+
+def test_folder_scan_skips_dependencies_config_and_legal_text(tmp_path, capsys):
+    _write(tmp_path, "README.md", EASY)
+    _write(tmp_path, "requirements.txt", "requests==2.31\nflask>=3.0\n")
+    _write(tmp_path, "LICENSE.md", HARD)
+    (tmp_path / "node_modules" / "lib").mkdir(parents=True)
+    _write(tmp_path, "node_modules/lib/README.md", HARD)
+    assert main([str(tmp_path), "--max-grade", "10"]) == 0
+    out = capsys.readouterr().out
+    assert "requirements" not in out and "LICENSE" not in out and "node_modules" not in out
+
+
+def test_folder_scan_skips_git_ignored_files(tmp_path, capsys):
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    _write(tmp_path, ".gitignore", "build/\n")
+    _write(tmp_path, "README.md", EASY)
+    (tmp_path / "build").mkdir()
+    _write(tmp_path, "build/out.md", HARD)
+    assert main([str(tmp_path), "--max-grade", "10"]) == 0
+    assert "build" not in capsys.readouterr().out
+
+
+def test_named_file_is_graded_even_when_scans_skip_it(tmp_path):
+    assert main([_write(tmp_path, "LICENSE.md", HARD), "--max-grade", "10"]) == 1
