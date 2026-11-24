@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "papa-lint"
-version = "0.2.3"
+version = "0.2.4"
 description = "Hemingway-grade readability for your docs pipeline: CLI, library and CI gate."
 readme = "README.md"
 requires-python = ">=3.11"

@@ -9,7 +9,7 @@ $ hard.md --max-grade 8 --report sarif
       "tool": {
         "driver": {
           "name": "papa",
-          "version": "0.2.3",
+          "version": "0.2.4",
           "informationUri": "https://github.com/bharadwaj-pendyala/papa",
           "rules": [
             {
