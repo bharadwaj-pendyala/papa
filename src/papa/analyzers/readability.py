@@ -8,7 +8,7 @@ from ..models import COLOR, HARD, VERY_HARD, Finding
 from ..scoring import sentence_grade
 from . import AnalyzerContext, register
 
-_WORD = re.compile(r"[A-Za-z]+")
+WORD = re.compile(r"[A-Za-z]+")
 _HINT = "Split the sentence or cut words. Aim for one idea per sentence."
 # Grade formulas swing wildly on short sentences: "Interrogate before you
 # generate." scores 15. Below this length a sentence is never "hard" to read,
@@ -20,7 +20,7 @@ MIN_WORDS = 8
 def analyze(ctx: AnalyzerContext) -> list[Finding]:
     findings = []
     for start, end, text in ctx.sentences:
-        if len(_WORD.findall(text)) < MIN_WORDS:
+        if len(WORD.findall(text)) < MIN_WORDS:
             continue
         grade = sentence_grade(text)
         if grade >= 14:
