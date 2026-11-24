@@ -214,3 +214,19 @@ def test_jsx_text_with_an_apostrophe_inside_an_expression_is_stripped():
     mdx = "Before.\n\n{ready && <span>You're ready.</span>}\n\nAfter the check.\n"
     clean = _graded(mdx, "mdx")
     assert "ready &&" not in clean and "After the check." in clean
+
+
+def test_an_escaped_brace_does_not_open_an_mdx_expression():
+    mdx = "Write \\{ to open a placeholder.\n\nKeep this sentence.\n\n~~~\n{x: {y: 1}}\n~~~\n\n}\n"
+    assert "Keep this sentence." in _graded(mdx, "mdx")
+
+
+def test_a_backslash_in_a_jsx_attribute_is_literal():
+    mdx = '<Example path="C:\\">\nRead the migration guide.\n\nUse `">"` to match the prompt.\n</Example>\n'
+    assert "Read the migration guide." in _graded(mdx, "mdx")
+
+
+def test_an_inline_expression_at_a_line_start_does_not_split_the_sentence():
+    one_line = analyze("Install {productName} on your machine.\n", path="a.mdx", fmt="mdx")
+    wrapped = analyze("Install\n{productName} on your machine.\n", path="a.mdx", fmt="mdx")
+    assert wrapped.score.sentences == one_line.score.sentences == 1

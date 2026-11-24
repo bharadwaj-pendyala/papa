@@ -124,7 +124,10 @@ def block_breaks(text: str, fmt: str, offset_map: OffsetMap) -> set[int]:
     tags = _jsx_spans(text, _code_spans(text)) if fmt == "mdx" else [m.span() for m in _TAG.finditer(text)]
     for start, end in tags:
         line_start = text.rfind("\n", 0, start) + 1
-        if not text[line_start:start].strip():
+        line_end = text.find("\n", end)
+        rest = text[end:line_end if line_end != -1 else None]
+        # An {expression} that wraps into prose, like "{name} on your machine", is inline.
+        if not text[line_start:start].strip() and (text[start] == "<" or not rest.strip()):
             starts += [start, end]
     return {offset_map.to_clean(pos) for pos in starts}
 
@@ -172,13 +175,14 @@ _TAG_NAME = re.compile(r"</?[A-Za-z][\w.:-]*(?=[\s/>])|<>|</>")
 
 def _jsx_spans(text: str, code: list[tuple[int, int]]) -> list[tuple[int, int]]:
     """Spans of JSX tags and {expressions} in MDX, outside code."""
+    # Scan a copy with code blanked out, so braces and quotes in code never count.
+    text = _mask(text, code, " ")
     spans, i, n = [], 0, len(text)
-    code_starts = {start: end for start, end in code}
     while i < n:
-        if i in code_starts:
-            i = code_starts[i]
-            continue
         end = -1
+        if text[i] == "\\":
+            i += 2
+            continue
         if text[i] == "{":
             end = _brace_end(text, i)
         elif text[i] == "<":
@@ -207,7 +211,9 @@ def _tag_end(text: str, i: int) -> int:
         if ch == "<":
             return -1
         if ch in "\"'":
-            k = _string_end(text, k, stop_at_newline=False)
+            # JSX attribute strings have no escapes: "C:\" ends at its second quote.
+            close = text.find(ch, k + 1)
+            k = len(text) if close == -1 else close + 1
         elif ch == "{":
             k = _brace_end(text, k)
             if k == -1:
