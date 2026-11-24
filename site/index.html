@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Papa · readability linter for docs</title>
+<meta name="description" content="Papa grades the readability of Markdown and text like the Hemingway editor, in your terminal, in CI, and on every pull request. Try it in your browser.">
+<meta property="og:title" content="Papa · readability linter for docs">
+<meta property="og:description" content="Hemingway-style grades and highlights for Markdown, in the terminal and on every PR.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible+Next:wght@400;600&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="bar">
+  <a class="mark" href="./">papa</a>
+  <nav>
+    <a href="#try">Try it</a>
+    <a href="#ci">CI</a>
+    <a href="report.html">Sample report</a>
+    <a href="https://github.com/bharadwaj-pendyala/papa">GitHub</a>
+  </nav>
+</header>
+
+<main>
+  <section class="hero" aria-labelledby="hero-title">
+    <p class="eyebrow">A readability linter for Markdown and plain text</p>
+    <h1 id="hero-title" class="proof" data-state="before">
+      <span class="sentence" aria-hidden="true">
+        <span class="hl hl-very-hard-sentence">Our documentation <span class="hl hl-passive">was written</span> <span class="hl hl-complex-phrase">in order to</span> <span class="hl hl-adverb">basically</span> explain the multifaceted functionality of the platform.</span>
+      </span>
+      <span class="sentence after">We wrote these docs to explain what the platform does.</span>
+      <span class="grade" aria-hidden="true"><span class="from">Grade 16</span><span class="to">Grade 4</span></span>
+    </h1>
+    <p class="lede">Papa grades each page of your docs the way the Hemingway editor does. It marks hard sentences, passive voice, adverbs, and wordy phrases, in your terminal and on every pull request.</p>
+    <div class="install">
+      <code id="install-cmd">pipx install papa-lint</code>
+      <button type="button" class="copy" data-copy="install-cmd">Copy</button>
+    </div>
+  </section>
+
+  <section id="try" class="try" aria-labelledby="try-title">
+    <div class="try-head">
+      <h2 id="try-title">Grade your own text</h2>
+      <p>Paste a README or a paragraph. Papa runs in this tab, so your text never leaves the browser.</p>
+    </div>
+    <div class="desk">
+      <label class="pane input">
+        <span class="pane-label">Your text</span>
+        <textarea id="draft" spellcheck="false">## Getting started
+
+Our documentation was written in order to basically explain the multifaceted functionality of the platform, and it is expected that the reader will utilize the configuration options that are described below in a manner that is consistent with their requirements.
+
+Install the CLI. Run it on one file. Fix what it marks.</textarea>
+      </label>
+      <div class="pane output" aria-live="polite">
+        <div class="pane-label">
+          <span>What Papa sees</span>
+          <span id="status" class="status">Loading the grader, about 10 MB, once</span>
+        </div>
+        <div class="panel" id="panel" hidden>
+          <p class="big-grade"><span id="grade-num">-</span><span id="grade-label"></span></p>
+          <ul class="counts" id="counts"></ul>
+          <p class="formulas" id="formulas"></p>
+        </div>
+        <pre class="rendered" id="rendered"></pre>
+        <ol class="tips" id="tips"></ol>
+      </div>
+    </div>
+  </section>
+
+  <section id="ci" class="ci" aria-labelledby="ci-title">
+    <h2 id="ci-title">Run the same check everywhere</h2>
+    <div class="ways">
+      <article>
+        <h3>Terminal</h3>
+        <pre><code>papa README.md docs/
+papa docs/ --max-grade 10
+papa post.md --report html -o report.html</code></pre>
+        <p>Exit code 1 when a file is harder than your max grade. Exit code 0 for findings alone.</p>
+      </article>
+      <article>
+        <h3>GitHub Action</h3>
+        <pre><code>- uses: bharadwaj-pendyala/papa@v0
+  with:
+    paths: README.md docs/
+    max-grade: 10
+    comment: true</code></pre>
+        <p>Annotations on the diff, a job summary, and one PR comment that stays current.</p>
+      </article>
+      <article>
+        <h3>pre-commit</h3>
+        <pre><code>- repo: https://github.com/bharadwaj-pendyala/papa
+  rev: v0.2.0
+  hooks:
+    - id: papa</code></pre>
+        <p>Set <code>max-grade</code> in <code>papa.toml</code> to block hard commits.</p>
+      </article>
+      <article>
+        <h3>Agents</h3>
+        <pre><code>papa draft.md --report json</code></pre>
+        <p>Offsets, lines, and a fix hint for each finding, so an agent can rewrite until the grade passes.</p>
+      </article>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <p>Papa is open source under the MIT license. Grades use <a href="https://github.com/textstat/textstat">textstat</a>: the mean of ARI, Flesch-Kincaid, and Gunning fog.</p>
+  <p><a href="https://github.com/bharadwaj-pendyala/papa/issues">Report a bug</a> · <a href="https://pypi.org/project/papa-lint/">PyPI</a></p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/pyodide/v0.27.7/full/pyodide.js"></script>
+<script src="app.js" type="module"></script>
+</body>
+</html>
