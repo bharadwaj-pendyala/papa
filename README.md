@@ -321,10 +321,15 @@ print(result.score.verdict)
 
 ## 🗺️ Roadmap
 
+- Per-category budgets for agents, such as a maximum count of passive verbs ([#2](https://github.com/bharadwaj-pendyala/papa/issues/2))
+- GitLab Code Quality and JUnit reports ([#22](https://github.com/bharadwaj-pendyala/papa/issues/22), [#23](https://github.com/bharadwaj-pendyala/papa/issues/23))
 - Built-in `--suggest` workflow for LLM-assisted rewrites
-- MDX, HTML, and reStructuredText ingestion
+- HTML and reStructuredText ingestion
 - Optional integrations with tools such as `proselint`, `alex`, and `vale`
 - npm, Homebrew, and Docker distribution
+
+Share your docs grade, or a finding that looks wrong, in
+[Discussions](https://github.com/bharadwaj-pendyala/papa/discussions/27).
 
 ## 🆚 Comparison
 
@@ -336,6 +341,8 @@ print(result.score.verdict)
 | CLI | ✅ | ❌ | ✅ | ✅ |
 | CI gate via exit code | ✅ | ❌ | ✅ | ✅ |
 | JSON for automation | ✅ | ❌ | ⚠️ | ✅ |
+| PR annotations and summary | ✅ | ❌ | ❌ | ⚠️ |
+| MCP server for agents | ✅ | ❌ | ❌ | ❌ |
 | Open source | ✅ | ❌ | ✅ | ✅ |
 
 ## 🙏 Built on the shoulders of
