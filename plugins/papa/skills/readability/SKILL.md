@@ -15,7 +15,7 @@ Use the `grade_files` or `grade_text` tool from the papa MCP server. If the tool
 uvx --from papa-lint papa <files> --report json --max-grade <grade>
 ```
 
-Use the max grade from the user, then from `papa.toml`. If neither sets one, use 10.
+Pick the max grade in this order: the grade the user gave, then `max-grade` under `[papa]` in `papa.toml`, then `max-grade` under `[tool.papa]` in `pyproject.toml`, then 10. Pass it on every CLI run.
 
 ## Rewrite loop
 
