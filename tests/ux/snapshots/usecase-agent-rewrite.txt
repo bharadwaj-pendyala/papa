@@ -1,0 +1,58 @@
+$ usecases/agent-rewrite.md --max-grade 10 --report json
+[exit 0]
+--- stdout
+{
+  "version": "0.2",
+  "files": [
+    {
+      "file": "usecases/agent-rewrite.md",
+      "score": {
+        "ari": 8.5,
+        "flesch_kincaid": 8.9,
+        "gunning_fog": 8.4,
+        "consensus": 8.5962,
+        "reading_grade": "Grade 9, easy to read",
+        "sentences": 2,
+        "hard_sentences": 1,
+        "very_hard_sentences": 0,
+        "adverbs": 0,
+        "passive": 0,
+        "complex_phrases": 0,
+        "verdict": "pass",
+        "threshold": {
+          "max_grade": 10
+        }
+      },
+      "findings": [
+        {
+          "start": 38,
+          "end": 159,
+          "line": 1,
+          "column": 39,
+          "end_line": 1,
+          "end_column": 160,
+          "category": "hard-sentence",
+          "color": "yellow",
+          "severity": "warn",
+          "message": "Hard to read (grade 12)",
+          "analyzer": "readability",
+          "hint": "Split the sentence or cut words. Aim for one idea per sentence.",
+          "excerpt": "In Node, dependencies get full access to all system I/O by default, which can add hidden vulnerabilities to your project."
+        }
+      ]
+    }
+  ],
+  "skipped": [],
+  "errors": [],
+  "summary": {
+    "files": 1,
+    "analyzed": 1,
+    "passed": 1,
+    "failed": 0,
+    "skipped": 0,
+    "errors": 0,
+    "max_grade": 10.0
+  }
+}
+--- stderr
+

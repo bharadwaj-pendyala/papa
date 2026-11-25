@@ -24,6 +24,7 @@
   <a class="mark" href="./">papa</a>
   <nav>
     <a href="#try">Try it</a>
+    <a href="#uses">Use cases</a>
     <a href="#ci">CI</a>
     <a href="leaderboard.html">Leaderboard</a>
     <a href="report.html">Sample report</a>
@@ -75,6 +76,44 @@ Install the CLI. Run it on one file. Fix what it marks.</textarea>
         <pre class="rendered" id="rendered"></pre>
         <ol class="tips" id="tips"></ol>
       </div>
+    </div>
+  </section>
+
+  <section id="uses" class="uses" aria-labelledby="uses-title">
+    <h2 id="uses-title">Catch hard-to-read Markdown before it ships</h2>
+    <p class="uses-lede">Three jobs Papa does today. Each example is a real sentence from a docs site on the <a href="leaderboard.html">leaderboard</a>, pinned to the commit Papa graded. The rewrites are our proposals.</p>
+    <div class="cases">
+      <article>
+        <p class="who">Maintainers before a release</p>
+        <h3>Check the quickstart</h3>
+        <pre><code>papa README.md docs/</code></pre>
+        <div class="edit">
+          <p class="before"><span class="chip very-hard">Grade 15</span><span class="hl hl-very-hard-sentence">Create a <code>.env</code> file in the root of your project and populate it with your Supabase connection variables that you can get from the helper below, or from the project Connect panel.</span></p>
+          <p class="after"><span class="chip easy">Grade 6</span>Create a <code>.env</code> file in the root of your project. Add your Supabase connection variables to it. Get them from the helper below, or from the project Connect panel.</p>
+        </div>
+        <p class="note">One sentence held three steps. Split, it reads as three steps. Source: <a href="https://github.com/supabase/supabase/blob/0af0e9aed420f1b44b808bd693f1c715a5ed4810/apps/docs/content/guides/getting-started/quickstarts/expo-react-native.mdx#L35">Supabase Expo quickstart, line 35</a>.</p>
+      </article>
+      <article>
+        <p class="who">Teams that let agents write docs</p>
+        <h3>Edit an agent's draft before review</h3>
+        <pre><code>papa draft.md --report json</code></pre>
+        <div class="edit">
+          <p class="before"><span class="chip very-hard">Grade 19</span><span class="hl hl-very-hard-sentence">This is a major difference from Node, where dependencies <span class="hl hl-passive">are automatically granted</span> full access to all system I/O, <span class="hl hl-adverb">potentially</span> introducing hidden vulnerabilities into your project.</span></p>
+          <p class="after"><span class="chip easy">Grade 9</span>This is a major difference from Node. In Node, dependencies get full access to all system I/O by default, which can add hidden vulnerabilities to your project.</p>
+        </div>
+        <p class="note">The JSON gives each finding a line, a column, and a hint, so an agent can fix that span and run Papa again. Check that the rewrite keeps the facts: here, Node, full access, and system I/O. Source: <a href="https://github.com/denoland/docs/blob/eff351baff03c2133a70bf89982fe83bec5641f1/runtime/fundamentals/security.md?plain=1#L10">Deno security guide, line 10</a>.</p>
+      </article>
+      <article>
+        <p class="who">Reviewers of docs pull requests</p>
+        <h3>See hard sentences on the PR</h3>
+        <pre><code>- uses: bharadwaj-pendyala/papa@v0
+  with:
+    paths: README.md docs/</code></pre>
+        <div class="edit">
+          <p class="annotation"><span class="chip hard">Warning</span><span><strong>papa very-hard-sentence</strong> on line 35 of <code>expo-react-native.mdx</code><br>Very hard to read (grade 15). Split the sentence or cut words. Aim for one idea per sentence.</span></p>
+        </div>
+        <p class="note">Findings show as warnings on the diff and never fail the job. To fail a PR only when a page gets harder, set <code>baseline: ${{ github.event.pull_request.base.sha }}</code>. Pages the PR does not touch keep their grade and pass.</p>
+      </article>
     </div>
   </section>
 
