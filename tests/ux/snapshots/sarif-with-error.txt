@@ -9,7 +9,7 @@ $ easy.txt missing.md --report sarif
       "tool": {
         "driver": {
           "name": "papa",
-          "version": "0.3.0",
+          "version": "0.3.1",
           "informationUri": "https://github.com/bharadwaj-pendyala/papa",
           "rules": [
             {
