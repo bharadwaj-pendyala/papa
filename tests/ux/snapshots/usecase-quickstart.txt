@@ -1,0 +1,15 @@
+$ usecases/quickstart.mdx --max-grade 10
+[exit 1]
+--- stdout
+usecases/quickstart.mdx  ·  Grade 15, very hard to read
+  FAIL  grade 15.3 is above --max-grade 10
+
+  1 very hard sentence
+  mean of ARI 15.6, FK 14.0, Fog 16.3 · 1 sentence
+
+  1:1  very hard  grade 15 "Create a file in the root of your project and pop…"
+
+Tips
+  very hard  Split the sentence or cut words. Aim for one idea per sentence.
+--- stderr
+

@@ -1,0 +1,6 @@
+$ usecases/quickstart.mdx --report github
+[exit 0]
+--- stdout
+::warning file=usecases/quickstart.mdx,line=1,endLine=1,col=1,endColumn=269,title=papa very-hard-sentence::Very hard to read (grade 15). Split the sentence or cut words. Aim for one idea per sentence.
+--- stderr
+
