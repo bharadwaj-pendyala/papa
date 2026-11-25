@@ -126,6 +126,7 @@
     {"id": "crlf-code-is-not-prose", "argv": ["crlf-frontmatter.md", "--max-grade", "10", "--report", "concise"], "exit": 0, "check_width": false, "stdout_absent": ["pip install", "configure"]},
     {"id": "indented-fence-is-not-prose", "argv": ["indented-fence.md", "--max-grade", "10", "--report", "concise"], "exit": 0, "check_width": false, "stdout_absent": ["pip install", "configure"]},
     {"id": "short-heading-is-not-graded", "argv": ["short-heading.md", "--max-grade", "10"], "exit": 0},
-    {"id": "repo-root-skips-non-prose", "argv": ["repo-root", "--max-grade", "10"], "exit": 0, "stdout_contains": ["README.md", "guide.md", "Checked 2 files"], "stdout_absent": ["requirements.txt", "robots.txt", "LICENSE.md", "node_modules"]}
+    {"id": "repo-root-skips-non-prose", "argv": ["repo-root", "--max-grade", "10"], "exit": 0, "stdout_contains": ["README.md", "guide.md", "Checked 2 files"], "stdout_absent": ["requirements.txt", "robots.txt", "LICENSE.md", "node_modules"]},
+    {"id": "windows-console-non-latin-path", "argv": ["指南.md", "--report", "json"], "env": {"PYTHONIOENCODING": "cp1252"}, "exit": 0, "stdout_contains": ["\"files\""]}
   ]
 }

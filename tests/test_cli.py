@@ -1,5 +1,7 @@
 import json
+import os
 import subprocess
+import sys
 
 from papa import analyze
 from papa.cli import main
@@ -209,3 +211,11 @@ def test_folder_scan_skips_git_ignored_files_next_to_a_submodule(tmp_path, capsy
     _write(repo, "build/out.md", HARD)
     assert main([str(repo), "--max-grade", "10"]) == 0
     assert "build" not in capsys.readouterr().out
+
+
+def test_non_latin_path_survives_a_cp1252_console(tmp_path):
+    path = _write(tmp_path, "指南.md", EASY)
+    for report in ("cli", "json"):
+        done = subprocess.run([sys.executable, "-m", "papa", path, "--report", report], capture_output=True,
+                              env={**os.environ, "PYTHONIOENCODING": "cp1252"})
+        assert done.returncode == 0, done.stderr.decode()

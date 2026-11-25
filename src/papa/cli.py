@@ -119,6 +119,7 @@ def _grade(value: str) -> float:
 
 
 def main(argv: list[str] | None = None) -> int:
+    _write_utf8()
     parser = build_parser()
     args = parser.parse_args(argv)
     if args.summary and args.report != "cli":
@@ -163,6 +164,13 @@ def _expand(args: argparse.Namespace, settings: config.Config) -> tuple[list[str
             raise
         print(f"papa: {error}", file=sys.stderr)
         return [], []
+
+
+def _write_utf8() -> None:
+    # On Windows, pipes and redirects use the ANSI code page, which cannot encode most non-Latin text.
+    for stream in (sys.stdout, sys.stderr):
+        if hasattr(stream, "reconfigure"):
+            stream.reconfigure(encoding="utf-8")
 
 
 def _settings(args: argparse.Namespace) -> config.Config:

@@ -199,7 +199,7 @@ steps:
 ```yaml
 repos:
   - repo: https://github.com/bharadwaj-pendyala/papa
-    rev: v0.2.4
+    rev: v0.2.5
     hooks:
       - id: papa
         args: [--report, concise, --allow-empty, --max-grade, "10"]
