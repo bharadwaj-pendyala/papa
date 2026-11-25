@@ -22,7 +22,7 @@ from .models import Analysis, DocumentScore, Finding
 from .scoring import document_grades
 from .sentences import split_sentences
 
-__version__ = "0.2.5"
+__version__ = "0.3.0"
 _SENTENCE_END = re.compile(r"[.!?][\"'\u201d\u2019)\]]*$")
 __all__ = ["analyze", "Analysis", "DocumentScore", "Finding"]
 

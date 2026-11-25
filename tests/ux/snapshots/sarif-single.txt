@@ -9,7 +9,7 @@ $ all-findings.md --report sarif
       "tool": {
         "driver": {
           "name": "papa",
-          "version": "0.2.5",
+          "version": "0.3.0",
           "informationUri": "https://github.com/bharadwaj-pendyala/papa",
           "rules": [
             {
