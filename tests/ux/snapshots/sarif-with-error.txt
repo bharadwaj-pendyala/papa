@@ -89,6 +89,19 @@ $ easy.txt missing.md --report sarif
               "defaultConfiguration": {
                 "level": "error"
               }
+            },
+            {
+              "id": "max-regression",
+              "name": "ReadabilityRegression",
+              "shortDescription": {
+                "text": "Readability regression"
+              },
+              "help": {
+                "text": "Make the file as easy to read as before, or raise --max-regression."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
             }
           ]
         }

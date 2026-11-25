@@ -1,0 +1,7 @@
+$ easy.txt --max-regression 1
+[exit 2]
+--- stdout
+
+--- stderr
+papa: error: --max-regression needs --baseline REF
+Run 'papa --help' for examples.

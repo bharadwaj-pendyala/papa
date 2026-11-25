@@ -1,0 +1,144 @@
+$ guide.md --baseline HEAD --report sarif
+[exit 1]
+--- stdout
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "papa",
+          "version": "0.2.4",
+          "informationUri": "https://github.com/bharadwaj-pendyala/papa",
+          "rules": [
+            {
+              "id": "hard-sentence",
+              "name": "HardSentence",
+              "shortDescription": {
+                "text": "Hard sentence"
+              },
+              "help": {
+                "text": "Split the sentence or cut words."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "very-hard-sentence",
+              "name": "VeryHardSentence",
+              "shortDescription": {
+                "text": "Very hard sentence"
+              },
+              "help": {
+                "text": "Split the sentence or cut words. Aim for one idea per sentence."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "passive",
+              "name": "PassiveVoice",
+              "shortDescription": {
+                "text": "Passive voice"
+              },
+              "help": {
+                "text": "Name who does the action and make them the subject."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "adverb",
+              "name": "Adverb",
+              "shortDescription": {
+                "text": "Adverb"
+              },
+              "help": {
+                "text": "Cut the adverb or use a stronger verb."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "complex-phrase",
+              "name": "ComplexPhrase",
+              "shortDescription": {
+                "text": "Complex phrase"
+              },
+              "help": {
+                "text": "Use the plainer phrase shown in the finding."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "max-grade",
+              "name": "ReadabilityGate",
+              "shortDescription": {
+                "text": "Readability gate"
+              },
+              "help": {
+                "text": "Make the file easier to read, or raise --max-grade."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
+            },
+            {
+              "id": "max-regression",
+              "name": "ReadabilityRegression",
+              "shortDescription": {
+                "text": "Readability regression"
+              },
+              "help": {
+                "text": "Make the file as easy to read as before, or raise --max-regression."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
+            }
+          ]
+        }
+      },
+      "columnKind": "unicodeCodePoints",
+      "results": [
+        {
+          "ruleId": "max-regression",
+          "level": "error",
+          "message": {
+            "text": "Grade 8.6 rose from 2.5, more than --max-regression 1."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "guide.md"
+                },
+                "region": {
+                  "startLine": 1,
+                  "startColumn": 1,
+                  "endLine": 1,
+                  "endColumn": 1
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "invocations": [
+        {
+          "executionSuccessful": true,
+          "toolExecutionNotifications": []
+        }
+      ]
+    }
+  ]
+}
+--- stderr
+

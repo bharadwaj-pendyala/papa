@@ -1,0 +1,93 @@
+$ guide.md new.md --baseline HEAD --report json
+[exit 1]
+--- stdout
+{
+  "version": "0.2",
+  "files": [
+    {
+      "file": "guide.md",
+      "score": {
+        "ari": 8.2,
+        "flesch_kincaid": 7.3,
+        "gunning_fog": 10.4,
+        "consensus": 8.6214,
+        "reading_grade": "Grade 9, easy to read",
+        "sentences": 4,
+        "hard_sentences": 0,
+        "very_hard_sentences": 0,
+        "adverbs": 0,
+        "passive": 0,
+        "complex_phrases": 0,
+        "verdict": "fail",
+        "threshold": {
+          "baseline": 2.4935,
+          "max_regression": 1
+        }
+      },
+      "findings": []
+    },
+    {
+      "file": "new.md",
+      "score": {
+        "ari": 42.9,
+        "flesch_kincaid": 39.0,
+        "gunning_fog": 40.7,
+        "consensus": 40.868,
+        "reading_grade": "Grade 41, very hard to read",
+        "sentences": 2,
+        "hard_sentences": 0,
+        "very_hard_sentences": 1,
+        "adverbs": 1,
+        "passive": 0,
+        "complex_phrases": 0,
+        "verdict": "pass",
+        "threshold": null
+      },
+      "findings": [
+        {
+          "start": 13,
+          "end": 208,
+          "line": 3,
+          "column": 1,
+          "end_line": 3,
+          "end_column": 196,
+          "category": "very-hard-sentence",
+          "color": "red",
+          "severity": "error",
+          "message": "Very hard to read (grade 18+)",
+          "analyzer": "readability",
+          "hint": "Split the sentence or cut words. Aim for one idea per sentence.",
+          "excerpt": "Organizations contemplating comprehensive infrastructure modernization should systematically evaluate interoperability considerations before undertaking substantial architectural transformations."
+        },
+        {
+          "start": 91,
+          "end": 105,
+          "line": 3,
+          "column": 79,
+          "end_line": 3,
+          "end_column": 93,
+          "category": "adverb",
+          "color": "blue",
+          "severity": "info",
+          "message": "Adverb: 'systematically'",
+          "analyzer": "adverbs",
+          "hint": "Cut the adverb or use a stronger verb.",
+          "excerpt": "systematically"
+        }
+      ]
+    }
+  ],
+  "skipped": [],
+  "errors": [],
+  "summary": {
+    "files": 2,
+    "analyzed": 2,
+    "passed": 1,
+    "failed": 1,
+    "skipped": 0,
+    "errors": 0,
+    "max_grade": null
+  }
+}
+--- stderr
+

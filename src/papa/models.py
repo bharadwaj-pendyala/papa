@@ -87,3 +87,5 @@ class Run:
     errors: list[tuple[str, str]]
     max_grade: float | None
     config: str | None = None
+    baseline: str | None = None
+    max_regression: float = 1.0

@@ -1,7 +1,10 @@
+import io
 import json
 import os
 import subprocess
 import sys
+
+import pytest
 
 from papa import analyze
 from papa.cli import main
@@ -219,3 +222,93 @@ def test_non_latin_path_survives_a_cp1252_console(tmp_path):
         done = subprocess.run([sys.executable, "-m", "papa", path, "--report", report], capture_output=True,
                               env={**os.environ, "PYTHONIOENCODING": "cp1252"})
         assert done.returncode == 0, done.stderr.decode()
+
+
+def _commit(repo):
+    git = ["git", "-C", str(repo), "-c", "user.email=t@t", "-c", "user.name=t", "-c", "commit.gpgsign=false"]
+    subprocess.run([*git, "add", "-A"], check=True)
+    subprocess.run([*git, "commit", "-qm", "base"], check=True)
+
+
+def _repo(tmp_path, monkeypatch, **files):
+    subprocess.run(["git", "init", "-q", str(tmp_path)], check=True)
+    for name, text in files.items():
+        _write(tmp_path, name, text)
+    _commit(tmp_path)
+    monkeypatch.chdir(tmp_path)
+
+
+def test_baseline_fails_a_file_that_got_harder(tmp_path, monkeypatch, capsys):
+    _repo(tmp_path, monkeypatch, **{"guide.md": EASY})
+    _write(tmp_path, "guide.md", HARD)
+    assert main(["guide.md", "--baseline", "HEAD"]) == 1
+    assert "rose from" in capsys.readouterr().out
+
+
+def test_baseline_passes_an_untouched_file_above_max_grade(tmp_path, monkeypatch):
+    _repo(tmp_path, monkeypatch, **{"legacy.md": HARD})
+    assert main(["legacy.md", "--baseline", "HEAD", "--max-grade", "8"]) == 0
+
+
+def test_baseline_max_regression_allows_a_bigger_rise(tmp_path, monkeypatch):
+    _repo(tmp_path, monkeypatch, **{"guide.md": EASY})
+    _write(tmp_path, "guide.md", HARD)
+    assert main(["guide.md", "--baseline", "HEAD", "--max-regression", "100"]) == 0
+
+
+def test_baseline_new_file_falls_back_to_max_grade(tmp_path, monkeypatch, capsys):
+    _repo(tmp_path, monkeypatch, **{"guide.md": EASY})
+    _write(tmp_path, "new.md", HARD)
+    assert main(["new.md", "--baseline", "HEAD", "--max-grade", "8"]) == 1
+    assert "--max-grade 8" in capsys.readouterr().out
+    assert main(["new.md", "--baseline", "HEAD"]) == 0
+
+
+def test_baseline_reads_files_in_subfolders(tmp_path, monkeypatch):
+    _repo(tmp_path, monkeypatch, **{"README.md": EASY})
+    (tmp_path / "docs").mkdir()
+    _write(tmp_path, "docs/guide.md", EASY)
+    _commit(tmp_path)
+    _write(tmp_path, "docs/guide.md", HARD)
+    assert main(["docs", "--baseline", "HEAD~0"]) == 1
+
+
+def test_baseline_json_threshold_names_the_baseline_grade(tmp_path, monkeypatch, capsys):
+    _repo(tmp_path, monkeypatch, **{"guide.md": EASY})
+    main(["guide.md", "--baseline", "HEAD", "--report", "json"])
+    threshold = json.loads(capsys.readouterr().out)["files"][0]["score"]["threshold"]
+    assert set(threshold) == {"baseline", "max_regression"}
+    assert threshold["max_regression"] == 1
+
+
+def test_baseline_unknown_ref_is_a_usage_error(tmp_path, monkeypatch, capsys):
+    _repo(tmp_path, monkeypatch, **{"guide.md": EASY})
+    assert main(["guide.md", "--baseline", "nope"]) == 2
+    assert "no commit 'nope'" in capsys.readouterr().err
+
+
+def test_baseline_outside_git_is_a_usage_error(tmp_path, monkeypatch, capsys):
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setenv("GIT_CEILING_DIRECTORIES", str(tmp_path.parent))
+    _write(tmp_path, "guide.md", EASY)
+    assert main(["guide.md", "--baseline", "HEAD"]) == 2
+    assert "git repository" in capsys.readouterr().err
+
+
+def test_baseline_stdin_falls_back_to_max_grade(tmp_path, monkeypatch, capsys):
+    _repo(tmp_path, monkeypatch, **{"guide.md": EASY})
+    monkeypatch.setattr("sys.stdin", io.TextIOWrapper(io.BytesIO(HARD.encode())))
+    assert main(["-", "--baseline", "HEAD", "--max-grade", "8"]) == 1
+
+
+def test_max_regression_needs_baseline(tmp_path, capsys):
+    with pytest.raises(SystemExit) as exit_info:
+        main([_write(tmp_path, "guide.md", EASY), "--max-regression", "1"])
+    assert exit_info.value.code == 2
+    assert "--max-regression needs --baseline" in capsys.readouterr().err
+
+
+def test_baseline_rejects_an_option_as_ref(tmp_path, capsys):
+    with pytest.raises(SystemExit):
+        main([_write(tmp_path, "guide.md", EASY), "--baseline=--output=x"])
+    assert "needs a git ref" in capsys.readouterr().err

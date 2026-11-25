@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 from ..models import Run
-from .common import LineIndex, gate_grade
+from .common import LineIndex, gate_message, gate_rule
 
-# Findings are advice; only a failed --max-grade gate is an error.
+# Findings are advice; only a failed gate is an error.
 _SEVERITY = {"error": "warning", "warn": "warning", "info": "note"}
 
 
@@ -15,9 +15,7 @@ def render(run: Run, *, color: bool = False, width: int = 80, details: bool = Tr
     for analysis in run.analyses:
         score = analysis.score
         if score.verdict == "fail":
-            max_grade = score.threshold["max_grade"]
-            shown = gate_grade(score.consensus, max_grade, failed=True)
-            lines.append(f"{analysis.path}:1:1: error: grade {shown} is above --max-grade {max_grade} [max-grade]")
+            lines.append(f"{analysis.path}:1:1: error: {gate_message(score)} [{gate_rule(score)}]")
         index = LineIndex(analysis.source)
         for finding in analysis.findings:
             line, col = index.line_col(finding.start)

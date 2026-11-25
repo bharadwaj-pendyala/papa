@@ -1,0 +1,17 @@
+$ legacy.md --baseline HEAD --max-grade 10
+[exit 0]
+--- stdout
+legacy.md  ·  Grade 36, very hard to read
+  PASS  grade 36.2 is within --max-regression 1 of 36.2
+
+  1 very hard sentence · 1 adverb
+  mean of ARI 36.9, FK 33.8, Fog 37.9 · 2 sentences
+
+  3:1    very hard  grade 18+ "The multifaceted implementation demonstrates c…"
+  3:151  adverb     'consistently'
+
+Tips
+  very hard  Split the sentence or cut words. Aim for one idea per sentence.
+  adverb     Cut the adverb or use a stronger verb.
+--- stderr
+

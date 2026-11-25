@@ -33,8 +33,14 @@ def analyze(
     path: str = "<string>",
     fmt: str = "md",
     max_grade: float | None = None,
+    baseline: float | None = None,
+    max_regression: float = 1.0,
 ) -> Analysis:
-    """Run the full Ingestor → Analyzers → Aggregator pipeline on ``source``."""
+    """Run the full Ingestor → Analyzers → Aggregator pipeline on ``source``.
+
+    With ``baseline``, the file fails when its grade rises more than
+    ``max_regression`` above that grade, and ``max_grade`` does not apply.
+    """
     # Every Markdown pattern expects LF, so CRLF files run as LF and map back.
     text = source.replace("\r\n", "\n")
     clean, offset_map = ingest(text, fmt)
@@ -45,7 +51,7 @@ def analyze(
     raw = [_remap(finding, clean, offset_map) for finding in raw]
 
     grades = document_grades(_as_sentences(_graded(sentences)))
-    score = build_score(raw, len(sentences), grades, max_grade)
+    score = build_score(raw, len(sentences), grades, max_grade, baseline, max_regression)
     findings = merge_findings(raw)
     if text != source:
         findings = _to_crlf_offsets(findings, source)

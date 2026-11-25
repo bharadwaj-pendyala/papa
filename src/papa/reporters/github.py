@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from ..models import COMPLEX, Run
-from .common import LineIndex, gate_grade
+from .common import LineIndex, gate_message, gate_rule
 
 _COMMAND = {"error": "warning", "warn": "warning", "info": "notice"}
 
@@ -14,10 +14,9 @@ def render(run: Run, *, color: bool = False, width: int = 80, details: bool = Tr
     for analysis in run.analyses:
         score = analysis.score
         if score.verdict == "fail":
-            max_grade = score.threshold["max_grade"]
-            shown = gate_grade(score.consensus, max_grade, failed=True)
-            lines.append(_command("error", analysis.path, (1, 1, 1, 1), "max-grade",
-                                  f"Grade {shown} is above --max-grade {max_grade}. {score.reading_grade}."))
+            message = gate_message(score)
+            lines.append(_command("error", analysis.path, (1, 1, 1, 1), gate_rule(score),
+                                  f"{message[0].upper()}{message[1:]}. {score.reading_grade}."))
         index = LineIndex(analysis.source)
         for finding in analysis.findings:
             region = index.line_col(finding.start) + index.line_col(finding.end)
