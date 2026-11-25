@@ -1,0 +1,7 @@
+$ guide.md --baseline nope
+[exit 2]
+--- stdout
+
+--- stderr
+papa: --baseline: no commit 'nope' in this repository
+  fetch it first: git fetch origin nope

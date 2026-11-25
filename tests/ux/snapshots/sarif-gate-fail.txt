@@ -9,7 +9,7 @@ $ hard.md --max-grade 8 --report sarif
       "tool": {
         "driver": {
           "name": "papa",
-          "version": "0.2.5",
+          "version": "0.3.0",
           "informationUri": "https://github.com/bharadwaj-pendyala/papa",
           "rules": [
             {
@@ -85,6 +85,19 @@ $ hard.md --max-grade 8 --report sarif
               },
               "help": {
                 "text": "Make the file easier to read, or raise --max-grade."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              }
+            },
+            {
+              "id": "max-regression",
+              "name": "ReadabilityRegression",
+              "shortDescription": {
+                "text": "Readability regression"
+              },
+              "help": {
+                "text": "Make the file as easy to read as before, or raise --max-regression."
               },
               "defaultConfiguration": {
                 "level": "error"

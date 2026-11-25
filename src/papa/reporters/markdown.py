@@ -7,7 +7,7 @@ import re
 
 from ..models import Analysis, Run
 from .cli import _BADGE, PER_FILE_LIMIT, SINGLE_FILE_LIMIT, _shown_findings, _summary
-from .common import LineIndex, display_grade, gate_grade, plural
+from .common import LineIndex, display_grade, gate_grades, plural
 
 # A PR comment holds at most 65,536 characters; this keeps a large docs tree under it.
 DETAILED_FILES_LIMIT = 20
@@ -18,7 +18,7 @@ def render(run: Run, *, color: bool = False, width: int = 80, details: bool = Tr
     ranked = sorted(run.analyses, key=lambda a: (a.score.verdict != "fail", -a.score.consensus))
     lines = ["## Papa readability", "", _summary(run, color=False)[0], ""]
     if run.analyses:
-        lines += _table(ranked, run.max_grade is not None) + [""]
+        lines += _table(ranked, run.max_grade is not None or run.baseline is not None) + [""]
     for path, message in run.errors:
         lines.append(f"- :warning: `{_code(path)}`: {_text(message)}")
     for path, reason in run.skipped:
@@ -40,8 +40,7 @@ def _table(analyses: list[Analysis], gated: bool) -> list[str]:
     rows = [head, "|---|---|---|---|" if gated else "|---|---|---|"]
     for analysis in analyses:
         score = analysis.score
-        grade = (gate_grade(score.consensus, score.threshold["max_grade"], score.verdict == "fail")
-                 if score.threshold else f"{display_grade(round(score.consensus, 1))}")
+        grade = gate_grades(score)[0] if score.threshold else f"{display_grade(round(score.consensus, 1))}"
         cells = [f"`{_code(analysis.path)}`", grade]
         if gated:
             cells.append(":x: fail" if score.verdict == "fail" else ":white_check_mark: pass")

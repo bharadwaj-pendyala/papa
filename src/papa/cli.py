@@ -10,7 +10,7 @@ import shutil
 import sys
 from pathlib import Path
 
-from . import __version__, analyze, config, inputs
+from . import __version__, analyze, baseline, config, inputs
 from .models import Run
 from .reporters import REPORTERS
 
@@ -18,6 +18,7 @@ EXAMPLES = """\
 Examples:
   papa post.md                         check one file
   papa docs/ --max-grade 10            check a folder, fail above grade 10
+  papa docs/ --baseline origin/main    fail only files that got harder
   papa 'docs/**/*.md' --exclude 'docs/generated/**'
   cat post.md | papa --stdin-filename post.md
   papa post.md --report concise        file:line:col lines for editors
@@ -32,8 +33,9 @@ Config:
   pyproject.toml. Keys: max-grade, exclude. Flags override config.
 
 Exit codes:
-  0  no file failed --max-grade (findings alone never fail a run)
-  1  at least one file is harder than --max-grade
+  0  no file failed a gate (findings alone never fail a run)
+  1  at least one file is harder than --max-grade, or rose more than
+     --max-regression above its --baseline grade
   2  usage, config, or input error, or no input had prose to check
      (files with no prose are skipped with a note on stderr; --allow-empty
      makes that case exit 0, as pre-commit needs)
@@ -87,6 +89,11 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("-o", "--output", metavar="FILE", help="write the report to FILE")
     parser.add_argument("--max-grade", type=_grade, metavar="N",
                         help="exit 1 if a file's consensus grade is above N")
+    parser.add_argument("--baseline", metavar="REF",
+                        help="gate each file on its grade at git REF instead; "
+                             "files new since REF use --max-grade")
+    parser.add_argument("--max-regression", type=_grade, metavar="N",
+                        help="with --baseline, exit 1 if a grade rose more than N (default: 1)")
     parser.add_argument("--exclude", action="append", default=[], metavar="GLOB",
                         help="skip paths that match GLOB (repeatable)")
     parser.add_argument("--format", choices=["md", "mdx", "txt"], help="override format detection")
@@ -124,6 +131,10 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     if args.summary and args.report != "cli":
         parser.error(f"--summary only works with --report cli, not --report {args.report}")
+    if args.max_regression is not None and not args.baseline:
+        parser.error("--max-regression needs --baseline REF")
+    if args.baseline is not None and (not args.baseline or args.baseline.startswith("-")):
+        parser.error(f"--baseline needs a git ref, such as origin/main, not '{args.baseline}'")
 
     if not args.files and sys.stdin.isatty():
         parser.print_help()
@@ -132,13 +143,16 @@ def main(argv: list[str] | None = None) -> int:
     try:
         settings = _settings(args)
         paths, input_errors = _expand(args, settings)
-    except (config.ConfigError, inputs.InputError) as error:
+        commit = baseline.resolve(args.baseline) if args.baseline else None
+    except (config.ConfigError, inputs.InputError, baseline.BaselineError) as error:
         return _fail(str(error))
 
     run = Run(analyses=[], skipped=[], errors=input_errors, max_grade=settings.max_grade,
-              config=_display_path(settings.path) if settings.path else None)
+              config=_display_path(settings.path) if settings.path else None,
+              baseline=baseline.short(args.baseline) if args.baseline else None,
+              max_regression=1.0 if args.max_regression is None else args.max_regression)
     for path in paths:
-        _check_one(path, args, run)
+        _check_one(path, args, run, commit)
 
     for path, message in run.errors:
         print(f"papa: {path}: {message}", file=sys.stderr)
@@ -191,7 +205,7 @@ def _settings(args: argparse.Namespace) -> config.Config:
     return settings
 
 
-def _check_one(path: str, args: argparse.Namespace, run: Run) -> None:
+def _check_one(path: str, args: argparse.Namespace, run: Run, commit: str | None) -> None:
     label = (args.stdin_filename or "<stdin>") if path == inputs.STDIN else path
     try:
         source = _read(path)
@@ -206,11 +220,24 @@ def _check_one(path: str, args: argparse.Namespace, run: Run) -> None:
         reason = "no prose on stdin; pass a file or pipe text" if path == inputs.STDIN else "no prose found"
         run.skipped.append((label, reason))
         return
-    analysis = analyze(source, path=label, fmt=_detect_format(label, args.format), max_grade=run.max_grade)
+    fmt = _detect_format(label, args.format)
+    analysis = analyze(source, path=label, fmt=fmt, max_grade=run.max_grade,
+                       baseline=_baseline_grade(path, fmt, commit), max_regression=run.max_regression)
     if not analysis.clean.strip():
         run.skipped.append((label, "no prose found (only code or markup)"))
         return
     run.analyses.append(analysis)
+
+
+def _baseline_grade(path: str, fmt: str, commit: str | None) -> float | None:
+    """The file's grade at the baseline commit, or None for a new file, which --max-grade gates."""
+    if commit is None or path == inputs.STDIN:
+        return None
+    old = baseline.source_at(commit, path)
+    if not old or not old.strip():
+        return None
+    before = analyze(old, path=path, fmt=fmt)
+    return before.score.consensus if before.clean.strip() else None
 
 
 def _read(path: str) -> str:

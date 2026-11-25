@@ -16,7 +16,7 @@ from ..models import (
     Finding,
     Run,
 )
-from .common import LineIndex, display_grade as _grade, gate_grade, plural
+from .common import LineIndex, display_grade as _grade, gate_message, plural
 
 _ANSI = {
     "yellow": "33", "red": "31", "blue": "34", "green": "32",
@@ -98,13 +98,10 @@ def _file_block(analysis: Analysis, color: bool, width: int, details: bool, limi
     lines = [_c(header, "bold", on=color)]
 
     if score.threshold is not None:
-        max_grade = _fmt(score.threshold["max_grade"])
-        failed = score.verdict == "fail"
-        shown = gate_grade(score.consensus, score.threshold["max_grade"], failed)
-        if failed:
-            lines.append(_c(f"  FAIL  grade {shown} is above --max-grade {max_grade}", "red", on=color))
+        if score.verdict == "fail":
+            lines.append(_c(f"  FAIL  {gate_message(score)}", "red", on=color))
         else:
-            lines.append(_c(f"  PASS  grade {shown} is within --max-grade {max_grade}", "green", on=color))
+            lines.append(_c(f"  PASS  {gate_message(score)}", "green", on=color))
 
     lines.append("")
     counts = [
@@ -178,7 +175,8 @@ def _summary(run: Run, color: bool) -> list[str]:
     parts = []
     if run.skipped or run.errors:
         parts.append(f"{len(run.analyses)} analyzed")
-    if run.max_grade is not None:
+    gated = run.max_grade is not None or run.baseline is not None
+    if gated:
         failed = sum(1 for a in run.analyses if a.score.verdict == "fail")
         parts += [f"{len(run.analyses) - failed} passed", f"{failed} failed"]
     if run.skipped:
@@ -186,8 +184,11 @@ def _summary(run: Run, color: bool) -> list[str]:
     if run.errors:
         parts.append(plural(len(run.errors), "error"))
     text = f"Checked {plural(total, 'file')}" + (": " + ", ".join(parts) if parts else "")
+    gates = [f"--baseline {run.baseline}"] if run.baseline is not None else []
     if run.max_grade is not None:
-        text += f" (--max-grade {_fmt(run.max_grade)})"
+        gates.append(f"--max-grade {_fmt(run.max_grade)}")
+    if gates:
+        text += f" ({', '.join(gates)})"
     bad = run.errors or any(a.score.verdict == "fail" for a in run.analyses)
     lines = [_c(text + ".", "red" if bad else "bold", on=color)]
     if len(run.analyses) > 1:

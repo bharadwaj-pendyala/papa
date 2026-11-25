@@ -18,7 +18,7 @@ from ..models import (
     Finding,
     Run,
 )
-from .common import LineIndex, display_grade, plural
+from .common import LineIndex, display_grade, gate_message, plural
 
 _BG = {
     HARD: "#fff3bf",
@@ -146,7 +146,7 @@ def _sidebar(analysis: Analysis) -> str:
         cls = "pass" if score.verdict == "pass" else "fail"
         verdict_html = (
             f'<span class="verdict {cls}">{score.verdict.upper()}'
-            f' · max {score.threshold["max_grade"]}</span>'
+            f' · {_html.escape(gate_message(score))}</span>'
         )
     rows = "".join(
         f'<li><span class="swatch" style="background:{_BG[cat]}"></span>'

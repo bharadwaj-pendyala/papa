@@ -1,0 +1,10 @@
+$ guide.md --baseline HEAD --max-regression 7
+[exit 0]
+--- stdout
+guide.md  ·  Grade 9, easy to read
+  PASS  grade 8.6 is within --max-regression 7 of 2.5
+
+  No flagged sentences or words.
+  mean of ARI 8.2, FK 7.3, Fog 10.4 · 4 sentences
+--- stderr
+

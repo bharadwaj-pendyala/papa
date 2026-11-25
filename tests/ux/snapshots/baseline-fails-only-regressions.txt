@@ -1,0 +1,32 @@
+$ guide.md legacy.md steady.md --baseline HEAD --max-grade 10
+[exit 1]
+--- stdout
+guide.md  ·  Grade 9, easy to read
+  FAIL  grade 8.6 rose from 2.5, more than --max-regression 1
+
+  No flagged sentences or words.
+  mean of ARI 8.2, FK 7.3, Fog 10.4 · 4 sentences
+
+legacy.md  ·  Grade 36, very hard to read
+  PASS  grade 36.2 is within --max-regression 1 of 36.2
+
+  1 very hard sentence · 1 adverb
+  mean of ARI 36.9, FK 33.8, Fog 37.9 · 2 sentences
+
+  3:1    very hard  grade 18+ "The multifaceted implementation demonstrates c…"
+  3:151  adverb     'consistently'
+
+steady.md  ·  Grade 1, easy to read
+  PASS  grade 1.5 is within --max-regression 1 of 1.4
+
+  No flagged sentences or words.
+  mean of ARI 1.8, FK 0.5, Fog 2.1 · 4 sentences
+
+Tips
+  very hard  Split the sentence or cut words. Aim for one idea per sentence.
+  adverb     Cut the adverb or use a stronger verb.
+
+Checked 3 files: 2 passed, 1 failed (--baseline HEAD, --max-grade 10).
+Hardest: legacy.md (grade 36.2).
+--- stderr
+

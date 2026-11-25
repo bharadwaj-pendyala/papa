@@ -1,5 +1,5 @@
 name: Papa readability
-description: Grade the readability of Markdown and text, annotate hard sentences on the PR, and fail above a max grade.
+description: Grade the readability of Markdown and text, annotate hard sentences on the PR, and fail above a max grade or when a file gets harder.
 author: Bharadwaj Pendyala
 branding:
   icon: book-open
@@ -11,6 +11,12 @@ inputs:
     default: "."
   max-grade:
     description: Fail the step when a file's grade is above this number. Empty uses papa.toml, or no gate.
+    default: ""
+  baseline:
+    description: Git ref to compare with, such as the PR base SHA. A file then fails only when its grade rose more than `max-regression` since this ref. New files use `max-grade`.
+    default: ""
+  max-regression:
+    description: With `baseline`, how much a file's grade may rise before the step fails. Empty uses 1.
     default: ""
   args:
     description: Extra papa arguments, such as `--exclude 'docs/generated/**'`.
@@ -36,7 +42,7 @@ inputs:
 
 outputs:
   exit-code:
-    description: "papa's exit code: 0 passed, 1 a file is above the max grade, 2 usage or input error."
+    description: "papa's exit code: 0 passed, 1 a file failed a gate, 2 usage or input error."
     value: ${{ steps.papa.outputs.exit-code }}
   report:
     description: Path to the Markdown report.
@@ -59,6 +65,8 @@ runs:
       env:
         INPUT_PATHS: ${{ inputs.paths }}
         INPUT_MAX_GRADE: ${{ inputs.max-grade }}
+        INPUT_BASELINE: ${{ inputs.baseline }}
+        INPUT_MAX_REGRESSION: ${{ inputs.max-regression }}
         INPUT_ARGS: ${{ inputs.args }}
         INPUT_ANNOTATIONS: ${{ inputs.annotations }}
         INPUT_SUMMARY: ${{ inputs.summary }}
