@@ -1,6 +1,6 @@
 {
   "name": "papa",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Grade docs like the Hemingway editor and rewrite flagged sentences until the grade passes.",
   "author": {
     "name": "Bharadwaj Pendyala"

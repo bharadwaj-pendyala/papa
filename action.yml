@@ -1,5 +1,5 @@
 name: Papa readability
-description: Grade the readability of Markdown and text, annotate hard sentences on the PR, and fail above a max grade or when a file gets harder.
+description: Grade Markdown readability, annotate hard sentences on PRs, and fail above a max grade or when a file gets harder.
 author: Bharadwaj Pendyala
 branding:
   icon: book-open
