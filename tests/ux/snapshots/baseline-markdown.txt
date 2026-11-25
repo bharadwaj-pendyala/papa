@@ -1,0 +1,13 @@
+$ guide.md steady.md --baseline HEAD --report markdown
+[exit 1]
+--- stdout
+## Papa readability
+
+Checked 2 files: 1 passed, 1 failed (--baseline HEAD).
+
+| File | Grade | Result | Findings |
+|---|---|---|---|
+| `guide.md` | 8.6 | :x: fail | 0 |
+| `steady.md` | 1.5 | :white_check_mark: pass | 0 |
+--- stderr
+

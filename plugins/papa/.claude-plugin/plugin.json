@@ -1,11 +1,11 @@
 {
   "name": "papa",
-  "version": "0.2.3",
+  "version": "0.3.1",
   "description": "Grade docs like the Hemingway editor and rewrite flagged sentences until the grade passes.",
   "author": {
     "name": "Bharadwaj Pendyala"
   },
-  "homepage": "https://bharadwaj-pendyala.github.io/papa/",
+  "homepage": "https://papa.bharad.dev/",
   "repository": "https://github.com/bharadwaj-pendyala/papa",
   "license": "MIT"
 }

@@ -1,0 +1,68 @@
+$ --help
+[exit 0]
+--- stdout
+usage: papa [-h] [--report {cli,concise,json,html,sarif,github,markdown}]
+            [-o FILE] [--max-grade N] [--baseline REF] [--max-regression N]
+            [--exclude GLOB] [--format {md,mdx,txt}] [--stdin-filename NAME]
+            [--all] [--allow-empty] [--summary] [-q]
+            [--color {auto,always,never}] [--config FILE] [--no-config]
+            [--version]
+            [PATH ...]
+
+Hemingway-style readability linting for Markdown and plain text.
+
+positional arguments:
+  PATH                  files, folders, or quoted globs; '-' or a pipe reads
+                        stdin
+
+options:
+  -h, --help            show this help message and exit
+  --report {cli,concise,json,html,sarif,github,markdown}
+                        output format (default: cli)
+  -o, --output FILE     write the report to FILE
+  --max-grade N         exit 1 if a file's consensus grade is above N
+  --baseline REF        gate each file on its grade at git REF instead; files
+                        new since REF use --max-grade
+  --max-regression N    with --baseline, exit 1 if a grade rose more than N
+                        (default: 1)
+  --exclude GLOB        skip paths that match GLOB (repeatable)
+  --format {md,mdx,txt}
+                        override format detection
+  --stdin-filename NAME
+                        name to show for stdin; its suffix picks the format
+  --all                 show every finding; by default long output is capped
+  --allow-empty         exit 0, not 2, when no input has prose to check
+  --summary             show grades and counts only, without each finding
+  -q, --quiet           print nothing to stdout; -o files are still written
+  --color {auto,always,never}
+                        color terminal output (default: auto)
+  --config FILE         read settings from FILE
+  --no-config           ignore papa.toml and pyproject.toml
+  --version             show program's version number and exit
+
+Examples:
+  papa post.md                         check one file
+  papa docs/ --max-grade 10            check a folder, fail above grade 10
+  papa docs/ --baseline origin/main    fail only files that got harder
+  papa 'docs/**/*.md' --exclude 'docs/generated/**'
+  cat post.md | papa --stdin-filename post.md
+  papa post.md --report concise        file:line:col lines for editors
+  papa post.md --report json           findings for scripts and LLMs
+  papa post.md --report html -o report.html
+  papa docs/ --report sarif -o papa.sarif
+  papa docs/ --report github           annotations in GitHub Actions
+  papa docs/ --report markdown         a job summary or PR comment
+
+Config:
+  papa reads [papa] from the nearest papa.toml, or [tool.papa] from
+  pyproject.toml. Keys: max-grade, exclude. Flags override config.
+
+Exit codes:
+  0  no file failed a gate (findings alone never fail a run)
+  1  at least one file is harder than --max-grade, or rose more than
+     --max-regression above its --baseline grade
+  2  usage, config, or input error, or no input had prose to check
+     (files with no prose are skipped with a note on stderr; --allow-empty
+     makes that case exit 0, as pre-commit needs)
+--- stderr
+

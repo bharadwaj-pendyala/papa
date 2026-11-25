@@ -74,6 +74,11 @@ Schema `0.2` has one shape for every run: one file, many files, or none.
   `--max-grade` gate compares this value. `reading_grade` is the rounded label.
 - `verdict` is `fail` only when a gate is set and `consensus` is above it.
   `threshold` is `null` when no gate is set.
+- With `--baseline`, a file that exists at the baseline ref has
+  `"threshold": { "baseline": 8.1234, "max_regression": 1 }`. `baseline` is
+  the file's `consensus` at that ref. The file fails when `consensus` is more
+  than `max_regression` above `baseline`. A new file has the `max_grade`
+  threshold, or `null` without `--max-grade`.
 - Papa always writes this JSON with `--report json`, also when every input
   fails. Read `errors` and `skipped` before you trust `files`.
 

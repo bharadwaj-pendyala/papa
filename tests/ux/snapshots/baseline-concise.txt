@@ -1,0 +1,6 @@
+$ guide.md --baseline HEAD --report concise
+[exit 1]
+--- stdout
+guide.md:1:1: error: grade 8.6 rose from 2.5, more than --max-regression 1 [max-regression]
+--- stderr
+

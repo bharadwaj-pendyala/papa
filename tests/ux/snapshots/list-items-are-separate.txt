@@ -7,11 +7,11 @@ $ readme-style.md --report json
     {
       "file": "readme-style.md",
       "score": {
-        "ari": 6.1,
-        "flesch_kincaid": 4.0,
-        "gunning_fog": 3.8,
-        "consensus": 4.639,
-        "reading_grade": "Grade 5, easy to read",
+        "ari": 3.2,
+        "flesch_kincaid": 2.0,
+        "gunning_fog": 1.8,
+        "consensus": 2.3686,
+        "reading_grade": "Grade 2, easy to read",
         "sentences": 16,
         "hard_sentences": 0,
         "very_hard_sentences": 0,

@@ -44,23 +44,29 @@ def build_score(
     sentence_count: int,
     grades: tuple[float, float, float, float],
     max_grade: float | None,
+    baseline: float | None = None,
+    max_regression: float = 1.0,
 ) -> DocumentScore:
     ari, fk, fog, consensus = grades
     label, _ = reading_grade(consensus)  # rounded grade is display-only
-    if max_grade is None:
-        verdict, threshold = "pass", None
+    # Gate on the consensus as JSON reports it (4 decimals), not the rounded
+    # display grade: 10.4 is harder than 10 and must fail even though it
+    # displays as "Grade 10".
+    shown = round(consensus, 4)
+    if baseline is not None:
+        verdict = "fail" if round(shown - baseline, 4) > max_regression else "pass"
+        threshold = {"baseline": baseline, "max_regression": _clean(max_regression)}
+    elif max_grade is not None:
+        verdict = "fail" if shown > max_grade else "pass"
+        threshold = {"max_grade": _clean(max_grade)}
     else:
-        # Gate on the consensus as JSON reports it (4 decimals), not the rounded
-        # display grade: 10.4 is harder than 10 and must fail even though it
-        # displays as "Grade 10".
-        verdict = "fail" if round(consensus, 4) > max_grade else "pass"
-        clean_max = int(max_grade) if float(max_grade).is_integer() else max_grade
-        threshold = {"max_grade": clean_max}
+        verdict, threshold = "pass", None
 
     return DocumentScore(
-        ari=round(ari, 1),
-        flesch_kincaid=round(fk, 1),
-        gunning_fog=round(fog, 1),
+        # Adding 0.0 turns a rounded -0.0 into 0.0.
+        ari=round(ari, 1) + 0.0,
+        flesch_kincaid=round(fk, 1) + 0.0,
+        gunning_fog=round(fog, 1) + 0.0,
         consensus=round(consensus, 4),
         reading_grade=label,
         sentences=sentence_count,
@@ -72,6 +78,10 @@ def build_score(
         verdict=verdict,
         threshold=threshold,
     )
+
+
+def _clean(value: float) -> float:
+    return int(value) if float(value).is_integer() else value
 
 
 def _count(findings: list[Finding], category: str) -> int:

@@ -1,0 +1,10 @@
+$ usecases/quickstart-rewrite.mdx --max-grade 10
+[exit 0]
+--- stdout
+usecases/quickstart-rewrite.mdx  ·  Grade 6, easy to read
+  PASS  grade 5.6 is within --max-grade 10
+
+  No flagged sentences or words.
+  mean of ARI 4.8, FK 5.3, Fog 6.6 · 3 sentences
+--- stderr
+

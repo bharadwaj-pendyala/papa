@@ -1,0 +1,19 @@
+$ repo-root --max-grade 10
+[exit 0]
+--- stdout
+repo-root/README.md  ·  Grade 0, easy to read
+  PASS  grade 0.0 is within --max-grade 10
+
+  No flagged sentences or words.
+  mean of ARI 0.0, FK 0.0, Fog 1.4 · 3 sentences
+
+repo-root/docs/guide.md  ·  Grade 1, easy to read
+  PASS  grade 1.1 is within --max-grade 10
+
+  No flagged sentences or words.
+  mean of ARI 0.9, FK 0.5, Fog 2.0 · 3 sentences
+
+Checked 2 files: 2 passed, 0 failed (--max-grade 10).
+Hardest: repo-root/docs/guide.md (grade 1.1).
+--- stderr
+

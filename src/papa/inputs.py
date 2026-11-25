@@ -6,11 +6,18 @@ import fnmatch
 import glob
 import os
 import re
+import subprocess
 from pathlib import Path
 
 STDIN = "-"
 PROSE_SUFFIXES = {".md", ".markdown", ".mdx", ".txt"}
 _GLOB_CHARS = set("*?[")
+# Folder and glob scans skip these: they hold dependencies, config, or legal text, not docs.
+_SKIP_DIRS = {"node_modules", "LICENSES"}
+_NOT_DOCS = re.compile(
+    r"(?:requirements|constraints)[\w.-]*\.txt|robots\.txt|cmakelists\.txt|(?:licen[cs]e(?:-\w+)?|copying|notices?|third[_-]party[_-](?:notices?|licen[cs]es?))(?:\.\w+)?",
+    re.IGNORECASE,
+)
 
 
 class InputError(Exception):
@@ -56,20 +63,18 @@ def _expand_one(arg: str) -> list[str]:
     if arg == STDIN:
         return [STDIN]
     if _GLOB_CHARS & set(arg) and not Path(arg).exists():
-        matches = [m for m in glob.glob(arg, recursive=True) if _is_discoverable(m)]
+        matches = _not_git_ignored([m for m in glob.glob(arg, recursive=True) if _is_discoverable(m)])
         if not matches:
             raise InputError("no files match; check the pattern or the working directory")
         return sorted(os.path.normpath(m) for m in matches)
     if Path(arg).is_dir():
         found = []
         for root, dirs, files in os.walk(arg):
-            dirs[:] = [d for d in dirs if not d.startswith(".")]
-            found += [
-                os.path.normpath(os.path.join(root, name)) for name in files
-                if not name.startswith(".") and Path(name).suffix.lower() in PROSE_SUFFIXES
-            ]
+            dirs[:] = [d for d in dirs if not d.startswith(".") and d not in _SKIP_DIRS]
+            found += [os.path.normpath(os.path.join(root, name)) for name in files if _is_doc_name(name)]
+        found = _not_git_ignored(found)
         if not found:
-            raise InputError("no .md, .mdx or .txt files in this folder")
+            raise InputError("no .md, .mdx or .txt docs in this folder")
         return sorted(found)
     return [arg]
 
@@ -78,9 +83,33 @@ def _is_discoverable(path: str) -> bool:
     parts = Path(path).parts
     return (
         Path(path).is_file()
-        and Path(path).suffix.lower() in PROSE_SUFFIXES
-        and not any(p.startswith(".") and p not in (".", "..") for p in parts)
+        and _is_doc_name(Path(path).name)
+        and not any((p.startswith(".") and p not in (".", "..")) or p in _SKIP_DIRS for p in parts)
     )
+
+
+def _is_doc_name(name: str) -> bool:
+    return not name.startswith(".") and Path(name).suffix.lower() in PROSE_SUFFIXES and not _NOT_DOCS.fullmatch(name)
+
+
+def _not_git_ignored(paths: list[str]) -> list[str]:
+    """Drop the paths that git ignores, such as build output. Outside a git repo, keep all."""
+    if not paths:
+        return paths
+    absolute = [os.path.abspath(p) for p in paths]
+    try:
+        result = subprocess.run(
+            ["git", "-C", os.path.commonpath([os.path.dirname(a) for a in absolute]), "check-ignore", "--no-index", "--stdin", "-z"],
+            input="\0".join(absolute), capture_output=True, text=True, check=False,
+        )
+    except OSError:
+        return paths
+    # 0: some paths are ignored. 1: none are. Anything else: not a repo, or git failed.
+    # --no-index also lets a path inside a submodule through instead of failing the batch.
+    if result.returncode != 0:
+        return paths
+    ignored = set(result.stdout.split("\0"))
+    return [p for p, a in zip(paths, absolute) if a not in ignored]
 
 
 def _excluded(path: str, excludes: list[str]) -> bool:

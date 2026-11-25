@@ -83,3 +83,19 @@ def test_merge_keeps_sentence_layer_and_resolves_word_overlap():
 
 def _f(start, end, category):
     return Finding(start, end, category, COLOR[category], "warn", "", category)
+
+
+def test_baseline_gate_allows_a_rise_of_exactly_max_regression():
+    score = build_score([], 5, (6.1, 6.1, 6.1, 6.1), None, baseline=5.1, max_regression=1)
+    assert score.verdict == "pass"
+
+
+def test_baseline_gate_fails_a_rise_above_max_regression():
+    score = build_score([], 5, (6.1001, 6.1001, 6.1001, 6.1001), None, baseline=5.1, max_regression=1)
+    assert score.verdict == "fail"
+
+
+def test_baseline_gate_ignores_max_grade():
+    score = build_score([], 5, (30.0, 30.0, 30.0, 30.0), 10, baseline=30.0)
+    assert score.verdict == "pass"
+    assert score.threshold == {"baseline": 30.0, "max_regression": 1}

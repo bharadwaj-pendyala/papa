@@ -17,9 +17,9 @@ HTML report.
 
 [**Quickstart**](#-quickstart) · [**CI usage**](#-ci-usage) · [**Agents**](#-agents) · [**How it works**](#-how-it-works) · [**Roadmap**](#-roadmap)
 
-**[Try it in your browser](https://bharadwaj-pendyala.github.io/papa/#try)**
-with no install. Or see a [sample HTML report](https://bharadwaj-pendyala.github.io/papa/report.html)
-and the [docs readability leaderboard](https://bharadwaj-pendyala.github.io/papa/leaderboard.html)
+**[Try it in your browser](https://papa.bharad.dev/#try)**
+with no install. Or see a [sample HTML report](https://papa.bharad.dev/report.html)
+and the [docs readability leaderboard](https://papa.bharad.dev/leaderboard.html)
 for 14 open-source projects.
 
 </div>
@@ -38,7 +38,7 @@ small:
   SARIF, GitHub annotations, and Markdown
 - GitHub Action and pre-commit hook
 - Config: `papa.toml` or `[tool.papa]` in `pyproject.toml`
-- CI gating: use `--max-grade` and the process exit code
+- CI gating: use `--max-grade` or `--baseline` and the process exit code
 
 Optional external linters and built-in LLM rewriting are roadmap items.
 
@@ -56,7 +56,8 @@ Papa focuses on a narrow first job: make prose readability checks scriptable.
 - **Handles Markdown and MDX** by ignoring frontmatter, code, tags, link URLs,
   and badges while preserving offsets back to the original file.
 - **Emits JSON** so agents, scripts, or dashboards can consume the findings.
-- **Gates CI** by exiting non-zero when prose is harder than your max grade.
+- **Gates CI** by exiting non-zero when prose is harder than your max grade,
+  or when a PR makes a file harder to read than it was.
 
 ## ⚡ Quickstart
 
@@ -65,6 +66,7 @@ pipx install papa-lint
 
 papa post.md                          # check one file
 papa docs/ --max-grade 10             # check a folder, fail above grade 10
+papa docs/ --baseline origin/main     # fail only files that got harder
 cat post.md | papa                    # read stdin
 papa post.md --report concise         # file:line:col lines for editors
 papa post.md --report html -o report.html
@@ -99,6 +101,11 @@ Papa grades prose only. It ignores code, HTML and JSX tags, MDX imports, link
 URLs, images, badges, and emphasis marks. Each list item, heading, and table
 cell counts as its own unit, and short headings or labels are not graded.
 
+A folder or glob finds `.md`, `.mdx`, and `.txt` files. It skips hidden
+folders, `node_modules`, `LICENSES`, files that git ignores, and files that
+are not docs: `requirements*.txt`, `robots.txt`, `CMakeLists.txt`, and
+license or notice files. Name a file to check it anyway.
+
 Long output is capped. One file shows its 25 most severe findings. A run over
 more than 10 files shows one line per file. Add `--all` to see every finding.
 JSON and concise output always include every finding.
@@ -123,8 +130,8 @@ report names the config file that it used.
 
 | Code | Meaning |
 |---|---|
-| `0` | No file failed `--max-grade`. Findings alone never fail a run. |
-| `1` | At least one file is harder than `--max-grade`. |
+| `0` | No file failed a gate. Findings alone never fail a run. |
+| `1` | At least one file is harder than `--max-grade`, or its grade rose more than `--max-regression` since `--baseline`. |
 | `2` | Usage, config, or input error, or no input had prose to check. |
 
 Papa skips files that have no prose, such as a file with only code blocks. It
@@ -159,6 +166,8 @@ jobs:
 |---|---|---|
 | `paths` | `.` | Files, folders, or quoted globs, separated by spaces or new lines. |
 | `max-grade` | from `papa.toml` | Fail when a file's grade is above this number. |
+| `baseline` | | Git ref to compare with, such as the PR base SHA. Fail only files whose grade rose more than `max-regression`. New files use `max-grade`. |
+| `max-regression` | `1` | With `baseline`, how much a file's grade may rise before the step fails. |
 | `args` | | Extra flags, such as `--exclude 'docs/generated/**'`. |
 | `annotations` | `true` | Show findings on the PR diff. |
 | `summary` | `true` | Write the Markdown report to the job summary. |
@@ -169,6 +178,38 @@ jobs:
 The action sets two outputs: `exit-code` and `report`, the path to the
 Markdown report. GitHub shows at most 10 warning annotations per step, so
 the job summary is the full list.
+
+### Fail only when docs get harder
+
+`max-grade` is an absolute ceiling. It fails a PR for an old hard page that
+the PR did not touch, and it passes a page that gets harder but stays under
+the ceiling. To gate on change instead, set `baseline` to the PR base:
+
+```yaml
+      - uses: bharadwaj-pendyala/papa@v0
+        with:
+          paths: README.md docs/
+          baseline: ${{ github.event.pull_request.base.sha }}
+          max-regression: 1
+          max-grade: 10   # only for files that the base does not have
+```
+
+Papa grades each file twice: as it is now, and as it was at `baseline`. The
+file fails when its grade rose more than `max-regression`. A file that the PR
+does not change keeps its grade, so it passes. A new file has no baseline
+grade, so `max-grade` gates it. Without `max-grade`, new files pass.
+
+The action fetches the base commit itself, so the default shallow
+`actions/checkout` is enough.
+
+On the command line, `--baseline` takes any git ref:
+
+```bash
+papa docs/ --baseline origin/main --max-regression 0.5
+```
+
+Papa reads each file at that ref with `git show`, so the ref must exist in
+the local clone. Fetch it first if it does not.
 
 To see findings in the **Security** tab, write SARIF and upload it. The
 upload needs these permissions:
@@ -194,7 +235,7 @@ steps:
 ```yaml
 repos:
   - repo: https://github.com/bharadwaj-pendyala/papa
-    rev: v0.2.3
+    rev: v0.3.1
     hooks:
       - id: papa
         args: [--report, concise, --allow-empty, --max-grade, "10"]
@@ -206,10 +247,12 @@ excluded or code-only files still goes through. Keep it when you set `args`.
 
 ### Any other CI
 
-Install papa and let `--max-grade` set the exit code:
+Install papa and let `--max-grade` or `--baseline` set the exit code:
 
 ```bash
 pipx run --spec papa-lint papa README.md docs/ --max-grade 10 --report concise
+git fetch origin main
+pipx run --spec papa-lint papa README.md docs/ --baseline origin/main --report concise
 ```
 
 | Report | Use it for |
@@ -222,8 +265,8 @@ pipx run --spec papa-lint papa README.md docs/ --max-grade 10 --report concise
 | `github` | Annotations from any GitHub Actions step. |
 | `markdown` | A job summary or PR comment. |
 
-In every report, findings are advice. Only a failed `--max-grade` gate is an
-error.
+In every report, findings are advice. Only a failed `--max-grade` or
+`--max-regression` gate is an error.
 
 ## 🤖 Agents
 

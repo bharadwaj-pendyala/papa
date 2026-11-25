@@ -8,9 +8,10 @@ from urllib.parse import quote
 
 from .. import __version__
 from ..models import ADVERB, COMPLEX, HARD, PASSIVE, VERY_HARD, Run
-from .common import LineIndex, gate_grade
+from .common import LineIndex, gate_message, gate_rule
 
 GATE = "max-grade"
+REGRESSION = "max-regression"
 
 _RULES = {
     HARD: ("Hard sentence", "Split the sentence or cut words."),
@@ -19,8 +20,9 @@ _RULES = {
     ADVERB: ("Adverb", "Cut the adverb or use a stronger verb."),
     COMPLEX: ("Complex phrase", "Use the plainer phrase shown in the finding."),
     GATE: ("Readability gate", "Make the file easier to read, or raise --max-grade."),
+    REGRESSION: ("Readability regression", "Make the file as easy to read as before, or raise --max-regression."),
 }
-# Findings are advice; only a failed --max-grade gate is an error.
+# Findings are advice; only a failed gate is an error.
 _LEVEL = {"error": "warning", "warn": "warning", "info": "note"}
 
 
@@ -31,9 +33,8 @@ def render(run: Run, *, color: bool = False, width: int = 80, details: bool = Tr
         uri = _uri(analysis.path)
         score = analysis.score
         if score.verdict == "fail":
-            max_grade = score.threshold["max_grade"]
-            shown = gate_grade(score.consensus, max_grade, failed=True)
-            results.append(_result(GATE, "error", f"Grade {shown} is above --max-grade {max_grade}.",
+            message = gate_message(score)
+            results.append(_result(gate_rule(score), "error", f"{message[0].upper()}{message[1:]}.",
                                    uri, (1, 1, 1, 1)))
         index = LineIndex(analysis.source)
         for finding in analysis.findings:
@@ -72,7 +73,7 @@ def _rule(rule_id: str) -> dict:
         "name": name.title().replace(" ", ""),
         "shortDescription": {"text": name},
         "help": {"text": help_text},
-        "defaultConfiguration": {"level": "error" if rule_id == GATE else "warning"},
+        "defaultConfiguration": {"level": "error" if rule_id in (GATE, REGRESSION) else "warning"},
     }
 
 

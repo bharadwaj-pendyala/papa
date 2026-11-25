@@ -1,0 +1,10 @@
+$ short-heading.md --max-grade 10
+[exit 0]
+--- stdout
+short-heading.md  ·  Grade 0, easy to read
+  PASS  grade 0.0 is within --max-grade 10
+
+  No flagged sentences or words.
+  mean of ARI 0.0, FK 0.0, Fog 1.2 · 2 sentences
+--- stderr
+

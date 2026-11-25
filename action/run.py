@@ -27,6 +27,14 @@ def papa_without_commands(*args: str) -> int:
         print(f"::{token}::", flush=True)
 
 
+def fetch_baseline(ref: str) -> None:
+    # actions/checkout fetches one commit by default, so the PR base is often missing.
+    # A failed fetch is left for papa to report, with its exit code 2.
+    found = subprocess.run(["git", "cat-file", "-e", f"{ref}^{{commit}}"], capture_output=True).returncode == 0
+    if not found and not ref.startswith("-"):
+        subprocess.run(["git", "fetch", "--quiet", "--no-tags", "--depth=1", "origin", ref])
+
+
 def main() -> None:
     env = os.environ
     # shlex keeps quoted globs and paths with spaces whole, and never expands a glob itself.
@@ -34,6 +42,12 @@ def main() -> None:
     common = paths + shlex.split(env.get("INPUT_ARGS", ""))
     if env.get("INPUT_MAX_GRADE", "").strip():
         common += ["--max-grade", env["INPUT_MAX_GRADE"].strip()]
+    baseline = env.get("INPUT_BASELINE", "").strip()
+    if baseline:
+        fetch_baseline(baseline)
+        common += ["--baseline", baseline]
+    if env.get("INPUT_MAX_REGRESSION", "").strip():
+        common += ["--max-regression", env["INPUT_MAX_REGRESSION"].strip()]
 
     if env.get("INPUT_ANNOTATIONS") == "true":
         papa(*common, "--report", "github", stderr=subprocess.DEVNULL)

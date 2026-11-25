@@ -1,0 +1,6 @@
+$ guide.md --baseline HEAD --report github
+[exit 1]
+--- stdout
+::error file=guide.md,line=1,endLine=1,col=1,endColumn=1,title=papa max-regression::Grade 8.6 rose from 2.5, more than --max-regression 1. Grade 9, easy to read.
+--- stderr
+

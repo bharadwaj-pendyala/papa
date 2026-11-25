@@ -1,0 +1,6 @@
+$ indented-fence.md --max-grade 10 --report concise
+[exit 0]
+--- stdout
+
+--- stderr
+
