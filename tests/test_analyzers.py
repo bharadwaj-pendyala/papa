@@ -1,3 +1,5 @@
+import pytest
+
 from papa.analyzers import ANALYZERS, AnalyzerContext
 from papa.models import ADVERB, COMPLEX, PASSIVE
 from papa.sentences import split_sentences
@@ -49,6 +51,43 @@ def test_complex_phrase_flags_curated_phrases():
 def test_complex_phrase_message_has_suggestion():
     findings = _run("complex-phrase", "We met prior to the launch.")
     assert "consider 'before'" in findings[0].message
+
+
+@pytest.mark.parametrize(
+    ("phrase", "expected"),
+    [
+        ("have the ability to", "can"),
+        ("is capable of", "can"),
+        ("are capable of", "can"),
+        ("has the potential to", "can"),
+        ("in the case of", "for"),
+        ("make use of", "use"),
+        ("makes use of", "uses"),
+        ("made use of", "used"),
+        ("by means of", "with"),
+        ("for the reason that", "because"),
+        ("in light of the fact that", "because"),
+        ("regardless of the fact that", "although"),
+        ("in the near future", "soon"),
+        ("at all times", "always"),
+        ("at a later time", "later"),
+        ("until such time as", "until"),
+        ("as of yet", "yet"),
+        ("a large number of", "many"),
+        ("a sufficient number of", "enough"),
+        ("in the absence of", "without"),
+        ("with the exception of", "except"),
+        ("in close proximity to", "near"),
+        ("in order for", "for"),
+    ],
+)
+def test_complex_phrase_flags_docs_phrases(phrase, expected):
+    text = f"Docs {phrase} teams."
+    findings = _run("complex-phrase", text)
+    assert len(findings) == 1
+    assert findings[0].category == COMPLEX
+    assert text_of(findings[0], text).lower() == phrase
+    assert f"consider '{expected}'" in findings[0].message
 
 
 def test_readability_marks_hard_sentence():
